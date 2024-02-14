@@ -4,6 +4,8 @@ import CardDataStats from "../components/CardDataStats";
 import ChartOne from "../components/Charts/ChartOne";
 import ChartThree from "../components/Charts/ChartThree";
 import TableOne from "../components/Tables/TableOne";
+import { useUser } from '@auth0/nextjs-auth0/client'; //To get usernames and such from auth0
+import {v4} from "uuid" //To generate random IDs for the transactions
 
 
 interface StockData {
@@ -15,6 +17,8 @@ interface StockData {
   volume: string;
 }
 
+
+//API call to get the stock data
 async function fetchList() {
   const res = await fetch("https://api.twelvedata.com/time_series?apikey=adc7d6ddaadc405683b7a833edd5abbc&interval=1min&symbol=MSFT&dp=2&"+
     "start_date=2024-01-18 14:07:00&format=JSON&outputsize=1");
@@ -22,12 +26,99 @@ async function fetchList() {
   return data;
 }
 
-async function fetchLogo() {
-  //const res = await fetch("https://api.twelvedata.com/logo?symbol=MSFT&apikey=adc7d6ddaadc405683b7a833edd5abbc");
-  const res = await fetch("test");
-  const logoLink = await res.json();
-  return logoLink;
+
+// async function fetchLogo() {
+//   const res = await fetch("https://api.twelvedata.com/logo?symbol=MSFT&apikey=adc7d6ddaadc405683b7a833edd5abbc");
+//   const res = await fetch("test");
+//   const logoLink = await res.json();
+//   return logoLink;
+// }
+
+
+//Connecting to the AWS DynamoDB function so it can be reused for the different CRUD functions
+function connectAWS() {
+  var AWS = require("aws-sdk"); //Load the AWS SDK
+  AWS.config.update({ region: "eu-west-1", accessKeyId: "AKIA2UC3CODSG6HZTVKN", secretAccessKey: "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" }); //Set the region
+
+  var ddb = new AWS.DynamoDB({ apiVersion: "2012-08-10" }); //Creating a DynamoDB service object
+  return ddb
 }
+
+
+//Function that returns the user ID of the currently logged in user
+function getCurrentUser() {
+  const { user } = useUser(); //Auth0 user
+  var stockwaveUser = String(user?.sub);
+  return stockwaveUser;
+}
+
+
+//Generates a random hash to be used for the transaction ID in the database
+function generateTransactionID() {
+  var randomID = v4();
+  return randomID;
+}
+
+
+//Function to retrieve records from the DynamoDB
+function getDatabaseItem() {
+  var ddb = connectAWS();
+
+  var params = {
+    TableName: "StockwaveBuys",
+    Key: {
+      TransactionID: { S: "1" },
+    },
+    ProjectionExpression: "ATTRIBUTE_NAME",
+  };
+
+  // Call DynamoDB to read the item from the table
+  ddb.getItem(params, function (err, data) {
+    if (err) {
+      console.log("Error", err);
+    } else {
+      console.log("Success", data.Item);
+    }
+  });
+
+}
+
+
+//Function to add records to the DynamoDB
+function addDatabaseItem() {
+  var ddb = connectAWS();
+  var currentUser = getCurrentUser();
+  var randomHash = generateTransactionID();
+
+  var params = {
+    TableName: "StockwaveBuys",
+    Item: {
+      TransactionID: { S: randomHash },
+      UserID: { S: currentUser },
+      StockTicker: { S: "Richard Roe" },
+      AverageCost: { S: "Richard Roe" },
+      NumberOfShares: { S: "Richard Roe" },
+      Notes: { S: "Richard Roe" },
+
+    },
+  };
+  
+  // Call DynamoDB to add the item to the table
+  ddb.putItem(params, function (err, data) {
+    if (err) {
+      console.log("Error", err);
+    } else {
+      console.log("Success", data);
+    }
+  });
+}
+
+
+//Function to delete records from the DynamoDB
+function deleteDatabaseItem() {
+  var ddb = connectAWS();
+}
+
 
 function Home() {
   const [metaData, setMetaData] = useState(null);
@@ -38,10 +129,10 @@ function Home() {
     const fetchData = async () => {
       try {
         const stocks = await fetchList();
-        const logos = await fetchLogo();
+        //const logos = await fetchLogo();
         setMetaData(stocks.meta);
         setStockData(stocks.values);
-        setLogoData(logos.url);
+        //setLogoData(logos.url);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
