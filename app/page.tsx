@@ -1,12 +1,12 @@
-'use client';
-import React, { useState, useEffect } from 'react';
+"use client";
+import React, { useState, useEffect } from "react";
 import CardDataStats from "../components/CardDataStats";
 import ChartOne from "../components/Charts/ChartOne";
 import ChartThree from "../components/Charts/ChartThree";
 import TableOne from "../components/Tables/TableOne";
-import { useUser } from '@auth0/nextjs-auth0/client'; //To get usernames and such from auth0
-import {v4} from "uuid" //To generate random IDs for the transactions
-
+import MyModal from "@/components/Modal/SubmitNewModal";
+import { useUser } from "@auth0/nextjs-auth0/client"; //To get usernames and such from auth0
+import { v4 } from "uuid"; //To generate random IDs for the transactions
 
 interface StockData {
   datetime: string;
@@ -17,15 +17,15 @@ interface StockData {
   volume: string;
 }
 
-
 //API call to get the stock data
 async function fetchList() {
-  const res = await fetch("https://api.twelvedata.com/time_series?apikey=adc7d6ddaadc405683b7a833edd5abbc&interval=1min&symbol=MSFT&dp=2&"+
-    "start_date=2024-01-18 14:07:00&format=JSON&outputsize=1");
+  const res = await fetch(
+    "https://api.twelvedata.com/time_series?apikey=adc7d6ddaadc405683b7a833edd5abbc&interval=1min&symbol=MSFT&dp=2&" +
+      "start_date=2024-01-18 14:07:00&format=JSON&outputsize=1",
+  );
   const data = await res.json();
   return data;
 }
-
 
 // async function fetchLogo() {
 //   const res = await fetch("https://api.twelvedata.com/logo?symbol=MSFT&apikey=adc7d6ddaadc405683b7a833edd5abbc");
@@ -34,16 +34,18 @@ async function fetchList() {
 //   return logoLink;
 // }
 
-
 //Connecting to the AWS DynamoDB function so it can be reused for the different CRUD functions
 function connectAWS() {
   var AWS = require("aws-sdk"); //Load the AWS SDK
-  AWS.config.update({ region: "eu-west-1", accessKeyId: "AKIA2UC3CODSG6HZTVKN", secretAccessKey: "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" }); //Set the region
+  AWS.config.update({
+    region: "eu-west-1",
+    accessKeyId: "AKIA2UC3CODSG6HZTVKN",
+    secretAccessKey: "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",
+  }); //Set the region
 
   var ddb = new AWS.DynamoDB({ apiVersion: "2012-08-10" }); //Creating a DynamoDB service object
-  return ddb
+  return ddb;
 }
-
 
 //Function that returns the user ID of the currently logged in user
 function getCurrentUser() {
@@ -52,37 +54,38 @@ function getCurrentUser() {
   return stockwaveUser;
 }
 
-
 //Generates a random hash to be used for the transaction ID in the database
 function generateTransactionID() {
   var randomID = v4();
   return randomID;
 }
 
-
 //Function to retrieve records from the DynamoDB
-function getDatabaseItem() {
+//https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/dynamodb-example-query-scan.html
+export function getDatabaseItems() {
   var ddb = connectAWS();
 
   var params = {
-    TableName: "StockwaveBuys",
-    Key: {
-      TransactionID: { S: "1" },
+    ExpressionAttributeValues: {
+      ":uid": { S: "123" },
     },
-    ProjectionExpression: "ATTRIBUTE_NAME",
+    KeyConditionExpression: "UserID = :uid",
+    ProjectionExpression:
+      "UserID, TransactionID, Notes, StockTicker, AverageCost, DateBought",
+    TableName: "StockwaveBuys2",
   };
 
-  // Call DynamoDB to read the item from the table
-  ddb.getItem(params, function (err, data) {
+  ddb.query(params, function (err: any, data: { Items: any[] }) {
     if (err) {
       console.log("Error", err);
     } else {
-      console.log("Success", data.Item);
+      console.log("Success", data.Items);
+      // data.Items.forEach(function (element, index, array) {
+      //   console.log(element.TransactionID.S + " (" + element.StockTicker.S + ")");
+      // });
     }
   });
-
 }
-
 
 //Function to add records to the DynamoDB
 function addDatabaseItem() {
@@ -94,17 +97,17 @@ function addDatabaseItem() {
     TableName: "StockwaveBuys",
     Item: {
       TransactionID: { S: randomHash },
-      UserID: { S: currentUser },
+      UserID: { S: "NiallTest" },
+      DateBought: { S: "01/01/2000" },
       StockTicker: { S: "Richard Roe" },
       AverageCost: { S: "Richard Roe" },
       NumberOfShares: { S: "Richard Roe" },
       Notes: { S: "Richard Roe" },
-
     },
   };
-  
+
   // Call DynamoDB to add the item to the table
-  ddb.putItem(params, function (err, data) {
+  ddb.putItem(params, function (err: any, data: any) {
     if (err) {
       console.log("Error", err);
     } else {
@@ -113,17 +116,27 @@ function addDatabaseItem() {
   });
 }
 
-
 //Function to delete records from the DynamoDB
 function deleteDatabaseItem() {
   var ddb = connectAWS();
 }
 
-
 function Home() {
   const [metaData, setMetaData] = useState(null);
   const [stockData, setStockData] = useState<StockData[]>([]);
   const [logoData, setLogoData] = useState(null);
+
+  //const [isModalOpen, setIsModalOpen] = useState(false);
+
+  let [isOpen, setIsOpen] = useState(false);
+
+  function closeModal() {
+    setIsOpen(false);
+  }
+
+  function openModal() {
+    setIsOpen(true);
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -137,13 +150,13 @@ function Home() {
         console.error("Error fetching data:", error);
       }
     };
-
+    //getDatabaseItems();
     fetchData();
   }, []);
 
   return (
     <>
-         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
         <CardDataStats title="Total Gain" total="$63.45K" rate="12.43%" levelUp>
           <svg
             className="fill-primary dark:fill-white"
@@ -163,7 +176,12 @@ function Home() {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Unrealised Gain" total="$45.2K" rate="14.35%" levelUp>
+        <CardDataStats
+          title="Unrealised Gain"
+          total="$45.2K"
+          rate="14.35%"
+          levelUp
+        >
           <svg
             className="fill-primary dark:fill-white"
             width="20"
@@ -186,7 +204,12 @@ function Home() {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Realised Gain" total="12.45" rate="12.59%" levelUp>
+        <CardDataStats
+          title="Realised Gain"
+          total="12.45"
+          rate="12.59%"
+          levelUp
+        >
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -217,25 +240,58 @@ function Home() {
       </div>
 
       <div>
-        {metaData && Object.entries(metaData).map(([key, value]) => (
-          <p key={key}><strong>{key}:</strong> {value as string}</p>
-        ))}
+        {metaData &&
+          Object.entries(metaData).map(([key, value]) => (
+            <p key={key}>
+              <strong>{key}:</strong> {value as string}
+            </p>
+          ))}
       </div>
 
       <div>
-        <br></br>
-      <p><strong>Logo Link:</strong> {logoData}</p>
+        {isOpen && <MyModal openModal={openModal} closeModal={closeModal} />}
       </div>
 
-      <div className='p-5'>
+      <button
+        onClick={openModal}
+        className="inline-flex items-center justify-center gap-2.5 rounded-md bg-black py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+      >
+        <span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="fill-current"
+            width="20"
+            height="20"
+            viewBox="0 0 448 512"
+          >
+            <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
+          </svg>
+        </span>
+        Button With Icon
+      </button>
+
+      <div className="p-5">
         {stockData.map((stock, index) => (
-          <div className='mt-2 mb-2' key={index}>
-            <p><strong>Datetime:</strong> {stock.datetime}</p>
-            <p><strong>Open:</strong> {stock.open}</p>
-            <p><strong>High:</strong> {stock.high}</p>
-            <p><strong>Low:</strong> {stock.low}</p>
-            <p><strong>Close:</strong> {stock.close}</p>
-            <p><strong>Volume:</strong> {stock.volume}</p>
+          <div className="mt-2 mb-2" key={index}>
+            <p>
+              <strong>Datetime:</strong> {stock.datetime}
+            </p>
+            <p>
+              <strong>Open:</strong> {stock.open}
+            </p>
+            <p>
+              <strong>High:</strong> {stock.high}
+            </p>
+            <p>
+              <strong>Low:</strong> {stock.low}
+            </p>
+            <p>
+              <strong>Close:</strong> {stock.close}
+            </p>
+
+            <p>
+              <strong>Volume:</strong> {stock.volume}
+            </p>
           </div>
         ))}
       </div>

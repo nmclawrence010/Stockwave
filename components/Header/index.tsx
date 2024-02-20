@@ -110,7 +110,6 @@ const Header = (props: {
             {/* <!-- Notification Menu Area --> */}
             <DropdownNotification />
             {/* <!-- Notification Menu Area --> */}
-
           </ul>
 
           {/* <!-- User Area --> */}

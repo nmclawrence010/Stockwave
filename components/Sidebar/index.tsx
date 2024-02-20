@@ -17,7 +17,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
   let storedSidebarExpanded = "true";
   const [sidebarExpanded, setSidebarExpanded] = useState(
-    storedSidebarExpanded === null ? false : storedSidebarExpanded === "true"
+    storedSidebarExpanded === null ? false : storedSidebarExpanded === "true",
   );
 
   // close on click outside
@@ -66,9 +66,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
         <Link href="/">
           <Image
-            width={176}
-            height={32}
-            src={"/images/logo/logo.svg"}
+            width={250}
+            height={250}
+            src={"/images/logo/untitled2.png"}
             alt="Logo"
           />
         </Link>
@@ -267,7 +267,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </li>
               {/* <!-- Menu Item Profile --> */}
 
-
               {/* <!-- Menu Item Settings --> */}
               <li>
                 <Link
@@ -311,8 +310,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </li>
               {/* <!-- Menu Item Settings --> */}
 
-                            {/* <!-- Menu Item Profile --> */}
-                            <li>
+              {/* <!-- Menu Item Profile --> */}
+              <li>
                 <Link
                   href="/api/auth/login"
                   className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
@@ -342,12 +341,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Profile --> */}
             </ul>
           </div>
-
-          
-
-
-
-
         </nav>
         {/* <!-- Sidebar Menu --> */}
       </div>
