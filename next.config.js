@@ -9,6 +9,7 @@ const nextConfig = {
         pathname: "/a/**",
       },
     ],
+    domains: ["api.twelvedata.com"],
   },
 };
 

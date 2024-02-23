@@ -1,60 +1,78 @@
 import { STOCK } from "@/types/stocks";
-
 import Image from "next/image";
+import { getDatabaseItems } from "@/lib/AWSFunctionality";
+import { fetchLogo, fetchStockData } from "@/lib/StockAPIFunctionality";
+import { useEffect, useState } from "react";
 
 const dbData: STOCK[] = [];
 
-//Connecting to the AWS DynamoDB function so it can be reused for the different CRUD functions
-function connectAWS() {
-  var AWS = require("aws-sdk"); //Load the AWS SDK
-  AWS.config.update({
-    region: "eu-west-1",
-    accessKeyId: "AKIA2UC3CODSG6HZTVKN",
-    secretAccessKey: "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",
-  }); //Set the region
-
-  var ddb = new AWS.DynamoDB({ apiVersion: "2012-08-10" }); //Creating a DynamoDB service object
-  return ddb;
+interface StockData {
+  datetime: string;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
+  volume: string;
 }
 
-//Function to retrieve records from the DynamoDB
-//https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/dynamodb-example-query-scan.html
-export function getDatabaseItems() {
-  var ddb = connectAWS();
+let logoURL: string;
 
-  var params = {
-    ExpressionAttributeValues: {
-      ":uid": { S: "123" },
-    },
-    KeyConditionExpression: "UserID = :uid",
-    ProjectionExpression:
-      "UserID, TransactionID, Notes, StockTicker, AverageCost, DateBought, NumberOfShares",
-    TableName: "StockwaveBuys2",
-  };
+getDatabaseItems(dbData);
 
-  ddb.query(params, function (err: any, data: { Items: any[] }) {
-    if (err) {
-      console.log("Error", err);
-    } else {
-      //console.log("Success", data.Items);
-      data.Items.forEach(function (element, index, array) {
-        //console.log(element.TransactionID.S + " (" + element.StockTicker.S + ")");
+function getCurrentStockPrice(ticker: string) {
+  const [metaData, setMetaData] = useState(null);
+  const [stockData, setStockData] = useState<StockData[]>([]);
 
-        var obj = {
-          Ticker: element.StockTicker.S,
-          NoShares: element.NumberOfShares.S,
-          AverageCost: element.AverageCost.S,
-        };
-        //console.log(obj);
-        dbData.push(obj);
-      });
-    }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const stocks = await fetchStockData(ticker);
+        //const logos = await fetchLogo(ticker);
+        setMetaData(stocks.meta);
+        setStockData(stocks.values);
+        //setLogoData(logos.url);
+        console.log("Successful Call!");
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+  return (
+    <div className="p-5">
+      {stockData.map((stock, index) => (
+        <div className="flex items-center justify-center p-2.5 xl:p-5">
+          <p className="text-black dark:text-white">{stock.close}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function getStockLogo(ticker: string) {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const logos = await fetchLogo(ticker);
+        logoURL = logos.url;
+        console.log(logos.url);
+        console.log("Successful Call!");
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
   });
-  //console.log(dbData);
+  return (
+    <div className="p-5">
+      <div className="flex-shrink-0">
+        <Image src={logoURL} alt="Brand" width={48} height={48} />
+      </div>
+    </div>
+  );
 }
 
-const TableOne = () => {
-  getDatabaseItems();
+let TableOne = () => {
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
@@ -85,7 +103,7 @@ const TableOne = () => {
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Total Gain
+              Current Price
             </h5>
           </div>
         </div>
@@ -100,14 +118,7 @@ const TableOne = () => {
             key={key}
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
-              <div className="flex-shrink-0">
-                <Image
-                  src={"/images/brand/brand-03.svg"}
-                  alt="Brand"
-                  width={48}
-                  height={48}
-                />
-              </div>
+              {getStockLogo(brand.Ticker)}
               <p className="hidden text-black dark:text-white sm:block">
                 {brand.Ticker}
               </p>
@@ -120,6 +131,12 @@ const TableOne = () => {
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <p className="text-black dark:text-white">{brand.AverageCost}</p>
             </div>
+
+            <div className="flex items-center justify-center p-2.5 xl:p-5">
+              <p className="text-black dark:text-white">{brand.MarketValue}</p>
+            </div>
+
+            {getCurrentStockPrice(brand.Ticker)}
           </div>
         ))}
       </div>
