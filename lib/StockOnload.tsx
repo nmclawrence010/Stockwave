@@ -1,41 +1,22 @@
 import { fetchStockData, fetchLogo } from "./StockAPIFunctionality";
 import { getDatabaseItems } from "./AWSFunctionality";
 import { STOCK } from "@/types/stocks";
+import { PORTFOLIORECORD } from "@/types/userPortfolio";
 
 const dbData: STOCK[] = [];
-var myArr: any[] = [];
+const userPortfolio: any[] = [];
+
 export async function stockDataOnload() {
-  const data = await getDatabaseItems(dbData);
-
-  console.log("DBDATA", data);
-  //console.log("DBDATA", dbData[0]);
-  //console.log("DBDATA", dbData.at(0));
-  //dbData.map((brand, key) => (console.log(brand.Ticker));
-  //console.log("STRING123", abc);
-
-  // dbData.forEach((element, index, array) => {
-  //   myArr.push(array);
-  // });
-  //console.log(myArr, "MYARRAY");
-
-  // const googleShares = dbData[0].Ticker;
-  // console.log(googleShares);
-
-  // const msftData = dbData.find((stock) => stock.Ticker === "MSFT");
-  // if (msftData) {
-  //   console.log("MSFT Market Value:", msftData.MarketValue);
-  // }
-
-  //const googleStock = dbData[0];
-  //const googlTicker = googleStock.Ticker;
-  //const googlShares = googleStock.NoShares;
-  //console.log("OVERHERE", googleStock);
-
-  // const extractedData = dbData.map((stock) => ({
-  //   ticker: stock.Ticker,
-  //   shares: stock.NoShares,
-  //   averageCost: stock.AverageCost,
-  //   marketValue: stock.MarketValue,
-  // }));
-  // console.log(dbData);
+  await getDatabaseItems(dbData);
+  // console.log(dbData.length);
+  // console.log("DBDATA", dbData[0].Ticker);
+  dbData.forEach((element, index, array) => {
+    var obj = {
+      Ticker: element.Ticker,
+      NoShares: element.NoShares,
+      AverageCost: element.AverageCost,
+      MarketValue: element.MarketValue,
+      DateBought: element.DateBought,
+    };
+  });
 }

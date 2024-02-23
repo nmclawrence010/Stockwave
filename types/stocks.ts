@@ -3,4 +3,5 @@ export type STOCK = {
   NoShares: number;
   AverageCost: number;
   MarketValue: number;
+  DateBought: string;
 };
