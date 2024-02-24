@@ -6,6 +6,7 @@ import ChartThree from "../components/Charts/ChartThree";
 import TableOne from "../components/Tables/TableOne";
 import MyModal from "@/components/Modal/SubmitNewModal";
 import { stockDataOnload } from "@/lib/StockOnload";
+import { PORTFOLIORECORD } from "@/types/userPortfolio";
 
 interface StockData {
   datetime: string;
@@ -16,7 +17,9 @@ interface StockData {
   volume: string;
 }
 
-stockDataOnload();
+//stockDataOnload();
+// sessionStorage.setItem("userData", JSON.stringify(stockDataOnload()));
+// console.log(JSON.parse(sessionStorage.getItem("userData") as any));
 
 function Home() {
   const [metaData, setMetaData] = useState(null);
@@ -32,7 +35,6 @@ function Home() {
   function openModal() {
     setIsOpen(true);
   }
-
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">

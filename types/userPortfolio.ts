@@ -7,5 +7,4 @@ export type PORTFOLIORECORD = {
   CurrentPrice: number;
   LogoURL: string;
   GainLoss: number;
-  GainLossPercentage: number;
 };

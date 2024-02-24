@@ -1,6 +1,5 @@
 import { v4 } from "uuid"; //To generate random IDs for the transactions
 import { STOCK } from "@/types/stocks";
-import { fetchStockData } from "./StockAPIFunctionality";
 
 //Connecting to the AWS DynamoDB function so it can be reused for the different CRUD functions
 export function connectAWS() {
@@ -75,7 +74,7 @@ export function getDatabaseItems(dbData: STOCK[] = []): Promise<STOCK[]> {
             Ticker: element.StockTicker.S,
             NoShares: parseInt(element.NumberOfShares.S, 10),
             AverageCost: parseFloat(element.AverageCost.S),
-            MarketValue:
+            TotalPaid:
               parseInt(element.NumberOfShares.S, 10) *
               parseFloat(element.AverageCost.S),
             DateBought: element.DateBought.S,
