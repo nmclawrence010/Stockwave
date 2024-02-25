@@ -4,41 +4,35 @@ import CardDataStats from "../components/CardDataStats";
 import ChartOne from "../components/Charts/ChartOne";
 import ChartThree from "../components/Charts/ChartThree";
 import TableOne from "../components/Tables/TableOne";
-import MyModal from "@/components/Modal/SubmitNewModal";
 import { stockDataOnload } from "@/lib/StockOnload";
 import { PORTFOLIORECORD } from "@/types/userPortfolio";
 
-interface StockData {
-  datetime: string;
-  open: string;
-  high: string;
-  low: string;
-  close: string;
-  volume: string;
-}
-
-//stockDataOnload();
-// sessionStorage.setItem("userData", JSON.stringify(stockDataOnload()));
-// console.log(JSON.parse(sessionStorage.getItem("userData") as any));
-
 function Home() {
-  const [metaData, setMetaData] = useState(null);
-  const [stockData, setStockData] = useState<StockData[]>([]);
-  const [logoData, setLogoData] = useState(null);
+  const [tableData, setTableData] = useState<PORTFOLIORECORD[]>([]);
+  const [totalGainLoss, setTotalGainLoss] = useState<number>(0);
+  const [totalPercentageGain, setTotalGainLossPercentage] = useState<number>(0);
 
-  let [isOpen, setIsOpen] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      const { results, totalGainLoss, totalPercentageGain } =
+        await stockDataOnload();
+      setTableData(results);
+      setTotalGainLoss(totalGainLoss);
+      setTotalGainLossPercentage(totalPercentageGain);
+    };
 
-  function closeModal() {
-    setIsOpen(false);
-  }
+    fetchData();
+  }, []);
 
-  function openModal() {
-    setIsOpen(true);
-  }
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        <CardDataStats title="Total Gain" total="$63.45K" rate="12.43%" levelUp>
+        <CardDataStats
+          title="Total Gain"
+          total={`$${totalGainLoss.toFixed(2)}`}
+          rate={`${totalPercentageGain.toFixed(2)}%`}
+          levelUp
+        >
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -116,65 +110,8 @@ function Home() {
         <ChartOne />
         <ChartThree />
         <div className="col-span-12 xl:col-span-12">
-          <TableOne />
+          <TableOne tableData={tableData} totalGainLoss={totalGainLoss} />
         </div>
-      </div>
-
-      <div>
-        {metaData &&
-          Object.entries(metaData).map(([key, value]) => (
-            <p key={key}>
-              <strong>{key}:</strong> {value as string}
-            </p>
-          ))}
-      </div>
-
-      <div>
-        {isOpen && <MyModal openModal={openModal} closeModal={closeModal} />}
-      </div>
-
-      <button
-        onClick={openModal}
-        className="inline-flex items-center justify-center gap-2.5 rounded-md bg-black py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
-      >
-        <span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="fill-current"
-            width="20"
-            height="20"
-            viewBox="0 0 448 512"
-          >
-            <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
-          </svg>
-        </span>
-        Button With Icon
-      </button>
-
-      <div className="p-5">
-        {stockData.map((stock, index) => (
-          <div className="mt-2 mb-2" key={index}>
-            <p>
-              <strong>Datetime:</strong> {stock.datetime}
-            </p>
-            <p>
-              <strong>Open:</strong> {stock.open}
-            </p>
-            <p>
-              <strong>High:</strong> {stock.high}
-            </p>
-            <p>
-              <strong>Low:</strong> {stock.low}
-            </p>
-            <p>
-              <strong>Close:</strong> {stock.close}
-            </p>
-
-            <p>
-              <strong>Volume:</strong> {stock.volume}
-            </p>
-          </div>
-        ))}
       </div>
     </>
   );

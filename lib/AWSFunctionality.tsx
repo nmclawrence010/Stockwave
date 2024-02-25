@@ -14,42 +14,6 @@ export function connectAWS() {
   return ddb;
 }
 
-//Function to retrieve records from the DynamoDB
-//https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/dynamodb-example-query-scan.html
-// export function getDatabaseItems(dbData: STOCK[] = []) {
-//   var ddb = connectAWS();
-
-//   var params = {
-//     ExpressionAttributeValues: {
-//       ":uid": { S: "123" },
-//     },
-//     KeyConditionExpression: "UserID = :uid",
-//     ProjectionExpression:
-//       "UserID, TransactionID, Notes, StockTicker, AverageCost, DateBought, NumberOfShares",
-//     TableName: "StockwaveBuys2",
-//   };
-
-//   ddb.query(params, function (err: any, data: { Items: any[] }) {
-//     if (err) {
-//       console.log("Error", err);
-//     } else {
-//       //console.log("Success", data.Items);
-//       data.Items.forEach(function (element, index, array) {
-//         //console.log(element.TransactionID.S + " (" + element.StockTicker.S + ")");
-
-//         var obj = {
-//           Ticker: element.StockTicker.S,
-//           NoShares: element.NumberOfShares.S,
-//           AverageCost: element.AverageCost.S,
-//           MarketValue:
-//             Number(element.NumberOfShares.S) * Number(element.AverageCost.S),
-//         };
-//         dbData.push(obj);
-//       });
-//     }
-//   });
-// }
-
 export function getDatabaseItems(dbData: STOCK[] = []): Promise<STOCK[]> {
   return new Promise((resolve, reject) => {
     var ddb = connectAWS();
@@ -88,19 +52,27 @@ export function getDatabaseItems(dbData: STOCK[] = []): Promise<STOCK[]> {
 }
 
 //Function to add records to the DynamoDB
-export function addDatabaseItem(userid: string, randomHash: string) {
+export function addDatabaseItem(
+  userid: string,
+  randomHash: string,
+  formData: {
+    stockTicker: string;
+    numberOfShares: string;
+    averageCost: string;
+    date: string;
+  },
+) {
   var ddb = connectAWS();
 
   var params = {
-    TableName: "StockwaveBuys",
+    TableName: "StockwaveBuys2",
     Item: {
       TransactionID: { S: randomHash },
       UserID: { S: userid },
-      DateBought: { S: "01/01/2000" },
-      StockTicker: { S: "Richard Roe" },
-      AverageCost: { S: "Richard Roe" },
-      NumberOfShares: { S: "Richard Roe" },
-      Notes: { S: "Richard Roe" },
+      DateBought: { S: formData.date || "01/01/2000" },
+      StockTicker: { S: formData.stockTicker },
+      AverageCost: { N: formData.averageCost },
+      NumberOfShares: { N: formData.numberOfShares },
     },
   };
 
@@ -120,7 +92,7 @@ export function deleteDatabaseItem() {
 }
 
 //Generates a random hash to be used for the transaction ID in the database
-function generateTransactionID() {
+export function generateTransactionID() {
   var randomID = v4();
   return randomID;
 }

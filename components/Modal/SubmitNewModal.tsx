@@ -1,29 +1,38 @@
+import { addDatabaseItem, generateTransactionID } from "@/lib/AWSFunctionality";
+import { getCurrentUser } from "@/lib/Auth0Functionality";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 
-export default function MyModal({ openModal, closeModal }: any) {
+export default function MyModal({ openModal, closeModal, userId }: any) {
   let [isOpen, setIsOpen] = useState(true);
+  let [formData, setFormData] = useState({
+    stockTicker: "",
+    numberOfShares: "",
+    averageCost: "",
+    date: "",
+  });
 
-  // function closeModal() {
-  //   setIsOpen(false)
-  // }
+  userId = getCurrentUser();
 
-  // function openModal() {
-  //   setIsOpen(true)
-  // }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Call the addDatabaseItem function with the form data
+    addDatabaseItem(userId, generateTransactionID(), formData);
+
+    // Close the modal or perform any other necessary actions
+    closeModal();
+  };
 
   return (
     <>
-      {/* <div className="fixed inset-0 flex items-center justify-center">
-        <button
-          type="button"
-          onClick={openModal}
-          className="rounded-md bg-black/20 px-4 py-2 text-sm font-medium text-white hover:bg-black/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
-        >
-          Open dialog
-        </button>
-      </div> */}
-
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={closeModal}>
           <Transition.Child
@@ -58,7 +67,7 @@ export default function MyModal({ openModal, closeModal }: any) {
                   </Dialog.Title>
                   <div className="mt-2">
                     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-                      <form action="#">
+                      <form onSubmit={handleSubmit}>
                         <div className="p-6.5">
                           <div className="mb-4.5">
                             <label className="mb-2.5 block text-black dark:text-white">
@@ -66,6 +75,9 @@ export default function MyModal({ openModal, closeModal }: any) {
                               <span className="text-meta-1">*</span>
                             </label>
                             <input
+                              name="stockTicker"
+                              value={formData.stockTicker}
+                              onChange={handleInputChange}
                               placeholder="Enter the stock ticker"
                               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                             />
@@ -78,6 +90,9 @@ export default function MyModal({ openModal, closeModal }: any) {
                                 <span className="text-meta-1">*</span>
                               </label>
                               <input
+                                name="numberOfShares"
+                                value={formData.numberOfShares}
+                                onChange={handleInputChange}
                                 type="text"
                                 placeholder=""
                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -90,6 +105,9 @@ export default function MyModal({ openModal, closeModal }: any) {
                                 <span className="text-meta-1">*</span>
                               </label>
                               <input
+                                name="averageCost"
+                                value={formData.averageCost}
+                                onChange={handleInputChange}
                                 type="text"
                                 placeholder=""
                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -103,13 +121,19 @@ export default function MyModal({ openModal, closeModal }: any) {
                             </label>
                             <div className="relative">
                               <input
+                                name="date"
+                                value={formData.date}
+                                onChange={handleInputChange}
                                 type="date"
                                 className="custom-input-date custom-input-date-1 w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                               />
                             </div>
                           </div>
 
-                          <button className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray">
+                          <button
+                            type="submit"
+                            className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray"
+                          >
                             Submit
                           </button>
                         </div>

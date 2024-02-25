@@ -16,6 +16,7 @@ export async function stockDataOnload() {
       Ticker: element.Ticker,
       NoShares: element.NoShares,
       AverageCost: element.AverageCost,
+      TotalPaid: element.AverageCost * element.NoShares,
       MarketValue: element.NoShares * parseFloat(currentPrice),
       DateBought: element.DateBought,
       CurrentPrice: currentPrice,
@@ -29,7 +30,23 @@ export async function stockDataOnload() {
   // Wait for all promises to resolve
   const results = await Promise.all(promises);
 
+  // Calculate total Gain/Loss
+  const totalGainLoss = results.reduce(
+    (sum, result) => sum + result.GainLoss,
+    0,
+  );
+
+  // Calculate total paid to use for the overall percentage gain
+  const totalTotalPaid = results.reduce(
+    (sum, result) => sum + result.TotalPaid,
+    0,
+  );
+
+  // Calculate total paid to use for the overall percentage gain
+  const totalPercentageGain = (totalGainLoss / totalTotalPaid) * 100;
+
   // Now 'results' contains the array of objects with resolved values
-  console.log(results);
-  return results;
+  console.log(results[0]["Ticker"]);
+  console.log(totalGainLoss);
+  return { results, totalGainLoss, totalPercentageGain };
 }
