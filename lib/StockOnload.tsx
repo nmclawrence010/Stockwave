@@ -31,7 +31,7 @@ export async function stockDataOnload() {
   const results = await Promise.all(promises);
 
   // Calculate total Gain/Loss
-  const totalGainLoss = results.reduce(
+  const unrealisedGainLoss = results.reduce(
     (sum, result) => sum + result.GainLoss,
     0,
   );
@@ -43,10 +43,10 @@ export async function stockDataOnload() {
   );
 
   // Calculate total paid to use for the overall percentage gain
-  const totalPercentageGain = (totalGainLoss / totalTotalPaid) * 100;
+  const totalPercentageGain = (unrealisedGainLoss / totalTotalPaid) * 100;
 
   // Now 'results' contains the array of objects with resolved values
   console.log(results[0]["Ticker"]);
-  console.log(totalGainLoss);
-  return { results, totalGainLoss, totalPercentageGain };
+  console.log(unrealisedGainLoss);
+  return { results, unrealisedGainLoss, totalPercentageGain };
 }

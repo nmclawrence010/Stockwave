@@ -8,7 +8,7 @@ export function connectAWS() {
     region: "eu-west-1",
     accessKeyId: "AKIA2UC3CODSG6HZTVKN",
     secretAccessKey: "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",
-  }); //Set the region
+  }); //Set the region and keys
 
   var ddb = new AWS.DynamoDB({ apiVersion: "2012-08-10" }); //Creating a DynamoDB service object
   return ddb;
@@ -18,9 +18,11 @@ export function getDatabaseItems(dbData: STOCK[] = []): Promise<STOCK[]> {
   return new Promise((resolve, reject) => {
     var ddb = connectAWS();
 
+    var user = sessionStorage.getItem("currentUser"); //Potentially some spaghetti interactions here need to retest when live
+
     var params = {
       ExpressionAttributeValues: {
-        ":uid": { S: "123" },
+        ":uid": { S: user },
       },
       KeyConditionExpression: "UserID = :uid",
       ProjectionExpression:
@@ -71,8 +73,8 @@ export function addDatabaseItem(
       UserID: { S: userid },
       DateBought: { S: formData.date || "01/01/2000" },
       StockTicker: { S: formData.stockTicker },
-      AverageCost: { N: formData.averageCost },
-      NumberOfShares: { N: formData.numberOfShares },
+      AverageCost: { S: formData.averageCost },
+      NumberOfShares: { S: formData.numberOfShares },
     },
   };
 

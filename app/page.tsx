@@ -6,18 +6,19 @@ import ChartThree from "../components/Charts/ChartThree";
 import TableOne from "../components/Tables/TableOne";
 import { stockDataOnload } from "@/lib/StockOnload";
 import { PORTFOLIORECORD } from "@/types/userPortfolio";
+import { getCurrentUser } from "@/lib/Auth0Functionality";
 
 function Home() {
   const [tableData, setTableData] = useState<PORTFOLIORECORD[]>([]);
-  const [totalGainLoss, setTotalGainLoss] = useState<number>(0);
+  const [unrealisedGainLoss, setUnrealisedGainLoss] = useState<number>(0);
   const [totalPercentageGain, setTotalGainLossPercentage] = useState<number>(0);
-
+  sessionStorage.setItem("currentUser", getCurrentUser());
   useEffect(() => {
     const fetchData = async () => {
-      const { results, totalGainLoss, totalPercentageGain } =
+      const { results, unrealisedGainLoss, totalPercentageGain } =
         await stockDataOnload();
       setTableData(results);
-      setTotalGainLoss(totalGainLoss);
+      setUnrealisedGainLoss(unrealisedGainLoss);
       setTotalGainLossPercentage(totalPercentageGain);
     };
 
@@ -29,7 +30,7 @@ function Home() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
         <CardDataStats
           title="Total Gain"
-          total={`$${totalGainLoss.toFixed(2)}`}
+          total={`$${unrealisedGainLoss.toFixed(2)}`}
           rate={`${totalPercentageGain.toFixed(2)}%`}
           levelUp
         >
@@ -53,8 +54,8 @@ function Home() {
         </CardDataStats>
         <CardDataStats
           title="Unrealised Gain"
-          total="$45.2K"
-          rate="14.35%"
+          total={`$${unrealisedGainLoss.toFixed(2)}`}
+          rate={`${totalPercentageGain.toFixed(2)}%`}
           levelUp
         >
           <svg
@@ -110,7 +111,10 @@ function Home() {
         <ChartOne />
         <ChartThree />
         <div className="col-span-12 xl:col-span-12">
-          <TableOne tableData={tableData} totalGainLoss={totalGainLoss} />
+          <TableOne
+            tableData={tableData}
+            unrealisedGainLoss={unrealisedGainLoss}
+          />
         </div>
       </div>
     </>
