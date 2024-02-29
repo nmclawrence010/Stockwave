@@ -1,4 +1,5 @@
 export type PORTFOLIORECORD = {
+  TransactionID: any;
   Ticker: string;
   NoShares: number;
   AverageCost: number;
@@ -8,4 +9,5 @@ export type PORTFOLIORECORD = {
   CurrentPrice: number;
   LogoURL: string;
   GainLoss: number;
+  SoldGainLoss: number;
 };

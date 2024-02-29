@@ -11,15 +11,35 @@ import { getCurrentUser } from "@/lib/Auth0Functionality";
 function Home() {
   const [tableData, setTableData] = useState<PORTFOLIORECORD[]>([]);
   const [unrealisedGainLoss, setUnrealisedGainLoss] = useState<number>(0);
-  const [totalPercentageGain, setTotalGainLossPercentage] = useState<number>(0);
+  const [unrealisedPercentageGain, setUnrealisedGainLossPercentage] =
+    useState<number>(0);
+  const [realisedGainLoss, setRealisedGainLoss] = useState<number>(0);
+  const [realisedPercentageGain, setRealisedGainLossPercentage] =
+    useState<number>(0);
+  const [overallGainLoss, setOverallGainLoss] = useState<number>(0);
+  const [overallPercentageGain, setOverallGainLossPercentage] =
+    useState<number>(0);
+
   sessionStorage.setItem("currentUser", getCurrentUser());
+
   useEffect(() => {
     const fetchData = async () => {
-      const { results, unrealisedGainLoss, totalPercentageGain } =
-        await stockDataOnload();
+      const {
+        results,
+        unrealisedGainLoss,
+        unrealisedPercentageGain,
+        realisedGainLoss,
+        realisedPercentageGain,
+        overallGainLoss,
+        overallGainLossPercentage,
+      } = await stockDataOnload();
       setTableData(results);
       setUnrealisedGainLoss(unrealisedGainLoss);
-      setTotalGainLossPercentage(totalPercentageGain);
+      setUnrealisedGainLossPercentage(unrealisedPercentageGain);
+      setRealisedGainLoss(realisedGainLoss);
+      setRealisedGainLossPercentage(realisedPercentageGain);
+      setOverallGainLoss(overallGainLoss);
+      setOverallGainLossPercentage(overallGainLossPercentage);
     };
 
     fetchData();
@@ -30,8 +50,8 @@ function Home() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
         <CardDataStats
           title="Total Gain"
-          total={`$${unrealisedGainLoss.toFixed(2)}`}
-          rate={`${totalPercentageGain.toFixed(2)}%`}
+          total={`$${overallGainLoss.toFixed(2)}`}
+          rate={`${overallPercentageGain.toFixed(2)}%`}
           levelUp
         >
           <svg
@@ -55,7 +75,7 @@ function Home() {
         <CardDataStats
           title="Unrealised Gain"
           total={`$${unrealisedGainLoss.toFixed(2)}`}
-          rate={`${totalPercentageGain.toFixed(2)}%`}
+          rate={`${unrealisedPercentageGain.toFixed(2)}%`}
           levelUp
         >
           <svg
@@ -82,8 +102,8 @@ function Home() {
         </CardDataStats>
         <CardDataStats
           title="Realised Gain"
-          total="12.45"
-          rate="12.59%"
+          total={`$${realisedGainLoss.toFixed(2)}`}
+          rate={`${realisedPercentageGain.toFixed(2)}%`}
           levelUp
         >
           <svg

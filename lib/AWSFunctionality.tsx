@@ -44,6 +44,7 @@ export function getDatabaseItems(dbData: STOCK[] = []): Promise<STOCK[]> {
               parseInt(element.NumberOfShares.S, 10) *
               parseFloat(element.AverageCost.S),
             DateBought: element.DateBought.S,
+            TransactionID: element.TransactionID.S,
           };
           dbData.push(obj);
         });
@@ -89,8 +90,25 @@ export function addDatabaseItem(
 }
 
 //Function to delete records from the DynamoDB
-export function deleteDatabaseItem() {
+export function deleteDatabaseItem(transactionID: string, userId: string) {
   var ddb = connectAWS();
+
+  var params = {
+    TableName: "StockwaveBuys2",
+    Key: {
+      TransactionID: { S: transactionID },
+      UserID: { S: userId },
+    },
+  };
+
+  // Call DynamoDB to delete the item from the table
+  ddb.deleteItem(params, function (err: any, data: any) {
+    if (err) {
+      console.log("Error", err);
+    } else {
+      console.log("Success", data);
+    }
+  });
 }
 
 //Generates a random hash to be used for the transaction ID in the database

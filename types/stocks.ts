@@ -4,4 +4,5 @@ export type STOCK = {
   AverageCost: number;
   TotalPaid: number;
   DateBought: string;
+  TransactionID: string;
 };

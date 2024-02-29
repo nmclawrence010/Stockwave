@@ -2,6 +2,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { PORTFOLIORECORD } from "@/types/userPortfolio";
 import MyModal from "@/components/Modal/SubmitNewModal";
+import DeleteModal from "../Modal/DeleteModal";
+import { deleteDatabaseItem } from "@/lib/AWSFunctionality";
 
 // Define the props type
 interface TableOneProps {
@@ -14,6 +16,8 @@ const TableOne: React.FC<TableOneProps> = ({
   unrealisedGainLoss,
 }) => {
   let [isOpen, setIsOpen] = useState(false);
+  let [isOpen2, setIsOpen2] = useState(false);
+  let [deleteItemId, setDeleteItemId] = useState<string | null>(null);
 
   function closeModal() {
     setIsOpen(false);
@@ -22,6 +26,26 @@ const TableOne: React.FC<TableOneProps> = ({
   function openModal() {
     setIsOpen(true);
   }
+  function closeDeleteModal() {
+    setIsOpen2(false);
+    setDeleteItemId(null);
+  }
+
+  function openDeleteModal(transactionID: string) {
+    setIsOpen2(true);
+    setDeleteItemId(transactionID);
+  }
+
+  const handleDeleteClick = () => {
+    if (deleteItemId) {
+      deleteDatabaseItem(
+        deleteItemId,
+        String(sessionStorage.getItem("currentUser")),
+      );
+    }
+    closeDeleteModal();
+  };
+
   useEffect(() => {}, [tableData, unrealisedGainLoss]);
 
   return (
@@ -54,6 +78,15 @@ const TableOne: React.FC<TableOneProps> = ({
 
       <div>
         {isOpen && <MyModal openModal={openModal} closeModal={closeModal} />}
+      </div>
+      <div>
+        {isOpen2 && (
+          <DeleteModal
+            openModal={openDeleteModal}
+            closeModal={closeDeleteModal}
+            onDelete={handleDeleteClick}
+          />
+        )}
       </div>
       <div className="flex flex-col">
         <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-7">
@@ -156,7 +189,10 @@ const TableOne: React.FC<TableOneProps> = ({
                   />
                 </svg>
               </button>
-              <button className="hover:text-primary">
+              <button
+                onClick={() => openDeleteModal(brand.TransactionID)}
+                className="hover:text-primary"
+              >
                 <svg
                   className="fill-current"
                   width="18"
