@@ -1,6 +1,6 @@
 "use client";
 import { ApexOptions } from "apexcharts";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -8,6 +8,13 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 
 interface ChartThreeState {
   series: number[];
+}
+
+interface ChartThreeProps {
+  donutData: {
+    labels: string[];
+    series: number[];
+  };
 }
 
 const options: ApexOptions = {
@@ -52,10 +59,40 @@ const options: ApexOptions = {
   ],
 };
 
-const ChartThree: React.FC = () => {
+const ChartThree: React.FC<ChartThreeProps> = ({ donutData }) => {
+  // Calculate the total sum of MarketValue
+  const totalMarketValue = donutData.series.reduce(
+    (sum, value) => sum + value,
+    0,
+  );
+
+  // Calculate the percentage for each item and update the array
+  const updatedSeries = donutData.series.map(
+    (value) => (value / totalMarketValue) * 100,
+  );
+
   const [state, setState] = useState<ChartThreeState>({
-    series: [65, 34, 12, 56],
+    series: updatedSeries,
   });
+
+  useEffect(() => {
+    // Update the series state when donutData changes
+    setState({
+      series: updatedSeries,
+    });
+  }, [donutData]);
+
+  const percentageLabels = donutData.labels.map((label, index) => ({
+    name: `${label}`,
+  }));
+
+  // Use only percentages for series
+  const percentageSeries = donutData.series.map((value) =>
+    (
+      (value / donutData.series.reduce((acc, cur) => acc + cur, 0)) *
+      100
+    ).toFixed(2),
+  );
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-4">
@@ -72,8 +109,7 @@ const ChartThree: React.FC = () => {
               id=""
               className="relative z-20 inline-flex appearance-none bg-transparent py-1 pl-3 pr-8 text-sm font-medium outline-none"
             >
-              <option value="">Stocks</option>
-              <option value="">Sector</option>
+              <option value="">Stock</option>
             </select>
             <span className="absolute top-1/2 right-3 z-10 -translate-y-1/2">
               <svg
@@ -102,8 +138,11 @@ const ChartThree: React.FC = () => {
       <div className="mb-2">
         <div id="chartThree" className="mx-auto flex justify-center">
           <ReactApexChart
-            options={options}
-            series={state.series}
+            options={{
+              ...options,
+              labels: percentageLabels.map((item) => item.name),
+            }}
+            series={percentageSeries.map(Number)} // Convert strings to numbers
             type="donut"
           />
         </div>

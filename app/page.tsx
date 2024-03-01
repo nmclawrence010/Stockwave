@@ -9,7 +9,9 @@ import { PORTFOLIORECORD } from "@/types/userPortfolio";
 import { getCurrentUser } from "@/lib/Auth0Functionality";
 
 function Home() {
+  //Data for users transactions
   const [tableData, setTableData] = useState<PORTFOLIORECORD[]>([]);
+  //Data for the Cards
   const [unrealisedGainLoss, setUnrealisedGainLoss] = useState<number>(0);
   const [unrealisedPercentageGain, setUnrealisedGainLossPercentage] =
     useState<number>(0);
@@ -19,7 +21,11 @@ function Home() {
   const [overallGainLoss, setOverallGainLoss] = useState<number>(0);
   const [overallPercentageGain, setOverallGainLossPercentage] =
     useState<number>(0);
+  //Data for the Donut chart
+  const [donutData, setDonutData] = useState<PORTFOLIORECORD[]>([]);
+  const [donutDataLabels, setDonutDataLabels] = useState([]);
 
+  //Setting the current user into session storage for later use
   sessionStorage.setItem("currentUser", getCurrentUser());
 
   useEffect(() => {
@@ -32,6 +38,8 @@ function Home() {
         realisedPercentageGain,
         overallGainLoss,
         overallGainLossPercentage,
+        aggregatedData,
+        chartThreeData,
       } = await stockDataOnload();
       setTableData(results);
       setUnrealisedGainLoss(unrealisedGainLoss);
@@ -40,6 +48,10 @@ function Home() {
       setRealisedGainLossPercentage(realisedPercentageGain);
       setOverallGainLoss(overallGainLoss);
       setOverallGainLossPercentage(overallGainLossPercentage);
+
+      // Pass data to ChartThree
+      setDonutData(aggregatedData);
+      setDonutDataLabels(chartThreeData.labels as never[]);
     };
 
     fetchData();
@@ -126,10 +138,14 @@ function Home() {
         </CardDataStats>
       </div>
 
-      {/* <!-- ===== Pie chart ===== --> */}
       <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
         <ChartOne />
-        <ChartThree />
+        <ChartThree
+          donutData={{
+            labels: donutDataLabels,
+            series: donutData.map((item) => item.MarketValue),
+          }}
+        />
         <div className="col-span-12 xl:col-span-12">
           <TableOne
             tableData={tableData}

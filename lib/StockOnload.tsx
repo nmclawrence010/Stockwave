@@ -1,6 +1,7 @@
 import { fetchStockData, fetchLogo } from "./StockAPIFunctionality";
 import { getDatabaseItems } from "./AWSFunctionality";
 import { STOCK } from "@/types/stocks";
+import { PORTFOLIORECORD } from "@/types/userPortfolio";
 
 const dbData: STOCK[] = [];
 
@@ -30,7 +31,7 @@ export async function stockDataOnload() {
   });
 
   // Wait for all promises to resolve
-  const results = await Promise.all(promises);
+  var results = await Promise.all(promises);
 
   // Unrealised
   const unrealisedGainLoss = results.reduce(
@@ -44,8 +45,7 @@ export async function stockDataOnload() {
     0,
   );
 
-  // Overall gain (Realised and Unrealised)
-  const overallGainLoss = unrealisedGainLoss + realisedGainLoss;
+  const overallGainLoss = unrealisedGainLoss + realisedGainLoss; // Overall gain
 
   // Total paid for the unrealised gains to be used for calculating the gain percentage
   const totalTotalPaid = results.reduce(
@@ -53,18 +53,41 @@ export async function stockDataOnload() {
     0,
   );
 
-  // Unrealised gain %
-  const unrealisedPercentageGain = (unrealisedGainLoss / totalTotalPaid) * 100;
+  //Percentage calcs for the overall portfolio
+  const unrealisedPercentageGain = (unrealisedGainLoss / totalTotalPaid) * 100; // Unrealised gain %
+  const realisedPercentageGain = (realisedGainLoss / totalTotalPaid) * 100; // Realised gain %
+  const overallGainLossPercentage = realisedPercentageGain * 2; // Overall gain %
 
-  // Realised gain %
-  const realisedPercentageGain = (realisedGainLoss / totalTotalPaid) * 100;
+  //Aggregating rows from results to display different transactions on the same stock together to show your overall position
+  const aggregatedData = results.reduce(
+    (result: Array<PORTFOLIORECORD>, currentItem) => {
+      const existingItem = result.find(
+        (item) => item.Ticker === currentItem.Ticker,
+      );
 
-  // Overall gain %
-  const overallGainLossPercentage = realisedPercentageGain * 2;
+      if (existingItem) {
+        // If a matching Ticker is found, update the values
+        existingItem.NoShares += currentItem.NoShares;
+        existingItem.TotalPaid += currentItem.TotalPaid;
+        existingItem.MarketValue += currentItem.MarketValue;
+        existingItem.AverageCost =
+          existingItem.TotalPaid / existingItem.NoShares;
+      } else {
+        // If no matching Ticker is found, add the current item to the result
+        result.push({ ...currentItem });
+      }
 
-  // Now 'results' contains the array of objects with resolved values
-  console.log(results[0]["Ticker"]);
-  console.log(unrealisedGainLoss);
+      return result;
+    },
+    [],
+  );
+
+  // Extract Ticker and MarketValue for ChartThree (Donut Chart)
+  const chartThreeData = {
+    labels: aggregatedData.map((item) => item.Ticker),
+    series: aggregatedData.map((item) => item.MarketValue),
+  };
+
   return {
     results,
     unrealisedGainLoss,
@@ -73,5 +96,7 @@ export async function stockDataOnload() {
     realisedPercentageGain,
     overallGainLoss,
     overallGainLossPercentage,
+    aggregatedData,
+    chartThreeData,
   };
 }
