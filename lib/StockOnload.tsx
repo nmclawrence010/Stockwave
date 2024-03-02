@@ -70,6 +70,7 @@ export async function stockDataOnload() {
         existingItem.NoShares += currentItem.NoShares;
         existingItem.TotalPaid += currentItem.TotalPaid;
         existingItem.MarketValue += currentItem.MarketValue;
+        existingItem.GainLoss += currentItem.GainLoss;
         existingItem.AverageCost =
           existingItem.TotalPaid / existingItem.NoShares;
       } else {

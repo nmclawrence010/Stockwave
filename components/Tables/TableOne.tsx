@@ -4,20 +4,28 @@ import { PORTFOLIORECORD } from "@/types/userPortfolio";
 import MyModal from "@/components/Modal/SubmitNewModal";
 import DeleteModal from "../Modal/DeleteModal";
 import { deleteDatabaseItem } from "@/lib/AWSFunctionality";
+import AdditionalTable from "./AdditionalTable";
 
 // Define the props type
 interface TableOneProps {
   tableData: PORTFOLIORECORD[];
+  additionalTableData: PORTFOLIORECORD[]; //For the sub table under the stocks
   unrealisedGainLoss: number;
 }
 
 const TableOne: React.FC<TableOneProps> = ({
   tableData,
+  additionalTableData,
   unrealisedGainLoss,
 }) => {
   let [isOpen, setIsOpen] = useState(false);
   let [isOpen2, setIsOpen2] = useState(false);
   let [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+
+  // Add state for the additional table
+  const [additionalTableVisible, setAdditionalTableVisible] = useState<
+    string | null
+  >(null);
 
   function closeModal() {
     setIsOpen(false);
@@ -46,7 +54,14 @@ const TableOne: React.FC<TableOneProps> = ({
     closeDeleteModal();
   };
 
-  useEffect(() => {}, [tableData, unrealisedGainLoss]);
+  // Function to toggle the visibility of the additional table
+  const toggleAdditionalTable = (transactionID: string) => {
+    setAdditionalTableVisible((prevVisible) =>
+      prevVisible === transactionID ? null : transactionID,
+    );
+  };
+
+  useEffect(() => {}, [tableData, additionalTableData, unrealisedGainLoss]);
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -138,9 +153,11 @@ const TableOne: React.FC<TableOneProps> = ({
               <div className="flex-shrink-0">
                 <Image src={brand.LogoURL} alt="Brand" width={48} height={48} />
               </div>
-              <p className="hidden text-black dark:text-white sm:block">
-                {brand.Ticker}
-              </p>
+              <b>
+                <p className="hidden text-black dark:text-white sm:block">
+                  {brand.Ticker}
+                </p>
+              </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
@@ -162,15 +179,20 @@ const TableOne: React.FC<TableOneProps> = ({
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p
-                className={`${brand.GainLoss < 0 ? "text-meta-1" : "text-meta-3"}`}
-              >
-                {brand.GainLoss.toFixed(2)}
-              </p>
+              <b>
+                <p
+                  className={`${brand.GainLoss < 0 ? "text-meta-1" : "text-meta-3"}`}
+                >
+                  {brand.GainLoss.toFixed(2)}
+                </p>
+              </b>
             </div>
 
             <div className="flex items-center space-x-3.5">
-              <button className="hover:text-primary">
+              <button
+                onClick={() => toggleAdditionalTable(brand.TransactionID)}
+                className="hover:text-primary"
+              >
                 <svg
                   className="fill-current"
                   width="18"
@@ -219,6 +241,22 @@ const TableOne: React.FC<TableOneProps> = ({
                   />
                 </svg>
               </button>
+            </div>
+            {/* Render the additional table if the corresponding button is clicked */}
+
+            <div
+              className={`${
+                additionalTableVisible === brand.TransactionID
+                  ? "col-span-7 sm:col-span-12" // Adjust the column span as needed
+                  : "hidden"
+              }`}
+            >
+              <AdditionalTable
+                tableData={tableData}
+                unrealisedGainLoss={unrealisedGainLoss}
+                transactionID={brand.TransactionID}
+                additionalData={additionalTableData}
+              />
             </div>
           </div>
         ))}
