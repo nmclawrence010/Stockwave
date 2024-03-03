@@ -80,15 +80,16 @@ const ChartThree: React.FC<ChartThreeProps> = ({ donutData }) => {
     0,
   );
 
-  useEffect(() => {
-    // Calculate the percentage for each item and update the array
-    const updatedSeries = donutData.series.map(
-      (value) => (value / totalMarketValue) * 100,
-    );
+  // Calculate the percentage for each item and update the array
+  const updatedSeries = donutData.series.map(
+    (value) => (value / totalMarketValue) * 100,
+  );
 
-    const [state, setState] = useState<ChartThreeState>({
-      series: updatedSeries,
-    });
+  const [state, setState] = useState<ChartThreeState>({
+    series: updatedSeries,
+  });
+
+  useEffect(() => {
     // Update the series state when donutData changes
     setState({
       series: updatedSeries,
