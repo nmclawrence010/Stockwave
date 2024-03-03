@@ -21,10 +21,24 @@ const options: ApexOptions = {
   chart: {
     type: "donut",
   },
-  colors: ["#10B981", "#375E83", "#259AE6", "#FFA70B"],
+  colors: [
+    "#10B981",
+    "#375E83",
+    "#259AE6",
+    "#FFA70B",
+    "FF715B",
+    "4C5B5C",
+    "9191E9",
+    "F487B6",
+    "DB7F67",
+    "5D2A42",
+    "93E1D8",
+    "AA4465",
+    "462255",
+  ],
   labels: ["Remote", "Hybrid", "Onsite", "Leave"],
   legend: {
-    show: true,
+    show: false,
     position: "bottom",
   },
 
@@ -66,16 +80,15 @@ const ChartThree: React.FC<ChartThreeProps> = ({ donutData }) => {
     0,
   );
 
-  // Calculate the percentage for each item and update the array
-  const updatedSeries = donutData.series.map(
-    (value) => (value / totalMarketValue) * 100,
-  );
-
-  const [state, setState] = useState<ChartThreeState>({
-    series: updatedSeries,
-  });
-
   useEffect(() => {
+    // Calculate the percentage for each item and update the array
+    const updatedSeries = donutData.series.map(
+      (value) => (value / totalMarketValue) * 100,
+    );
+
+    const [state, setState] = useState<ChartThreeState>({
+      series: updatedSeries,
+    });
     // Update the series state when donutData changes
     setState({
       series: updatedSeries,
@@ -149,42 +162,24 @@ const ChartThree: React.FC<ChartThreeProps> = ({ donutData }) => {
       </div>
 
       <div className="-mx-8 flex flex-wrap items-center justify-center gap-y-3">
-        <div className="w-full px-8 sm:w-1/2">
-          <div className="flex w-full items-center">
-            <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-primary"></span>
-            <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Desktop </span>
-              <span> 65% </span>
-            </p>
+        {percentageLabels.map((label, index) => (
+          <div key={index} className="w-full px-8 sm:w-1/2">
+            <div className="flex w-full items-center">
+              <span
+                className={`mr-2 block h-3 w-3 rounded-full`}
+                style={{
+                  backgroundColor:
+                    options.colors?.[index % options.colors.length] ??
+                    "defaultColor",
+                }}
+              ></span>
+              <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
+                <span>{label.name}</span>
+                <span>{percentageSeries[index]}%</span>
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="w-full px-8 sm:w-1/2">
-          <div className="flex w-full items-center">
-            <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#6577F3]"></span>
-            <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Tablet </span>
-              <span> 34% </span>
-            </p>
-          </div>
-        </div>
-        <div className="w-full px-8 sm:w-1/2">
-          <div className="flex w-full items-center">
-            <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#8FD0EF]"></span>
-            <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Mobile </span>
-              <span> 45% </span>
-            </p>
-          </div>
-        </div>
-        <div className="w-full px-8 sm:w-1/2">
-          <div className="flex w-full items-center">
-            <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#0FADCF]"></span>
-            <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Unknown </span>
-              <span> 12% </span>
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );

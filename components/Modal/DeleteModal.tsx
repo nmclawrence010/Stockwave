@@ -63,7 +63,7 @@ export default function DeleteModal({ openModal, closeModal, onDelete }: any) {
                         closeModal(); // Close the modal
                       }}
                     >
-                      Yes, I'm sure
+                      Yes, Im sure
                     </button>
                   </div>
                 </Dialog.Panel>

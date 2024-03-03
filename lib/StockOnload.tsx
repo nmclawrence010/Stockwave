@@ -32,6 +32,7 @@ export async function stockDataOnload() {
 
   // Wait for all promises to resolve
   var results = await Promise.all(promises);
+  //console.log("PROMISES LENGTH", promises.length);
 
   // Unrealised
   const unrealisedGainLoss = results.reduce(
