@@ -7,9 +7,8 @@ export async function fetchStockData(ticker: string) {
   );
   const data = await res.json(); //Returns the whole json from TwelveData
   const finalPrice = data.values[0].close; //Returns just the last price of the stock
-  console.log(data.meta.symbol);
   //console.log("VALUES", data.values[0].datetime);
-  // console.log("META", data.meta);
+  console.log("META", data.meta);
   // console.log("VALUES", data.values[0]);
   return finalPrice;
 }

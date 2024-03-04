@@ -153,11 +153,9 @@ const TableOne: React.FC<TableOneProps> = ({
               <div className="flex-shrink-0">
                 <Image src={brand.LogoURL} alt="Brand" width={48} height={48} />
               </div>
-              <b>
-                <p className="hidden text-black dark:text-white sm:block">
-                  {brand.Ticker}
-                </p>
-              </b>
+              <p className="hidden text-black dark:text-white sm:block">
+                {brand.Ticker}
+              </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
