@@ -9,13 +9,19 @@ import { PORTFOLIORECORD } from "@/types/userPortfolio";
 import { getCurrentUser } from "@/lib/Auth0Functionality";
 import { fetchLogo, fetchStockData } from "@/lib/StockAPIFunctionality";
 import { STOCK } from "@/types/stocks";
-import { getDatabaseItems } from "@/lib/AWSFunctionality";
+import { STOCKSELL } from "@/types/stockSell";
+import { getDatabaseItems, getDatabaseItemsSell } from "@/lib/AWSFunctionality";
+import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
+import TableTwo from "@/components/Tables/TableTwo";
 
 async function fetchAndCalculateStockData() {
   const dbData: STOCK[] = [];
+  const dbDataSells: STOCKSELL[] = [];
+
+  //For the buy table
   await getDatabaseItems(dbData);
-  // Create an array of promises for fetchStockData and fetchLogo
   const promises = dbData.map(async (element) => {
+    // Create an array of promises for fetchStockData and fetchLogo
     const currentPrice = await fetchStockData(element.Ticker);
     const logoURL = await fetchLogo(element.Ticker);
 
@@ -36,36 +42,70 @@ async function fetchAndCalculateStockData() {
     };
   });
 
-  // Wait for all promises to resolve
-  const results = await Promise.all(promises);
+  const results = await Promise.all(promises); // Wait for all promises to resolve
+
   //console.log("PROMISES LENGTH", promises.length);
 
-  // Unrealised
+  //For the sell table
+  await getDatabaseItemsSell(dbDataSells);
+  const promisesSell = dbDataSells.map(async (element) => {
+    // Create an array of promises for fetchStockData and fetchLogo
+    const logoURL = await fetchLogo(element.Ticker);
+
+    return {
+      Ticker: element.Ticker,
+      NoShares: element.NoShares,
+      AverageCost: element.AverageCost,
+      AverageSellPrice: element.AverageSellPrice,
+      DateBought: element.DateBought,
+      LogoURL: logoURL,
+      TotalPaid: element.AverageCost * element.NoShares,
+      GainLoss:
+        element.AverageSellPrice * element.NoShares -
+        element.AverageCost * element.NoShares,
+      TransactionID: element.TransactionID,
+    };
+  });
+
+  const resultsSells = await Promise.all(promisesSell); // Wait for all promises to resolve
+
+  //Card Calculations
+  // Unrealised (Summing the Gain/Loss from each transaction in the Current Holdings)
   const unrealisedGainLoss = results.reduce(
     (sum, result) => sum + result.GainLoss,
     0,
   );
 
-  // Realised
-  const realisedGainLoss = results.reduce(
-    (sum, result) => sum + result.SoldGainLoss,
+  // Realised (Summing the Gain/Loss from each transaction in the Sell Table)
+  const realisedGainLoss = resultsSells.reduce(
+    (sum, result) => sum + result.GainLoss,
     0,
   );
 
   const overallGainLoss = unrealisedGainLoss + realisedGainLoss; // Overall gain
 
-  // Total paid for the unrealised gains to be used for calculating the gain percentage
+  // Summing the total spend for the current holdings so we can work out the percentage gain/loss
   const totalTotalPaid = results.reduce(
+    (sum, result) => sum + result.TotalPaid,
+    0,
+  );
+
+  // Summing the total spend for the current holdings so we can work out the percentage gain/loss
+  const totalTotalPaidSells = resultsSells.reduce(
     (sum, result) => sum + result.TotalPaid,
     0,
   );
 
   //Percentage calcs for the overall portfolio
   const unrealisedPercentageGain = (unrealisedGainLoss / totalTotalPaid) * 100; // Unrealised gain %
-  const realisedPercentageGain = (realisedGainLoss / totalTotalPaid) * 100; // Realised gain %
-  const overallGainLossPercentage = realisedPercentageGain * 2; // Overall gain %
+  const realisedPercentageGain = (realisedGainLoss / totalTotalPaidSells) * 100; // Realised gain %
+  const overallGainLossPercentage =
+    ((unrealisedGainLoss + realisedGainLoss) /
+      (totalTotalPaid + totalTotalPaidSells)) *
+    100; // Overall gain %
 
   //Aggregating rows from results to display different transactions on the same stock together to show your overall position
+  //Aggregated current holdings
   const aggregatedData = results.reduce(
     (result: Array<PORTFOLIORECORD>, currentItem) => {
       const existingItem = result.find(
@@ -89,6 +129,30 @@ async function fetchAndCalculateStockData() {
     },
     [],
   );
+  //Aggregated Sells
+  const aggregatedDataSells = resultsSells.reduce(
+    (result: Array<PORTFOLIORECORDSELL>, currentItem) => {
+      const existingItemSell = result.find(
+        (item) => item.Ticker === currentItem.Ticker,
+      );
+
+      if (existingItemSell) {
+        // If a matching Ticker is found, update the values
+        existingItemSell.NoShares += currentItem.NoShares;
+        existingItemSell.TotalPaid += currentItem.TotalPaid;
+        existingItemSell.AverageSellPrice += currentItem.AverageSellPrice;
+        existingItemSell.GainLoss += currentItem.GainLoss;
+        existingItemSell.AverageCost =
+          existingItemSell.TotalPaid / existingItemSell.NoShares;
+      } else {
+        // If no matching Ticker is found, add the current item to the result
+        result.push({ ...currentItem });
+      }
+
+      return result;
+    },
+    [],
+  );
 
   // Extract Ticker and MarketValue for ChartThree (Donut Chart)
   const chartThreeData = {
@@ -98,13 +162,15 @@ async function fetchAndCalculateStockData() {
 
   return {
     results,
+    resultsSells, // The two results are the ungrouped transactions
     unrealisedGainLoss,
     unrealisedPercentageGain,
     realisedGainLoss,
     realisedPercentageGain,
     overallGainLoss,
     overallGainLossPercentage,
-    aggregatedData,
+    aggregatedData, // The aggreagated data is the transactions grouped together by their matching stock ticker
+    aggregatedDataSells,
     chartThreeData,
   };
 }
@@ -112,9 +178,15 @@ async function fetchAndCalculateStockData() {
 function Home() {
   //Data for users transactions
   const [tableData, setTableData] = useState<PORTFOLIORECORD[]>([]);
+  const [tableDataSells, setTableDataSells] = useState<PORTFOLIORECORDSELL[]>(
+    [],
+  );
   //FOr the sub table
   const [additionalTableData, setAdditionalTableData] = useState<
     PORTFOLIORECORD[]
+  >([]);
+  const [additionalTableDataSells, setAdditionalTableDataSells] = useState<
+    PORTFOLIORECORDSELL[]
   >([]);
   //Data for the Cards
   const [unrealisedGainLoss, setUnrealisedGainLoss] = useState<number>(0);
@@ -137,6 +209,7 @@ function Home() {
     const getServerSideProps = async () => {
       const {
         results,
+        resultsSells,
         unrealisedGainLoss,
         unrealisedPercentageGain,
         realisedGainLoss,
@@ -144,13 +217,14 @@ function Home() {
         overallGainLoss,
         overallGainLossPercentage,
         aggregatedData,
+        aggregatedDataSells,
         chartThreeData,
       } = await fetchAndCalculateStockData();
-      const currentPrice = await fetchStockData("META");
-      console.log("MAIN PAGE TEST", currentPrice);
       //For table and sub table
       setTableData(aggregatedData);
+      setTableDataSells(aggregatedDataSells);
       setAdditionalTableData(results);
+      setAdditionalTableDataSells(resultsSells);
       /////////////////////////
       setUnrealisedGainLoss(unrealisedGainLoss);
       setUnrealisedGainLossPercentage(unrealisedPercentageGain);
@@ -236,6 +310,13 @@ function Home() {
             <TableOne
               tableData={tableData}
               additionalTableData={additionalTableData}
+              unrealisedGainLoss={unrealisedGainLoss}
+            />
+          </div>
+          <div className="col-span-12 xl:col-span-12">
+            <TableTwo
+              tableData={tableDataSells}
+              additionalTableData={additionalTableDataSells}
               unrealisedGainLoss={unrealisedGainLoss}
             />
           </div>
