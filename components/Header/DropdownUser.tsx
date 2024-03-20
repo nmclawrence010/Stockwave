@@ -49,16 +49,25 @@ const DropdownUser = () => {
           <span className="block text-sm font-medium text-black dark:text-white">
             {user?.email}
           </span>
-          <span className="block text-xs">Smooth Brained</span>
+          <span className="block text-xs">Investor</span>
         </span>
 
         <span className="h-12 w-12 rounded-full overflow-hidden">
-          <Image
-            width={112}
-            height={112}
-            src={user?.picture ?? ""}
-            alt="User"
-          />
+          {user?.email ? (
+            <Image
+              width={112}
+              height={112}
+              src={user.picture ?? ""}
+              alt="User"
+            />
+          ) : (
+            <Image
+              width={112}
+              height={112}
+              src="/images/defaultuser.png"
+              alt="Not logged in user pic"
+            />
+          )}
         </span>
 
         <svg

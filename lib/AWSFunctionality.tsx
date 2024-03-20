@@ -133,7 +133,7 @@ export function getDatabaseItemsSell(
       },
       KeyConditionExpression: "UserID = :uid",
       ProjectionExpression:
-        "UserID, TransactionID, StockTicker, AverageCost, AverageSold, DateBought, NumberOfShares",
+        "UserID, TransactionID, StockTicker, AverageCost, AverageSellPrice, DateBought, NumberOfShares",
       TableName: "StockwaveSells",
     };
 
