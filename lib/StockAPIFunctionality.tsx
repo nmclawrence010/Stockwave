@@ -26,9 +26,23 @@ export async function fetchLogo(ticker: string) {
 }
 
 export async function fetchSPX() {
+  //Gets the current month and year to then pass to the GET request below
+  var m = new Date().getMonth() + 1;
+  const y = new Date().getFullYear().toString();
+  //For adding a "0" to the start of the month number if it's a single digit number
+  if (m < 10) {
+    var mStr: string = "0" + m;
+  } else {
+    var mStr: string = m.toString();
+  }
   const res = await fetch(
-    "https://api.twelvedata.com/time_series?apikey=adc7d6ddaadc405683b7a833edd5abbc&interval=1month&symbol=SPX&dp=2",
+    "https://api.twelvedata.com/time_series?apikey=adc7d6ddaadc405683b7a833edd5abbc&interval=1month&symbol=SPX&format=JSON&end_date=" +
+      y +
+      "-" +
+      mStr +
+      "-01 15:10:00&dp=2&outputsize=12",
   ); //Returns JSON data for S&P500 for the last 12 months
   const data = await res.json();
+  console.log(data);
   return data;
 }
