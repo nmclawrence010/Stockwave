@@ -24,8 +24,10 @@ async function fetchAndCalculateStockData() {
   await getDatabaseItems(dbData);
   const promises = dbData.map(async (element) => {
     // Create an array of promises for fetchStockData and fetchLogo
-    const currentPrice = await fetchStockData(element.Ticker);
+    const stockData = await fetchStockData(element.Ticker);
     const logoURL = await fetchLogo(element.Ticker);
+
+    const currentPrice = stockData.values[0].close; //Returns just the last price of the stock
 
     return {
       Ticker: element.Ticker,
@@ -45,8 +47,6 @@ async function fetchAndCalculateStockData() {
   });
 
   const results = await Promise.all(promises); // Wait for all promises to resolve
-
-  //console.log("PROMISES LENGTH", promises.length);
 
   //For the sell table
   await getDatabaseItemsSell(dbDataSells);
@@ -245,7 +245,7 @@ function Home() {
 
   //Displaying different HTML when the user isn't logged in
   const { user } = useUser(); // Auth0 user
-  console.log("TESTINGUSER:", user?.email);
+  //console.log("TESTINGUSER:", user?.email);
 
   if (!user?.email) {
     return (

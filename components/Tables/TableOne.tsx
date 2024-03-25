@@ -54,11 +54,18 @@ const TableOne: React.FC<TableOneProps> = ({
     closeDeleteModal();
   };
 
+  //For highlighting the currently open row
+  const [highlightedRow, setHighlightedRow] = useState<string | null>(null);
   // Function to toggle the visibility of the additional table
   const toggleAdditionalTable = (transactionID: string) => {
     setAdditionalTableVisible((prevVisible) =>
       prevVisible === transactionID ? null : transactionID,
     );
+    if (highlightedRow === transactionID) {
+      setHighlightedRow(null); // Remove highlighting if the same row is clicked again
+    } else {
+      setHighlightedRow(transactionID); // Highlight the clicked row
+    }
   };
 
   useEffect(() => {}, [tableData, additionalTableData, unrealisedGainLoss]);
@@ -148,30 +155,54 @@ const TableOne: React.FC<TableOneProps> = ({
                 : "border-b border-stroke dark:border-strokedark"
             }`}
             key={key}
+            style={{
+              backgroundColor:
+                highlightedRow === brand.TransactionID ? "#e5e7eb" : "inherit", // Change the background color based on the highlightedRow state
+              color:
+                highlightedRow === brand.TransactionID
+                  ? "black !important"
+                  : "inherit", // Change the text color to black in the highlighted row with !important
+            }}
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
               <div className="flex-shrink-0">
                 <Image src={brand.LogoURL} alt="Brand" width={48} height={48} />
               </div>
-              <p className="hidden text-black dark:text-white sm:block">
+              <p
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+              >
                 {brand.Ticker}
               </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{brand.CurrentPrice}</p>
+              <p
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+              >
+                {brand.CurrentPrice}
+              </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{brand.NoShares}</p>
+              <p
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+              >
+                {brand.NoShares}
+              </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{brand.AverageCost}</p>
+              <p
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+              >
+                {brand.AverageCost}
+              </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">
+              <p
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+              >
                 {brand.MarketValue.toFixed(2)}
               </p>
             </div>

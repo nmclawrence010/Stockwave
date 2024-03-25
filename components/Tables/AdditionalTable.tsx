@@ -57,7 +57,7 @@ const AdditionalTable: React.FC<AdditionalTableProps> = ({
   //   console.log("transactionID:", transactionID);
 
   return (
-    <div className="rounded-sm border border-stroke bg-white pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+    <div className=" bg-white pb-2.5 dark:border-strokedark dark:bg-boxdark xl:pb-1">
       <div style={{ display: "flex", alignItems: "center" }}></div>
 
       <div>
@@ -81,21 +81,11 @@ const AdditionalTable: React.FC<AdditionalTableProps> = ({
           }`}
         >
           <div className="flex items-center gap-3 p-2.5 xl:p-5">
-            <div className="flex-shrink-0">
-              <Image
-                src={"/images/logo/white.png"}
-                alt="Brand"
-                width={48}
-                height={48}
-              />
-            </div>
-            <p className="hidden text-black dark:text-white sm:block">
-              {data.Ticker}
-            </p>
+            <p className="hidden text-black dark:text-white sm:block"></p>
           </div>
 
           <div className="flex items-center justify-center p-2.5 xl:p-5">
-            <p className="text-black dark:text-white">{data.CurrentPrice}</p>
+            <p className="text-black dark:text-white">{data.DateBought}</p>
           </div>
 
           <div className="flex items-center justify-center p-2.5 xl:p-5">

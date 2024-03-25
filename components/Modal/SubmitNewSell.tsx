@@ -73,38 +73,40 @@ export default function SellModal({ openModal, closeModal, userId }: any) {
                     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                       <form onSubmit={handleSubmit}>
                         <div className="p-6.5">
-                          <div className="mb-4.5">
-                            <label className="mb-2.5 block text-black dark:text-white">
-                              Ticker Symbol{" "}
-                              <span className="text-meta-1">*</span>
-                            </label>
-                            <input
-                              name="stockTicker"
-                              value={formData.stockTicker}
-                              onChange={handleInputChange}
-                              placeholder="Enter the stock ticker"
-                              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                            />
-                          </div>
-                          <div className="w-full xl:w-1/2">
-                            <label className="mb-2.5 block text-black dark:text-white">
-                              Number of Shares{" "}
-                              <span className="text-meta-1">*</span>
-                            </label>
-                            <input
-                              name="numberOfShares"
-                              value={formData.numberOfShares}
-                              onChange={handleInputChange}
-                              type="text"
-                              placeholder=""
-                              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                            />
+                          <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                            <div className="mb-4.5">
+                              <label className="mb-2.5 block text-black dark:text-white">
+                                Ticker Symbol{" "}
+                                <span className="text-meta-1">*</span>
+                              </label>
+                              <input
+                                name="stockTicker"
+                                value={formData.stockTicker}
+                                onChange={handleInputChange}
+                                placeholder="Enter the stock ticker"
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                              />
+                            </div>
+                            <div className="w-full xl:w-1/2">
+                              <label className="mb-2.5 block text-black dark:text-white">
+                                Number of Shares{" "}
+                                <span className="text-meta-1">*</span>
+                              </label>
+                              <input
+                                name="numberOfShares"
+                                value={formData.numberOfShares}
+                                onChange={handleInputChange}
+                                type="text"
+                                placeholder=""
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                              />
+                            </div>
                           </div>
 
                           <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                             <div className="w-full xl:w-1/2">
                               <label className="mb-2.5 block text-black dark:text-white">
-                                Average Bought Price{" "}
+                                Price Paid{" "}
                                 <span className="text-meta-1">*</span>
                               </label>
                               <input
@@ -119,7 +121,7 @@ export default function SellModal({ openModal, closeModal, userId }: any) {
 
                             <div className="w-full xl:w-1/2">
                               <label className="mb-2.5 block text-black dark:text-white">
-                                Average Sell Price{" "}
+                                Price Sold{" "}
                                 <span className="text-meta-1">*</span>
                               </label>
                               <input

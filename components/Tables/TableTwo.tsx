@@ -54,11 +54,18 @@ const TableOne: React.FC<TableTwoProps> = ({
     closeDeleteModal();
   };
 
+  const [highlightedRow, setHighlightedRow] = useState<string | null>(null);
   // Function to toggle the visibility of the additional table
   const toggleAdditionalTable = (transactionID: string) => {
     setAdditionalTableVisible((prevVisible) =>
       prevVisible === transactionID ? null : transactionID,
     );
+
+    if (highlightedRow === transactionID) {
+      setHighlightedRow(null); // Remove highlighting if the same row is clicked again
+    } else {
+      setHighlightedRow(transactionID); // Highlight the clicked row
+    }
   };
 
   useEffect(() => {}, [tableData, additionalTableData, unrealisedGainLoss]);
@@ -87,7 +94,7 @@ const TableOne: React.FC<TableTwoProps> = ({
               <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
             </svg>
           </span>
-          Add a Sale
+          Add new
         </button>
       </div>
 
@@ -128,7 +135,7 @@ const TableOne: React.FC<TableTwoProps> = ({
 
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Total Transaction Value
+              Transaction Value
             </h5>
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
@@ -149,32 +156,54 @@ const TableOne: React.FC<TableTwoProps> = ({
                 : "border-b border-stroke dark:border-strokedark"
             }`}
             key={key}
+            style={{
+              backgroundColor:
+                highlightedRow === brand.TransactionID ? "#e5e7eb" : "inherit", // Change the background color based on the highlightedRow state
+              color:
+                highlightedRow === brand.TransactionID
+                  ? "black !important"
+                  : "inherit", // Change the text color to black in the highlighted row with !important
+            }}
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
               <div className="flex-shrink-0">
                 <Image src={brand.LogoURL} alt="Brand" width={48} height={48} />
               </div>
-              <p className="hidden text-black dark:text-white sm:block">
+              <p
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+              >
                 {brand.Ticker}
               </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">
+              <p
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+              >
                 {brand.AverageSellPrice}
               </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{brand.NoShares}</p>
+              <p
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+              >
+                {brand.NoShares}
+              </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{brand.AverageCost}</p>
+              <p
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+              >
+                {brand.AverageCost}
+              </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">
+              <p
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+              >
                 {brand.TotalPaid.toFixed(2)}
               </p>
             </div>
