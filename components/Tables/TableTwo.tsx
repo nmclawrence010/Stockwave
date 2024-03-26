@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
 import SellModal from "@/components/Modal/SubmitNewSell";
 import DeleteModal from "../Modal/DeleteModal";
+import MultiDeleteModal from "../Modal/MultiDeleteModal";
 import { deleteDatabaseItemSell } from "@/lib/AWSFunctionality";
 import AdditionalTableTwo from "./AdditionalTableTwo";
 
@@ -13,14 +14,17 @@ interface TableTwoProps {
   unrealisedGainLoss: number;
 }
 
-const TableOne: React.FC<TableTwoProps> = ({
+const TableTwo: React.FC<TableTwoProps> = ({
   tableData,
   additionalTableData,
   unrealisedGainLoss,
 }) => {
   let [isOpen, setIsOpen] = useState(false);
   let [isOpen2, setIsOpen2] = useState(false);
+  let [isOpenMulti, setIsOpenMulti] = useState(false);
   let [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+  let [deleteItemsFromAdditionalTable, setDeleteItemsFromAdditionalTable] =
+    useState<string[]>([]); //To delete all items from the additional table
 
   // Add state for the additional table
   const [additionalTableVisible, setAdditionalTableVisible] = useState<
@@ -36,12 +40,26 @@ const TableOne: React.FC<TableTwoProps> = ({
   }
   function closeDeleteModal() {
     setIsOpen2(false);
+    setIsOpenMulti(false);
     setDeleteItemId(null);
+    setDeleteItemsFromAdditionalTable([]);
   }
 
   function openDeleteModal(transactionID: string) {
     setIsOpen2(true);
     setDeleteItemId(transactionID);
+  }
+
+  function openMultiDeleteModal() {
+    // Filter additional table data based on transactionID
+    console.log("MODAL", additionalTableData);
+    const itemsToDelete: any[] = [];
+    additionalTableData.forEach((item) => {
+      itemsToDelete.push(item.TransactionID);
+    });
+    console.log("itemsToDelete", itemsToDelete);
+    setIsOpenMulti(true);
+    setDeleteItemsFromAdditionalTable(itemsToDelete);
   }
 
   const handleDeleteClick = () => {
@@ -50,6 +68,21 @@ const TableOne: React.FC<TableTwoProps> = ({
         deleteItemId,
         String(sessionStorage.getItem("currentUser")),
       );
+    }
+    closeDeleteModal();
+  };
+
+  const handleMultiDeleteClick = () => {
+    console.log("DATA BEING PASSED TO AWS:", deleteItemsFromAdditionalTable);
+    if (deleteItemsFromAdditionalTable.length > 0) {
+      // Loop through the list of TransactionIDs and delete each item
+      deleteItemsFromAdditionalTable.forEach((id) => {
+        console.log("TransactionID:", id);
+        deleteDatabaseItemSell(
+          id, // Directly use the ID
+          String(sessionStorage.getItem("currentUser")),
+        );
+      });
     }
     closeDeleteModal();
   };
@@ -68,7 +101,12 @@ const TableOne: React.FC<TableTwoProps> = ({
     }
   };
 
-  useEffect(() => {}, [tableData, additionalTableData, unrealisedGainLoss]);
+  useEffect(() => {}, [
+    tableData,
+    additionalTableData,
+    unrealisedGainLoss,
+    deleteItemsFromAdditionalTable,
+  ]);
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -107,6 +145,15 @@ const TableOne: React.FC<TableTwoProps> = ({
             openModal={openDeleteModal}
             closeModal={closeDeleteModal}
             onDelete={handleDeleteClick}
+          />
+        )}
+      </div>
+      <div>
+        {isOpenMulti && (
+          <MultiDeleteModal
+            openModal={openMultiDeleteModal}
+            closeModal={closeDeleteModal}
+            onDelete={handleMultiDeleteClick}
           />
         )}
       </div>
@@ -242,7 +289,7 @@ const TableOne: React.FC<TableTwoProps> = ({
                 </svg>
               </button>
               <button
-                onClick={() => openDeleteModal(brand.TransactionID)}
+                onClick={() => openMultiDeleteModal()}
                 className="hover:text-primary"
               >
                 <svg
@@ -295,7 +342,7 @@ const TableOne: React.FC<TableTwoProps> = ({
   );
 };
 
-export default TableOne;
+export default TableTwo;
 function setIsOpen(arg0: boolean) {
   throw new Error("Function not implemented.");
 }

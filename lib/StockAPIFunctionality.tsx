@@ -43,6 +43,6 @@ export async function fetchSPX() {
       "-01 15:10:00&dp=2&outputsize=12",
   ); //Returns JSON data for S&P500 for the last 12 months
   const data = await res.json();
-  console.log(data);
+  //console.log(data);
   return data;
 }

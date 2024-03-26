@@ -199,6 +199,8 @@ export function addDatabaseItemSell(
 ///Modified version of the DELETE function for the SELL table
 export function deleteDatabaseItemSell(transactionID: string, userId: string) {
   var ddb = connectAWS();
+  console.log("AWS ITEM 1:", transactionID);
+  console.log("AWS ITEM 2:", userId);
 
   var params = {
     TableName: "StockwaveSells",

@@ -29,6 +29,11 @@ async function fetchAndCalculateStockData() {
 
     const currentPrice = stockData.values[0].close; //Returns just the last price of the stock
 
+    // Extract close prices for the past 12 months
+    const closePrices = stockData.values
+      .slice(0, 12)
+      .map((item: { close: string }) => parseFloat(item.close));
+
     return {
       Ticker: element.Ticker,
       NoShares: element.NoShares,
