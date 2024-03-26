@@ -1,6 +1,7 @@
 import { v4 } from "uuid"; //To generate random IDs for the transactions
 import { STOCK } from "@/types/stocks";
 import { STOCKSELL } from "@/types/stockSell";
+import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
 
 //Connecting to the AWS DynamoDB function so it can be reused for the different CRUD functions
 export function connectAWS() {
@@ -198,6 +199,102 @@ export function addDatabaseItemSell(
 
 ///Modified version of the DELETE function for the SELL table
 export function deleteDatabaseItemSell(transactionID: string, userId: string) {
+  var ddb = connectAWS();
+  console.log("AWS ITEM 1:", transactionID);
+  console.log("AWS ITEM 2:", userId);
+
+  var params = {
+    TableName: "StockwaveSells",
+    Key: {
+      TransactionID: { S: transactionID },
+      UserID: { S: userId },
+    },
+  };
+
+  // Call DynamoDB to delete the item from the table
+  ddb.deleteItem(params, function (err: any, data: any) {
+    if (err) {
+      console.log("Error", err);
+    } else {
+      console.log("Success", data);
+    }
+  });
+}
+
+//Same as the function for getting user records but from the Sell table
+export function getDatabaseItemsDividends(
+  dbDividendData: PORTFOLIORECORDEXTRA[] = [],
+): Promise<PORTFOLIORECORDEXTRA[]> {
+  return new Promise((resolve, reject) => {
+    var ddb = connectAWS();
+
+    var user = sessionStorage.getItem("currentUser");
+
+    var params = {
+      ExpressionAttributeValues: {
+        ":uid": { S: user },
+      },
+      KeyConditionExpression: "UserID = :uid",
+      ProjectionExpression:
+        "UserID, TransactionID, StockTicker, Amount, DateBought",
+      TableName: "StockwaveDividends",
+    };
+
+    ddb.query(params, function (err: any, data: { Items: any[] }) {
+      if (err) {
+        console.log("Error", err);
+        reject(err);
+      } else {
+        data.Items.forEach(function (element) {
+          var obj = {
+            Ticker: element.StockTicker.S,
+            Amount: parseFloat(element.Amount.S),
+            DateBought: element.DateBought.S,
+            TransactionID: element.TransactionID.S,
+          };
+          dbDividendData.push(obj);
+        });
+        resolve(dbDividendData);
+      }
+    });
+  });
+}
+
+//Modified version of the ADD function for the SELL table
+export function addDatabaseItemDividends(
+  userid: string,
+  randomHash: string,
+  formData: {
+    stockTicker: string;
+    date: string;
+    amount: string;
+  },
+) {
+  var ddb = connectAWS();
+
+  var params = {
+    TableName: "StockwaveDividends",
+    Item: {
+      TransactionID: { S: randomHash },
+      UserID: { S: userid },
+      DateBought: { S: formData.date || "01/01/2000" },
+      StockTicker: { S: formData.stockTicker },
+      Amount: { S: formData.amount },
+    },
+  };
+
+  // Call DynamoDB to add the item to the table
+  ddb.putItem(params, function (err: any, data: any) {
+    if (err) {
+      console.log("Error", err);
+    } else {
+      console.log("Success", data);
+    }
+  });
+}
+
+///Modified version of the DELETE function for the EXTRA dividend/cash table
+export function deleteDatabaseItemExtra(transactionID: string, userId: string) {
   var ddb = connectAWS();
   console.log("AWS ITEM 1:", transactionID);
   console.log("AWS ITEM 2:", userId);

@@ -4,21 +4,28 @@ import CardDataStats from "../components/CardDataStats";
 import ChartOne from "../components/Charts/ChartOne";
 import ChartThree from "../components/Charts/ChartThree";
 import TableOne from "../components/Tables/TableOne";
+import TableTwo from "@/components/Tables/TableTwo";
+import TableThree from "@/components/Tables/TableThree";
 import { PORTFOLIORECORD } from "@/types/userPortfolio";
 import { getCurrentUser } from "@/lib/Auth0Functionality";
 import { fetchLogo, fetchStockData } from "@/lib/StockAPIFunctionality";
 import { STOCK } from "@/types/stocks";
 import { STOCKSELL } from "@/types/stockSell";
-import { getDatabaseItems, getDatabaseItemsSell } from "@/lib/AWSFunctionality";
+import {
+  getDatabaseItems,
+  getDatabaseItemsDividends,
+  getDatabaseItemsSell,
+} from "@/lib/AWSFunctionality";
 import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
-import TableTwo from "@/components/Tables/TableTwo";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import Link from "next/link";
 import Image from "next/image";
+import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
 
 async function fetchAndCalculateStockData() {
   const dbData: STOCK[] = [];
   const dbDataSells: STOCKSELL[] = [];
+  const dbDataDividends: PORTFOLIORECORDEXTRA[] = [];
 
   //For the buy table
   await getDatabaseItems(dbData);
@@ -56,7 +63,6 @@ async function fetchAndCalculateStockData() {
   //For the sell table
   await getDatabaseItemsSell(dbDataSells);
   const promisesSell = dbDataSells.map(async (element) => {
-    // Create an array of promises for fetchStockData and fetchLogo
     const logoURL = await fetchLogo(element.Ticker);
 
     return {
@@ -74,7 +80,23 @@ async function fetchAndCalculateStockData() {
     };
   });
 
-  const resultsSells = await Promise.all(promisesSell); // Wait for all promises to resolve
+  const resultsSells = await Promise.all(promisesSell);
+
+  //For the sell table
+  await getDatabaseItemsDividends(dbDataDividends);
+  const promisesDividends = dbDataDividends.map(async (element) => {
+    //const logoURL = await fetchLogo(element.Ticker);
+
+    return {
+      Ticker: element.Ticker,
+      Amount: element.Amount,
+      DateBought: element.DateBought,
+      //LogoURL: logoURL,
+      TransactionID: element.TransactionID,
+    };
+  });
+
+  const resultsDividends = await Promise.all(promisesDividends);
 
   //Card Calculations
   // Unrealised (Summing the Gain/Loss from each transaction in the Current Holdings)
@@ -89,7 +111,13 @@ async function fetchAndCalculateStockData() {
     0,
   );
 
-  const overallGainLoss = unrealisedGainLoss + realisedGainLoss; // Overall gain
+  // Adding up the dividends
+  const dividendGain = resultsDividends.reduce(
+    (sum, result) => sum + result.Amount,
+    0,
+  );
+
+  const overallGainLoss = unrealisedGainLoss + realisedGainLoss + dividendGain; // Overall gain
 
   // Summing the total spend for the current holdings so we can work out the percentage gain/loss
   const totalTotalPaid = results.reduce(
@@ -160,6 +188,25 @@ async function fetchAndCalculateStockData() {
     },
     [],
   );
+  //Aggregated Dividends
+  const aggregatedDataDividends = resultsDividends.reduce(
+    (result: Array<PORTFOLIORECORDEXTRA>, currentItem) => {
+      const existingItemDividend = result.find(
+        (item) => item.Ticker === currentItem.Ticker,
+      );
+
+      if (existingItemDividend) {
+        // If a matching Ticker is found, update the values
+        existingItemDividend.Amount += currentItem.Amount;
+      } else {
+        // If no matching Ticker is found, add the current item to the result
+        result.push({ ...currentItem });
+      }
+
+      return result;
+    },
+    [],
+  );
 
   // Extract Ticker and MarketValue for ChartThree (Donut Chart)
   const chartThreeData = {
@@ -170,6 +217,7 @@ async function fetchAndCalculateStockData() {
   return {
     results,
     resultsSells, // The two results are the ungrouped transactions
+    resultsDividends,
     unrealisedGainLoss,
     unrealisedPercentageGain,
     realisedGainLoss,
@@ -178,6 +226,7 @@ async function fetchAndCalculateStockData() {
     overallGainLossPercentage,
     aggregatedData, // The aggreagated data is the transactions grouped together by their matching stock ticker
     aggregatedDataSells,
+    aggregatedDataDividends,
     chartThreeData,
   };
 }
@@ -188,6 +237,9 @@ function Home() {
   const [tableDataSells, setTableDataSells] = useState<PORTFOLIORECORDSELL[]>(
     [],
   );
+  const [tableDataDividends, setTableDataDividends] = useState<
+    PORTFOLIORECORDEXTRA[]
+  >([]);
   //FOr the sub table
   const [additionalTableData, setAdditionalTableData] = useState<
     PORTFOLIORECORD[]
@@ -195,6 +247,8 @@ function Home() {
   const [additionalTableDataSells, setAdditionalTableDataSells] = useState<
     PORTFOLIORECORDSELL[]
   >([]);
+  const [additionalTableDataDividends, setAdditionalTableDataDividends] =
+    useState<PORTFOLIORECORDEXTRA[]>([]);
   //Data for the Cards
   const [unrealisedGainLoss, setUnrealisedGainLoss] = useState<number>(0);
   const [unrealisedPercentageGain, setUnrealisedGainLossPercentage] =
@@ -217,6 +271,7 @@ function Home() {
       const {
         results,
         resultsSells,
+        resultsDividends,
         unrealisedGainLoss,
         unrealisedPercentageGain,
         realisedGainLoss,
@@ -225,13 +280,16 @@ function Home() {
         overallGainLossPercentage,
         aggregatedData,
         aggregatedDataSells,
+        aggregatedDataDividends,
         chartThreeData,
       } = await fetchAndCalculateStockData();
       //For table and sub table
       setTableData(aggregatedData);
       setTableDataSells(aggregatedDataSells);
+      setTableDataDividends(aggregatedDataDividends);
       setAdditionalTableData(results);
       setAdditionalTableDataSells(resultsSells);
+      setAdditionalTableDataDividends(resultsDividends);
       /////////////////////////
       setUnrealisedGainLoss(unrealisedGainLoss);
       setUnrealisedGainLossPercentage(unrealisedPercentageGain);
@@ -553,6 +611,12 @@ function Home() {
               tableData={tableDataSells}
               additionalTableData={additionalTableDataSells}
               unrealisedGainLoss={unrealisedGainLoss}
+            />
+          </div>
+          <div className="col-span-12 xl:col-span-12">
+            <TableThree
+              tableData={tableDataDividends}
+              additionalTableData={additionalTableDataDividends}
             />
           </div>
         </div>

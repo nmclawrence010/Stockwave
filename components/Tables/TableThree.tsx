@@ -1,32 +1,28 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
-import SellModal from "@/components/Modal/SubmitNewSell";
 import DeleteModal from "../Modal/DeleteModal";
 import MultiDeleteModal from "../Modal/MultiDeleteModal";
-import { deleteDatabaseItemSell } from "@/lib/AWSFunctionality";
-import AdditionalTableTwo from "./AdditionalTableTwo";
+import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
+import { deleteDatabaseItemExtra } from "@/lib/AWSFunctionality";
+import DividendModal from "../Modal/SubmitNewDividend";
+import AdditionalTableThree from "./AdditionalTableThree";
 
-// Define the props type
-interface TableTwoProps {
-  tableData: PORTFOLIORECORDSELL[];
-  additionalTableData: PORTFOLIORECORDSELL[]; //For the sub table under the stocks
-  unrealisedGainLoss: number;
+interface TableThreeProps {
+  tableData: PORTFOLIORECORDEXTRA[];
+  additionalTableData: PORTFOLIORECORDEXTRA[];
 }
 
-const TableTwo: React.FC<TableTwoProps> = ({
+const TableThree: React.FC<TableThreeProps> = ({
   tableData,
   additionalTableData,
-  unrealisedGainLoss,
 }) => {
   let [isOpen, setIsOpen] = useState(false);
   let [isOpen2, setIsOpen2] = useState(false);
   let [isOpenMulti, setIsOpenMulti] = useState(false);
   let [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   let [deleteItemsFromAdditionalTable, setDeleteItemsFromAdditionalTable] =
-    useState<string[]>([]); //For batch delete
+    useState<string[]>([]);
 
-  // Add state for the additional table
   const [additionalTableVisible, setAdditionalTableVisible] = useState<
     string | null
   >(null);
@@ -62,7 +58,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
 
   const handleDeleteClick = () => {
     if (deleteItemId) {
-      deleteDatabaseItemSell(
+      deleteDatabaseItemExtra(
         deleteItemId,
         String(sessionStorage.getItem("currentUser")),
       );
@@ -76,7 +72,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
       // Loop through the list of TransactionIDs and delete each item
       deleteItemsFromAdditionalTable.forEach((id) => {
         console.log("TransactionID:", id);
-        deleteDatabaseItemSell(
+        deleteDatabaseItemExtra(
           id, // Directly use the ID
           String(sessionStorage.getItem("currentUser")),
         );
@@ -102,7 +98,6 @@ const TableTwo: React.FC<TableTwoProps> = ({
   useEffect(() => {}, [
     tableData,
     additionalTableData,
-    unrealisedGainLoss,
     deleteItemsFromAdditionalTable,
   ]);
 
@@ -113,7 +108,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
           className="mb-6 text-xl font-semibold text-black dark:text-white"
           style={{ paddingRight: "30px", marginTop: "20px" }}
         >
-          Sells
+          Dividends Received
         </h4>
         <button
           onClick={openModal}
@@ -135,7 +130,9 @@ const TableTwo: React.FC<TableTwoProps> = ({
       </div>
 
       <div>
-        {isOpen && <SellModal openModal={openModal} closeModal={closeModal} />}
+        {isOpen && (
+          <DividendModal openModal={openModal} closeModal={closeModal} />
+        )}
       </div>
       <div>
         {isOpen2 && (
@@ -156,7 +153,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
         )}
       </div>
       <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-7">
+        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-4">
           <div className="p-2.5 xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Stock
@@ -164,38 +161,19 @@ const TableTwo: React.FC<TableTwoProps> = ({
           </div>
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Average Sell Price
+              Date
             </h5>
           </div>
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
-              No. of Shares
+              Amount
             </h5>
-          </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Average Cost
-            </h5>
-          </div>
-
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Transaction Value
-            </h5>
-          </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Total Gain/Loss
-            </h5>
-          </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base"></h5>
           </div>
         </div>
 
         {tableData.map((brand, key) => (
           <div
-            className={`grid grid-cols-3 sm:grid-cols-7 ${
+            className={`grid grid-cols-3 sm:grid-cols-4 ${
               key === tableData.length - 1
                 ? ""
                 : "border-b border-stroke dark:border-strokedark"
@@ -211,9 +189,6 @@ const TableTwo: React.FC<TableTwoProps> = ({
             }}
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
-              <div className="flex-shrink-0">
-                <Image src={brand.LogoURL} alt="Brand" width={48} height={48} />
-              </div>
               <p
                 className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
               >
@@ -225,7 +200,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
               <p
                 className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
               >
-                {brand.AverageSellPrice}
+                {brand.DateBought}
               </p>
             </div>
 
@@ -233,34 +208,8 @@ const TableTwo: React.FC<TableTwoProps> = ({
               <p
                 className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
               >
-                {brand.NoShares}
+                {brand.Amount}
               </p>
-            </div>
-
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
-              >
-                {brand.AverageCost}
-              </p>
-            </div>
-
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
-              >
-                {brand.TotalPaid.toFixed(2)}
-              </p>
-            </div>
-
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <b>
-                <p
-                  className={`${brand.GainLoss < 0 ? "text-meta-1" : "text-meta-3"}`}
-                >
-                  {brand.GainLoss.toFixed(2)}
-                </p>
-              </b>
             </div>
 
             <div className="flex items-center space-x-3.5">
@@ -326,9 +275,8 @@ const TableTwo: React.FC<TableTwoProps> = ({
                   : "hidden"
               }`}
             >
-              <AdditionalTableTwo
+              <AdditionalTableThree
                 tableData={tableData}
-                unrealisedGainLoss={unrealisedGainLoss}
                 transactionID={brand.TransactionID}
                 additionalData={additionalTableData}
               />
@@ -340,7 +288,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
   );
 };
 
-export default TableTwo;
+export default TableThree;
 function setIsOpen(arg0: boolean) {
   throw new Error("Function not implemented.");
 }

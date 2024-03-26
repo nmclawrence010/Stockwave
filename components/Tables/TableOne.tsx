@@ -5,6 +5,7 @@ import MyModal from "@/components/Modal/SubmitNewModal";
 import DeleteModal from "../Modal/DeleteModal";
 import { deleteDatabaseItem } from "@/lib/AWSFunctionality";
 import AdditionalTable from "./AdditionalTable";
+import MultiDeleteModal from "../Modal/MultiDeleteModal";
 
 // Define the props type
 interface TableOneProps {
@@ -20,7 +21,10 @@ const TableOne: React.FC<TableOneProps> = ({
 }) => {
   let [isOpen, setIsOpen] = useState(false);
   let [isOpen2, setIsOpen2] = useState(false);
-  let [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+  let [isOpenMulti, setIsOpenMulti] = useState(false);
+  let [deleteItemId, setDeleteItemId] = useState<string | null>(null); //For singular transactions
+  let [deleteItemsFromAdditionalTable, setDeleteItemsFromAdditionalTable] =
+    useState<string[]>([]); //For batch delete
 
   // Add state for the additional table
   const [additionalTableVisible, setAdditionalTableVisible] = useState<
@@ -36,12 +40,24 @@ const TableOne: React.FC<TableOneProps> = ({
   }
   function closeDeleteModal() {
     setIsOpen2(false);
+    setIsOpenMulti(false);
     setDeleteItemId(null);
+    setDeleteItemsFromAdditionalTable([]);
   }
 
   function openDeleteModal(transactionID: string) {
     setIsOpen2(true);
     setDeleteItemId(transactionID);
+  }
+
+  function openMultiDeleteModal() {
+    // Filter additional table data based on transactionID
+    const itemsToDelete: any[] = [];
+    additionalTableData.forEach((item) => {
+      itemsToDelete.push(item.TransactionID);
+    });
+    setIsOpenMulti(true);
+    setDeleteItemsFromAdditionalTable(itemsToDelete);
   }
 
   const handleDeleteClick = () => {
@@ -50,6 +66,21 @@ const TableOne: React.FC<TableOneProps> = ({
         deleteItemId,
         String(sessionStorage.getItem("currentUser")),
       );
+    }
+    closeDeleteModal();
+  };
+
+  const handleMultiDeleteClick = () => {
+    console.log("DATA BEING PASSED TO AWS:", deleteItemsFromAdditionalTable);
+    if (deleteItemsFromAdditionalTable.length > 0) {
+      // Loop through the list of TransactionIDs and delete each item
+      deleteItemsFromAdditionalTable.forEach((id) => {
+        console.log("TransactionID:", id);
+        deleteDatabaseItem(
+          id, // Directly use the ID
+          String(sessionStorage.getItem("currentUser")),
+        );
+      });
     }
     closeDeleteModal();
   };
@@ -68,7 +99,12 @@ const TableOne: React.FC<TableOneProps> = ({
     }
   };
 
-  useEffect(() => {}, [tableData, additionalTableData, unrealisedGainLoss]);
+  useEffect(() => {}, [
+    tableData,
+    additionalTableData,
+    unrealisedGainLoss,
+    deleteItemsFromAdditionalTable,
+  ]);
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -107,6 +143,15 @@ const TableOne: React.FC<TableOneProps> = ({
             openModal={openDeleteModal}
             closeModal={closeDeleteModal}
             onDelete={handleDeleteClick}
+          />
+        )}
+      </div>
+      <div>
+        {isOpenMulti && (
+          <MultiDeleteModal
+            openModal={openMultiDeleteModal}
+            closeModal={closeDeleteModal}
+            onDelete={handleMultiDeleteClick}
           />
         )}
       </div>
@@ -219,7 +264,7 @@ const TableOne: React.FC<TableOneProps> = ({
 
             <div className="flex items-center space-x-3.5">
               <button
-                onClick={() => toggleAdditionalTable(brand.TransactionID)}
+                onClick={() => openMultiDeleteModal()}
                 className="hover:text-primary"
               >
                 <svg
