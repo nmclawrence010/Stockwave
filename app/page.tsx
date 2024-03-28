@@ -549,6 +549,7 @@ function Home() {
             title="Total Gain"
             total={`$${overallGainLoss.toFixed(2)}`}
             rate={`${overallPercentageGain.toFixed(2)}%`}
+            specificCard="1"
             levelUp
           >
             <svg
@@ -566,6 +567,7 @@ function Home() {
             title="Unrealised Gain"
             total={`$${unrealisedGainLoss.toFixed(2)}`}
             rate={`${unrealisedPercentageGain.toFixed(2)}%`}
+            specificCard="2"
             levelUp
           >
             <svg
@@ -583,6 +585,7 @@ function Home() {
             title="Realised Gain"
             total={`$${realisedGainLossIncDividend.toFixed(2)}`}
             rate={`${realisedPercentageGain.toFixed(2)}%`}
+            specificCard="3"
             levelUp
           >
             <svg

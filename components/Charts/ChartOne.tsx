@@ -175,18 +175,32 @@ const ChartOne: React.FC = () => {
               <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-primary">
                 <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-primary"></span>
               </span>
-              <div className="w-full">
+              <div className="w-full group relative inline-block">
                 <p className="font-semibold text-primary">S&P 500</p>
                 <p className="text-sm font-medium">Last 12 months</p>
+                <div className="absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 whitespace-nowrap rounded bg-black px-4.5 py-1.5 text-sm font-medium text-white opacity-0 group-hover:opacity-100">
+                  <p className="text-sm font-medium">
+                    SPX on the 1st of each month
+                  </p>
+                </div>
               </div>
             </div>
             <div className="flex min-w-47.5">
               <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-secondary">
                 <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
               </span>
-              <div className="w-full">
-                <p className="font-semibold text-secondary">You</p>
+              <div className="w-full group relative inline-block">
+                <p className="font-semibold text-secondary">
+                  Your current holdings
+                </p>
                 <p className="text-sm font-medium">Last 12 months</p>
+                <div className="absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 whitespace-nowrap rounded bg-black px-4.5 py-1.5 text-sm font-medium text-white opacity-0 group-hover:opacity-100">
+                  <p className="text-sm font-medium">
+                    How the current make up of your portfolio would have
+                    performed vs SPX if the same amount was invested 12 months
+                    ago
+                  </p>
+                </div>
               </div>
             </div>
           </div>
