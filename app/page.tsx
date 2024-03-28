@@ -72,7 +72,7 @@ async function fetchAndCalculateStockData() {
       AverageSellPrice: element.AverageSellPrice,
       DateBought: element.DateBought,
       LogoURL: logoURL,
-      TotalPaid: element.AverageCost * element.NoShares,
+      TotalPaid: element.AverageSellPrice * element.NoShares,
       GainLoss:
         element.AverageSellPrice * element.NoShares -
         element.AverageCost * element.NoShares,
@@ -105,17 +105,19 @@ async function fetchAndCalculateStockData() {
     0,
   );
 
+  // Adding up the dividends
+  const dividendGain = resultsDividends.reduce(
+    (sum, result) => sum + result.Amount,
+    0,
+  );
+
   // Realised (Summing the Gain/Loss from each transaction in the Sell Table)
   const realisedGainLoss = resultsSells.reduce(
     (sum, result) => sum + result.GainLoss,
     0,
   );
 
-  // Adding up the dividends
-  const dividendGain = resultsDividends.reduce(
-    (sum, result) => sum + result.Amount,
-    0,
-  );
+  const realisedGainLossIncludingDividends = realisedGainLoss + dividendGain;
 
   const overallGainLoss = unrealisedGainLoss + realisedGainLoss + dividendGain; // Overall gain
 
@@ -221,6 +223,7 @@ async function fetchAndCalculateStockData() {
     unrealisedGainLoss,
     unrealisedPercentageGain,
     realisedGainLoss,
+    realisedGainLossIncludingDividends,
     realisedPercentageGain,
     overallGainLoss,
     overallGainLossPercentage,
@@ -254,6 +257,8 @@ function Home() {
   const [unrealisedPercentageGain, setUnrealisedGainLossPercentage] =
     useState<number>(0);
   const [realisedGainLoss, setRealisedGainLoss] = useState<number>(0);
+  const [realisedGainLossIncDividend, setRealisedGainLossIncDividend] =
+    useState<number>(0);
   const [realisedPercentageGain, setRealisedGainLossPercentage] =
     useState<number>(0);
   const [overallGainLoss, setOverallGainLoss] = useState<number>(0);
@@ -276,6 +281,7 @@ function Home() {
         unrealisedPercentageGain,
         realisedGainLoss,
         realisedPercentageGain,
+        realisedGainLossIncludingDividends,
         overallGainLoss,
         overallGainLossPercentage,
         aggregatedData,
@@ -294,6 +300,7 @@ function Home() {
       setUnrealisedGainLoss(unrealisedGainLoss);
       setUnrealisedGainLossPercentage(unrealisedPercentageGain);
       setRealisedGainLoss(realisedGainLoss);
+      setRealisedGainLossIncDividend(realisedGainLossIncludingDividends);
       setRealisedGainLossPercentage(realisedPercentageGain);
       setOverallGainLoss(overallGainLoss);
       setOverallGainLossPercentage(overallGainLossPercentage);
@@ -574,7 +581,7 @@ function Home() {
           </CardDataStats>
           <CardDataStats
             title="Realised Gain"
-            total={`$${realisedGainLoss.toFixed(2)}`}
+            total={`$${realisedGainLossIncDividend.toFixed(2)}`}
             rate={`${realisedPercentageGain.toFixed(2)}%`}
             levelUp
           >

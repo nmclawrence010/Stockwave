@@ -190,7 +190,7 @@ const TableThree: React.FC<TableThreeProps> = ({
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
               <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium "} sm:block`}
               >
                 {brand.Ticker}
               </p>
@@ -198,7 +198,7 @@ const TableThree: React.FC<TableThreeProps> = ({
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
               >
                 {brand.DateBought}
               </p>
@@ -206,7 +206,7 @@ const TableThree: React.FC<TableThreeProps> = ({
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
               >
                 {brand.Amount}
               </p>

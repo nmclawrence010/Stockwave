@@ -19,10 +19,27 @@ export default function SellModal({ openModal, closeModal, userId }: any) {
   userId = getCurrentUser();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    if (
+      (name === "numberOfShares" ||
+        name === "averageCost" ||
+        name === "averageSellPrice") &&
+      (!isNaN(Number(value)) || value === "")
+    ) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    } else if (
+      name !== "numberOfShares" &&
+      name !== "averageCost" &&
+      name !== "averageSellPrice"
+    ) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

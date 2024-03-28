@@ -15,10 +15,23 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
   userId = getCurrentUser();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    // Apply validation only to "numberOfShares" and "averageCost" fields
+    if (
+      (name === "numberOfShares" || name === "averageCost") &&
+      (!isNaN(Number(value)) || value === "")
+    ) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    } else if (name !== "numberOfShares" && name !== "averageCost") {
+      // For other fields, simply update the state
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

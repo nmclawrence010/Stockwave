@@ -17,10 +17,18 @@ export default function DividendModal({ openModal, closeModal, userId }: any) {
   userId = getCurrentUser();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    if (name === "amount" && (!isNaN(Number(value)) || value === "")) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    } else if (name !== "amount") {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

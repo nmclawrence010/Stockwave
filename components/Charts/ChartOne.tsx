@@ -62,7 +62,7 @@ const ChartOne: React.FC = () => {
   const categories = [];
   for (let i = currentMonth; i >= currentMonth - 11; i--) {
     const monthIndex = i < 0 ? 12 + i : i; // Handle negative indices (wrap around to previous year)
-    categories.push(`${months[monthIndex]}, ${currentYear}`);
+    categories.push(`${months[monthIndex]}`);
   }
 
   const productOneData = chartData.find((item) => item.name === "S&P500")?.data;

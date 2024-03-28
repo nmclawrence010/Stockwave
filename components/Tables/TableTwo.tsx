@@ -156,7 +156,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
         )}
       </div>
       <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-7">
+        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-8">
           <div className="p-2.5 xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Stock
@@ -189,13 +189,18 @@ const TableTwo: React.FC<TableTwoProps> = ({
             </h5>
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">
+              Total Gain/Loss %
+            </h5>
+          </div>
+          <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base"></h5>
           </div>
         </div>
 
         {tableData.map((brand, key) => (
           <div
-            className={`grid grid-cols-3 sm:grid-cols-7 ${
+            className={`grid grid-cols-3 sm:grid-cols-8 ${
               key === tableData.length - 1
                 ? ""
                 : "border-b border-stroke dark:border-strokedark"
@@ -215,7 +220,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
                 <Image src={brand.LogoURL} alt="Brand" width={48} height={48} />
               </div>
               <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
               >
                 {brand.Ticker}
               </p>
@@ -223,7 +228,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
               >
                 {brand.AverageSellPrice}
               </p>
@@ -231,23 +236,25 @@ const TableTwo: React.FC<TableTwoProps> = ({
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
               >
-                {brand.NoShares}
+                {Number.isInteger(brand.NoShares)
+                  ? brand.NoShares
+                  : brand.NoShares.toFixed(3)}
               </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
               >
-                {brand.AverageCost}
+                {brand.AverageCost.toFixed(2)}
               </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white"} sm:block`}
+                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
               >
                 {brand.TotalPaid.toFixed(2)}
               </p>
@@ -259,6 +266,16 @@ const TableTwo: React.FC<TableTwoProps> = ({
                   className={`${brand.GainLoss < 0 ? "text-meta-1" : "text-meta-3"}`}
                 >
                   {brand.GainLoss.toFixed(2)}
+                </p>
+              </b>
+            </div>
+
+            <div className="flex items-center justify-center p-2.5 xl:p-5">
+              <b>
+                <p
+                  className={`${brand.GainLoss < 0 ? "text-meta-1" : "text-meta-3"}`}
+                >
+                  {((brand.GainLoss / brand.TotalPaid) * 100).toFixed(2)}%
                 </p>
               </b>
             </div>

@@ -74,7 +74,7 @@ const AdditionalTable: React.FC<AdditionalTableProps> = ({
       {filteredTableData.map((data, index) => (
         <div
           key={index}
-          className={`grid grid-cols-3 sm:grid-cols-7 ${
+          className={`grid grid-cols-3 sm:grid-cols-8 ${
             index === filteredTableData.length - 1
               ? ""
               : "border-b border-stroke dark:border-strokedark"
@@ -108,6 +108,16 @@ const AdditionalTable: React.FC<AdditionalTableProps> = ({
             >
               {data.GainLoss.toFixed(2)}
             </p>
+          </div>
+
+          <div className="flex items-center justify-center p-2.5 xl:p-5">
+            <b>
+              <p
+                className={`${data.GainLoss < 0 ? "text-meta-1" : "text-meta-3"}`}
+              >
+                {((data.GainLoss / data.TotalPaid) * 100).toFixed(2)}%
+              </p>
+            </b>
           </div>
 
           <div className="flex items-center space-x-3.5">
