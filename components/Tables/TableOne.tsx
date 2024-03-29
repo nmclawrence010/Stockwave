@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PORTFOLIORECORD } from "@/types/userPortfolio";
 import MyModal from "@/components/Modal/SubmitNewModal";
@@ -213,12 +214,16 @@ const TableOne: React.FC<TableOneProps> = ({
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
               <div className="flex-shrink-0">
-                <Image src={brand.LogoURL} alt="Brand" width={48} height={48} />
+                <Image src={brand.LogoURL} alt="logo" width={48} height={48} />
               </div>
               <p
                 className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
               >
-                {brand.Ticker}
+                <Link href={`/stocks/${brand.Ticker}`}>
+                  <span className="text-blue-500 hover:underline">
+                    {brand.Ticker}
+                  </span>
+                </Link>
               </p>
             </div>
 

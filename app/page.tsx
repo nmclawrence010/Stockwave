@@ -27,7 +27,7 @@ async function fetchAndCalculateStockData() {
   const dbDataSells: STOCKSELL[] = [];
   const dbDataDividends: PORTFOLIORECORDEXTRA[] = [];
 
-  //For the buy table
+  //For the current holdings table
   await getDatabaseItems(dbData);
   const promises = dbData.map(async (element) => {
     // Create an array of promises for fetchStockData and fetchLogo

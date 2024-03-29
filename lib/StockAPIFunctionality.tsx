@@ -5,10 +5,12 @@ export async function fetchStockData(ticker: string) {
       "&dp=2&" +
       "format=JSON&outputsize=12",
   );
-  const data = await res.json(); //Returns the whole json from TwelveData
+  setTimeout(() => {
+    console.log("Waiting...");
+  }, 800);
+  const data = await res.json();
   //const finalPrice = data.values[0].close; //Returns just the last price of the stock
-  //console.log("VALUES", data.values[0].datetime);
-  console.log("STOCK", data.meta);
+  //console.log("STOCK", data.meta);
   // console.log("VALUES", data.values[0]);
   return data;
 }
@@ -19,10 +21,30 @@ export async function fetchLogo(ticker: string) {
       ticker +
       "&apikey=adc7d6ddaadc405683b7a833edd5abbc",
   );
-  const logoLink = await res.json(); //Returns the whole json from TwelveData
+  const logoLink = await res.json();
   const logoURL = logoLink.url; //Returns just the URL link to the company logo
-  //console.log("APICALL-LOGO:", logoURL);
+  //console.log("LOGO", logoURL);
   return logoURL;
+}
+
+// https://twelvedata.com/docs#quote
+export async function fetchStockQuote(ticker: string) {
+  const res = await fetch(
+    "https://api.twelvedata.com/quote?apikey=adc7d6ddaadc405683b7a833edd5abbc&symbol=" +
+      ticker,
+  );
+  const data = await res.json();
+  return data;
+}
+
+// https://twelvedata.com/docs#profile
+export async function fetchStockProfile(ticker: string) {
+  const res = await fetch(
+    "https://api.twelvedata.com/quote?apikey=adc7d6ddaadc405683b7a833edd5abbc&symbol=" +
+      ticker,
+  );
+  const data = await res.json();
+  return data;
 }
 
 export async function fetchSPX() {
@@ -43,6 +65,5 @@ export async function fetchSPX() {
       "-01 15:10:00&dp=2&outputsize=12",
   ); //Returns JSON data for S&P500 for the last 12 months
   const data = await res.json();
-  //console.log(data);
   return data;
 }

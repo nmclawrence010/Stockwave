@@ -196,9 +196,9 @@ const ChartOne: React.FC = () => {
                 <p className="text-sm font-medium">Last 12 months</p>
                 <div className="absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 whitespace-nowrap rounded bg-black px-4.5 py-1.5 text-sm font-medium text-white opacity-0 group-hover:opacity-100">
                   <p className="text-sm font-medium">
-                    How the current make up of your portfolio would have
-                    performed vs SPX if the same amount was invested 12 months
-                    ago
+                    How the current make up of your portfolio would have <br />
+                    performed vs SPX if the same amount was invested <br />
+                    12 months ago
                   </p>
                 </div>
               </div>
