@@ -40,7 +40,7 @@ export async function fetchStockQuote(ticker: string) {
 // https://twelvedata.com/docs#profile
 export async function fetchStockProfile(ticker: string) {
   const res = await fetch(
-    "https://api.twelvedata.com/quote?apikey=adc7d6ddaadc405683b7a833edd5abbc&symbol=" +
+    "https://api.twelvedata.com/profile?apikey=adc7d6ddaadc405683b7a833edd5abbc&symbol=" +
       ticker,
   );
   const data = await res.json();
