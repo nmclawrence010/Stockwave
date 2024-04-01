@@ -11,11 +11,7 @@ import { getCurrentUser } from "@/lib/Auth0Functionality";
 import { fetchLogo, fetchStockData } from "@/lib/StockAPIFunctionality";
 import { STOCK } from "@/types/stocks";
 import { STOCKSELL } from "@/types/stockSell";
-import {
-  getDatabaseItems,
-  getDatabaseItemsDividends,
-  getDatabaseItemsSell,
-} from "@/lib/AWSFunctionality";
+import { getDatabaseItems, getDatabaseItemsDividends, getDatabaseItemsSell } from "@/lib/AWSFunctionality";
 import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import Link from "next/link";
@@ -37,9 +33,7 @@ async function fetchAndCalculateStockData() {
     const currentPrice = stockData.values[0].close; //Returns just the last price of the stock
 
     // Extract close prices for the past 12 months
-    const closePrices = stockData.values
-      .slice(0, 12)
-      .map((item: { close: string }) => parseFloat(item.close));
+    const closePrices = stockData.values.slice(0, 12).map((item: { close: string }) => parseFloat(item.close));
 
     return {
       Ticker: element.Ticker,
@@ -50,9 +44,7 @@ async function fetchAndCalculateStockData() {
       DateBought: element.DateBought,
       CurrentPrice: currentPrice,
       LogoURL: logoURL,
-      GainLoss:
-        parseFloat(currentPrice) * element.NoShares -
-        element.AverageCost * element.NoShares,
+      GainLoss: parseFloat(currentPrice) * element.NoShares - element.AverageCost * element.NoShares,
       SoldGainLoss: 100,
       TransactionID: element.TransactionID,
     };
@@ -73,9 +65,7 @@ async function fetchAndCalculateStockData() {
       DateBought: element.DateBought,
       LogoURL: logoURL,
       TotalPaid: element.AverageSellPrice * element.NoShares,
-      GainLoss:
-        element.AverageSellPrice * element.NoShares -
-        element.AverageCost * element.NoShares,
+      GainLoss: element.AverageSellPrice * element.NoShares - element.AverageCost * element.NoShares,
       TransactionID: element.TransactionID,
     };
   });
@@ -100,115 +90,80 @@ async function fetchAndCalculateStockData() {
 
   //Card Calculations
   // Unrealised (Summing the Gain/Loss from each transaction in the Current Holdings)
-  const unrealisedGainLoss = results.reduce(
-    (sum, result) => sum + result.GainLoss,
-    0,
-  );
+  const unrealisedGainLoss = results.reduce((sum, result) => sum + result.GainLoss, 0);
 
   // Adding up the dividends
-  const dividendGain = resultsDividends.reduce(
-    (sum, result) => sum + result.Amount,
-    0,
-  );
+  const dividendGain = resultsDividends.reduce((sum, result) => sum + result.Amount, 0);
 
   // Realised (Summing the Gain/Loss from each transaction in the Sell Table)
-  const realisedGainLoss = resultsSells.reduce(
-    (sum, result) => sum + result.GainLoss,
-    0,
-  );
+  const realisedGainLoss = resultsSells.reduce((sum, result) => sum + result.GainLoss, 0);
 
   const realisedGainLossIncludingDividends = realisedGainLoss + dividendGain;
 
   const overallGainLoss = unrealisedGainLoss + realisedGainLoss + dividendGain; // Overall gain
 
   // Summing the total spend for the current holdings so we can work out the percentage gain/loss
-  const totalTotalPaid = results.reduce(
-    (sum, result) => sum + result.TotalPaid,
-    0,
-  );
+  const totalTotalPaid = results.reduce((sum, result) => sum + result.TotalPaid, 0);
 
   // Summing the total spend for the current holdings so we can work out the percentage gain/loss
-  const totalTotalPaidSells = resultsSells.reduce(
-    (sum, result) => sum + result.TotalPaid,
-    0,
-  );
+  const totalTotalPaidSells = resultsSells.reduce((sum, result) => sum + result.TotalPaid, 0);
 
   //Percentage calcs for the overall portfolio
   const unrealisedPercentageGain = (unrealisedGainLoss / totalTotalPaid) * 100; // Unrealised gain %
   const realisedPercentageGain = (realisedGainLoss / totalTotalPaidSells) * 100; // Realised gain %
-  const overallGainLossPercentage =
-    ((unrealisedGainLoss + realisedGainLoss) /
-      (totalTotalPaid + totalTotalPaidSells)) *
-    100; // Overall gain %
+  const overallGainLossPercentage = ((unrealisedGainLoss + realisedGainLoss) / (totalTotalPaid + totalTotalPaidSells)) * 100; // Overall gain %
 
   //Aggregating rows from results to display different transactions on the same stock together to show your overall position
   //Aggregated current holdings
-  const aggregatedData = results.reduce(
-    (result: Array<PORTFOLIORECORD>, currentItem) => {
-      const existingItem = result.find(
-        (item) => item.Ticker === currentItem.Ticker,
-      );
+  const aggregatedData = results.reduce((result: Array<PORTFOLIORECORD>, currentItem) => {
+    const existingItem = result.find((item) => item.Ticker === currentItem.Ticker);
 
-      if (existingItem) {
-        // If a matching Ticker is found, update the values
-        existingItem.NoShares += currentItem.NoShares;
-        existingItem.TotalPaid += currentItem.TotalPaid;
-        existingItem.MarketValue += currentItem.MarketValue;
-        existingItem.GainLoss += currentItem.GainLoss;
-        existingItem.AverageCost =
-          existingItem.TotalPaid / existingItem.NoShares;
-      } else {
-        // If no matching Ticker is found, add the current item to the result
-        result.push({ ...currentItem });
-      }
+    if (existingItem) {
+      // If a matching Ticker is found, update the values
+      existingItem.NoShares += currentItem.NoShares;
+      existingItem.TotalPaid += currentItem.TotalPaid;
+      existingItem.MarketValue += currentItem.MarketValue;
+      existingItem.GainLoss += currentItem.GainLoss;
+      existingItem.AverageCost = existingItem.TotalPaid / existingItem.NoShares;
+    } else {
+      // If no matching Ticker is found, add the current item to the result
+      result.push({ ...currentItem });
+    }
 
-      return result;
-    },
-    [],
-  );
+    return result;
+  }, []);
   //Aggregated Sells
-  const aggregatedDataSells = resultsSells.reduce(
-    (result: Array<PORTFOLIORECORDSELL>, currentItem) => {
-      const existingItemSell = result.find(
-        (item) => item.Ticker === currentItem.Ticker,
-      );
+  const aggregatedDataSells = resultsSells.reduce((result: Array<PORTFOLIORECORDSELL>, currentItem) => {
+    const existingItemSell = result.find((item) => item.Ticker === currentItem.Ticker);
 
-      if (existingItemSell) {
-        // If a matching Ticker is found, update the values
-        existingItemSell.NoShares += currentItem.NoShares;
-        existingItemSell.TotalPaid += currentItem.TotalPaid;
-        existingItemSell.AverageSellPrice += currentItem.AverageSellPrice;
-        existingItemSell.GainLoss += currentItem.GainLoss;
-        existingItemSell.AverageCost =
-          existingItemSell.TotalPaid / existingItemSell.NoShares;
-      } else {
-        // If no matching Ticker is found, add the current item to the result
-        result.push({ ...currentItem });
-      }
+    if (existingItemSell) {
+      // If a matching Ticker is found, update the values
+      existingItemSell.NoShares += currentItem.NoShares;
+      existingItemSell.TotalPaid += currentItem.TotalPaid;
+      existingItemSell.AverageSellPrice += currentItem.AverageSellPrice;
+      existingItemSell.GainLoss += currentItem.GainLoss;
+      existingItemSell.AverageCost = existingItemSell.TotalPaid / existingItemSell.NoShares;
+    } else {
+      // If no matching Ticker is found, add the current item to the result
+      result.push({ ...currentItem });
+    }
 
-      return result;
-    },
-    [],
-  );
+    return result;
+  }, []);
   //Aggregated Dividends
-  const aggregatedDataDividends = resultsDividends.reduce(
-    (result: Array<PORTFOLIORECORDEXTRA>, currentItem) => {
-      const existingItemDividend = result.find(
-        (item) => item.Ticker === currentItem.Ticker,
-      );
+  const aggregatedDataDividends = resultsDividends.reduce((result: Array<PORTFOLIORECORDEXTRA>, currentItem) => {
+    const existingItemDividend = result.find((item) => item.Ticker === currentItem.Ticker);
 
-      if (existingItemDividend) {
-        // If a matching Ticker is found, update the values
-        existingItemDividend.Amount += currentItem.Amount;
-      } else {
-        // If no matching Ticker is found, add the current item to the result
-        result.push({ ...currentItem });
-      }
+    if (existingItemDividend) {
+      // If a matching Ticker is found, update the values
+      existingItemDividend.Amount += currentItem.Amount;
+    } else {
+      // If no matching Ticker is found, add the current item to the result
+      result.push({ ...currentItem });
+    }
 
-      return result;
-    },
-    [],
-  );
+    return result;
+  }, []);
 
   // Extract Ticker and MarketValue for ChartThree (Donut Chart)
   const chartThreeData = {
@@ -237,33 +192,20 @@ async function fetchAndCalculateStockData() {
 function Home() {
   //Data for users transactions
   const [tableData, setTableData] = useState<PORTFOLIORECORD[]>([]);
-  const [tableDataSells, setTableDataSells] = useState<PORTFOLIORECORDSELL[]>(
-    [],
-  );
-  const [tableDataDividends, setTableDataDividends] = useState<
-    PORTFOLIORECORDEXTRA[]
-  >([]);
+  const [tableDataSells, setTableDataSells] = useState<PORTFOLIORECORDSELL[]>([]);
+  const [tableDataDividends, setTableDataDividends] = useState<PORTFOLIORECORDEXTRA[]>([]);
   //FOr the sub table
-  const [additionalTableData, setAdditionalTableData] = useState<
-    PORTFOLIORECORD[]
-  >([]);
-  const [additionalTableDataSells, setAdditionalTableDataSells] = useState<
-    PORTFOLIORECORDSELL[]
-  >([]);
-  const [additionalTableDataDividends, setAdditionalTableDataDividends] =
-    useState<PORTFOLIORECORDEXTRA[]>([]);
+  const [additionalTableData, setAdditionalTableData] = useState<PORTFOLIORECORD[]>([]);
+  const [additionalTableDataSells, setAdditionalTableDataSells] = useState<PORTFOLIORECORDSELL[]>([]);
+  const [additionalTableDataDividends, setAdditionalTableDataDividends] = useState<PORTFOLIORECORDEXTRA[]>([]);
   //Data for the Cards
   const [unrealisedGainLoss, setUnrealisedGainLoss] = useState<number>(0);
-  const [unrealisedPercentageGain, setUnrealisedGainLossPercentage] =
-    useState<number>(0);
+  const [unrealisedPercentageGain, setUnrealisedGainLossPercentage] = useState<number>(0);
   const [realisedGainLoss, setRealisedGainLoss] = useState<number>(0);
-  const [realisedGainLossIncDividend, setRealisedGainLossIncDividend] =
-    useState<number>(0);
-  const [realisedPercentageGain, setRealisedGainLossPercentage] =
-    useState<number>(0);
+  const [realisedGainLossIncDividend, setRealisedGainLossIncDividend] = useState<number>(0);
+  const [realisedPercentageGain, setRealisedGainLossPercentage] = useState<number>(0);
   const [overallGainLoss, setOverallGainLoss] = useState<number>(0);
-  const [overallPercentageGain, setOverallGainLossPercentage] =
-    useState<number>(0);
+  const [overallPercentageGain, setOverallGainLossPercentage] = useState<number>(0);
   //Data for the Donut chart
   const [donutData, setDonutData] = useState<PORTFOLIORECORD[]>([]);
   const [donutDataLabels, setDonutDataLabels] = useState([]);
@@ -336,18 +278,11 @@ function Home() {
                 </Link>
                 <p className="2xl:px-20">
                   <br></br>
-                  Your go-to web app for effortlessly tracking your stock
-                  investments.
+                  Your go-to web app for effortlessly tracking your stock investments.
                 </p>
 
                 <span className="mt-15 inline-block">
-                  <svg
-                    width="350"
-                    height="350"
-                    viewBox="0 0 350 350"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
+                  <svg width="350" height="350" viewBox="0 0 350 350" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                       d="M33.5825 294.844L30.5069 282.723C25.0538 280.414 19.4747 278.414 13.7961 276.732L13.4079 282.365L11.8335 276.159C4.79107 274.148 0 273.263 0 273.263C0 273.263 6.46998 297.853 20.0448 316.653L35.8606 319.429L23.5737 321.2C25.2813 323.253 27.1164 325.196 29.0681 327.019C48.8132 345.333 70.8061 353.736 78.1898 345.787C85.5736 337.838 75.5526 316.547 55.8074 298.235C49.6862 292.557 41.9968 288.001 34.2994 284.415L33.5825 294.844Z"
                       fill="#F2F2F2"
@@ -380,18 +315,12 @@ function Home() {
                       d="M190.017 158.289H123.208C122.572 158.288 121.962 158.035 121.512 157.586C121.062 157.137 120.809 156.527 120.809 155.892V89.1315C120.809 88.496 121.062 87.8866 121.512 87.4372C121.962 86.9878 122.572 86.735 123.208 86.7343H190.017C190.653 86.735 191.263 86.9878 191.713 87.4372C192.163 87.8866 192.416 88.496 192.416 89.1315V155.892C192.416 156.527 192.163 157.137 191.713 157.586C191.263 158.035 190.653 158.288 190.017 158.289ZM123.208 87.6937C122.826 87.6941 122.46 87.8457 122.19 88.1154C121.92 88.385 121.769 88.7507 121.768 89.132V155.892C121.769 156.274 121.92 156.639 122.19 156.909C122.46 157.178 122.826 157.33 123.208 157.33H190.017C190.399 157.33 190.765 157.178 191.035 156.909C191.304 156.639 191.456 156.274 191.457 155.892V89.132C191.456 88.7507 191.304 88.385 191.035 88.1154C190.765 87.8457 190.399 87.6941 190.017 87.6937H123.208Z"
                       fill="#CCCCCC"
                     />
-                    <path
-                      d="M204.934 209.464H102.469V210.423H204.934V209.464Z"
-                      fill="#CCCCCC"
-                    />
+                    <path d="M204.934 209.464H102.469V210.423H204.934V209.464Z" fill="#CCCCCC" />
                     <path
                       d="M105.705 203.477C107.492 203.477 108.941 202.029 108.941 200.243C108.941 198.457 107.492 197.01 105.705 197.01C103.918 197.01 102.469 198.457 102.469 200.243C102.469 202.029 103.918 203.477 105.705 203.477Z"
                       fill="#3056D3"
                     />
-                    <path
-                      d="M204.934 241.797H102.469V242.757H204.934V241.797Z"
-                      fill="#CCCCCC"
-                    />
+                    <path d="M204.934 241.797H102.469V242.757H204.934V241.797Z" fill="#CCCCCC" />
                     <path
                       d="M105.705 235.811C107.492 235.811 108.941 234.363 108.941 232.577C108.941 230.791 107.492 229.344 105.705 229.344C103.918 229.344 102.469 230.791 102.469 232.577C102.469 234.363 103.918 235.811 105.705 235.811Z"
                       fill="#3056D3"
@@ -420,18 +349,12 @@ function Home() {
                       d="M264.742 229.309C264.972 229.414 265.193 229.537 265.404 229.678L286.432 220.709L287.183 215.174L295.585 215.123L295.089 227.818L267.334 235.153C267.275 235.345 267.205 235.535 267.124 235.719C266.722 236.574 266.077 237.292 265.269 237.783C264.46 238.273 263.525 238.514 262.58 238.475C261.636 238.436 260.723 238.119 259.958 237.563C259.193 237.008 258.61 236.239 258.28 235.353C257.951 234.467 257.892 233.504 258.108 232.584C258.325 231.664 258.809 230.829 259.5 230.183C260.19 229.538 261.056 229.11 261.989 228.955C262.922 228.799 263.879 228.922 264.742 229.309Z"
                       fill="#FFB8B8"
                     />
-                    <path
-                      d="M298.642 344.352H292.894L290.16 322.198L298.643 322.198L298.642 344.352Z"
-                      fill="#FFB8B8"
-                    />
+                    <path d="M298.642 344.352H292.894L290.16 322.198L298.643 322.198L298.642 344.352Z" fill="#FFB8B8" />
                     <path
                       d="M288.788 342.711H299.873V349.685H281.809C281.809 347.835 282.544 346.062 283.853 344.754C285.162 343.446 286.937 342.711 288.788 342.711Z"
                       fill="#1C2434"
                     />
-                    <path
-                      d="M320.995 342.729L315.274 343.292L310.379 321.513L318.822 320.682L320.995 342.729Z"
-                      fill="#FFB8B8"
-                    />
+                    <path d="M320.995 342.729L315.274 343.292L310.379 321.513L318.822 320.682L320.995 342.729Z" fill="#FFB8B8" />
                     <path
                       d="M311.028 342.061L322.059 340.975L322.744 347.916L304.766 349.685C304.676 348.774 304.767 347.854 305.033 346.977C305.299 346.101 305.735 345.285 306.317 344.577C306.898 343.869 307.614 343.283 308.422 342.851C309.23 342.419 310.116 342.151 311.028 342.061Z"
                       fill="#1C2434"
@@ -468,9 +391,7 @@ function Home() {
             <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
               <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
                 <span className="mb-1.5 block font-medium">Start for free</span>
-                <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-                  Sign In to Stockwave
-                </h2>
+                <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">Sign In to Stockwave</h2>
 
                 <form>
                   <div className="mb-5">
@@ -488,13 +409,7 @@ function Home() {
                   <Link href={"/api/auth/login"}>
                     <button className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50">
                       <span>
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <g clipPath="url(#clip0_191_13499)">
                             <path
                               d="M19.999 10.2217C20.0111 9.53428 19.9387 8.84788 19.7834 8.17737H10.2031V11.8884H15.8266C15.7201 12.5391 15.4804 13.162 15.1219 13.7195C14.7634 14.2771 14.2935 14.7578 13.7405 15.1328L13.7209 15.2571L16.7502 17.5568L16.96 17.5774C18.8873 15.8329 19.9986 13.2661 19.9986 10.2217"
@@ -610,24 +525,13 @@ function Home() {
             }}
           />
           <div className="col-span-12 xl:col-span-12">
-            <TableOne
-              tableData={tableData}
-              additionalTableData={additionalTableData}
-              unrealisedGainLoss={unrealisedGainLoss}
-            />
+            <TableOne tableData={tableData} additionalTableData={additionalTableData} unrealisedGainLoss={unrealisedGainLoss} />
           </div>
           <div className="col-span-12 xl:col-span-12">
-            <TableTwo
-              tableData={tableDataSells}
-              additionalTableData={additionalTableDataSells}
-              unrealisedGainLoss={unrealisedGainLoss}
-            />
+            <TableTwo tableData={tableDataSells} additionalTableData={additionalTableDataSells} unrealisedGainLoss={unrealisedGainLoss} />
           </div>
           <div className="col-span-12 xl:col-span-12">
-            <TableThree
-              tableData={tableDataDividends}
-              additionalTableData={additionalTableDataDividends}
-            />
+            <TableThree tableData={tableDataDividends} additionalTableData={additionalTableDataDividends} />
           </div>
         </div>
       </React.StrictMode>

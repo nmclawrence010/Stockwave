@@ -9,18 +9,14 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 });
 
 const ChartOne: React.FC = () => {
-  const [chartData, setChartData] = useState<
-    { name: string; data: number[] }[]
-  >([]);
+  const [chartData, setChartData] = useState<{ name: string; data: number[] }[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await fetchSPX();
         // Extract "open" values from the API response and reverse the order
-        const openValues = data.values
-          .map((item: any) => parseFloat(item.open))
-          .reverse();
+        const openValues = data.values.map((item: any) => parseFloat(item.open)).reverse();
         setChartData([
           { name: "S&P500", data: openValues },
           {
@@ -37,26 +33,11 @@ const ChartOne: React.FC = () => {
   }, []);
 
   const maxChartValue = Math.max(...chartData.flatMap((series) => series.data));
-  const minChartValue = Math.min(
-    ...(chartData.find((item) => item.name === "S&P500")?.data ?? []),
-  );
+  const minChartValue = Math.min(...(chartData.find((item) => item.name === "S&P500")?.data ?? []));
 
   const currentMonth = new Date().getMonth(); // Get current month (0-indexed)
   const currentYear = new Date().getFullYear(); // Get current year
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   // Construct categories array starting from 11 months ago to the current month
   const categories = [];
@@ -66,9 +47,7 @@ const ChartOne: React.FC = () => {
   }
 
   const productOneData = chartData.find((item) => item.name === "S&P500")?.data;
-  const productTwoData = chartData.find(
-    (item) => item.name === "Product Two",
-  )?.data;
+  const productTwoData = chartData.find((item) => item.name === "Product Two")?.data;
 
   const options: ApexOptions = {
     legend: {
@@ -179,9 +158,7 @@ const ChartOne: React.FC = () => {
                 <p className="font-semibold text-primary">S&P 500</p>
                 <p className="text-sm font-medium">Last 12 months</p>
                 <div className="absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 whitespace-nowrap rounded bg-black px-4.5 py-1.5 text-sm font-medium text-white opacity-0 group-hover:opacity-100">
-                  <p className="text-sm font-medium">
-                    SPX on the 1st of each month
-                  </p>
+                  <p className="text-sm font-medium">SPX on the 1st of each month</p>
                 </div>
               </div>
             </div>
@@ -190,9 +167,7 @@ const ChartOne: React.FC = () => {
                 <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
               </span>
               <div className="w-full group relative inline-block">
-                <p className="font-semibold text-secondary">
-                  Your current holdings
-                </p>
+                <p className="font-semibold text-secondary">Your current holdings</p>
                 <p className="text-sm font-medium">Last 12 months</p>
                 <div className="absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 whitespace-nowrap rounded bg-black px-4.5 py-1.5 text-sm font-medium text-white opacity-0 group-hover:opacity-100">
                   <p className="text-sm font-medium">

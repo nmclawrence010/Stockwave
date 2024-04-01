@@ -1,13 +1,58 @@
+"use client";
 import Link from "next/link";
 import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
 import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
+import nyseTickers from "../../public/extraStockData/nyse_tickers.json";
+import { useRouter } from "next/navigation";
 
-const Header = (props: {
-  sidebarOpen: string | boolean | undefined;
-  setSidebarOpen: (arg0: boolean) => void;
-}) => {
+const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOpen: (arg0: boolean) => void }) => {
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
+  const dropdownRef = useRef<HTMLUListElement>(null);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.target.value;
+    setSearchTerm(input);
+    // Filter options based on input
+    let filtered = nyseTickers.filter((option) => option.toLowerCase().includes(input.toLowerCase()));
+    // Prioritize exact matches
+    if (input.trim() !== "") {
+      const exactMatchIndex = filtered.findIndex((option) => option.toLowerCase() === input.toLowerCase());
+      if (exactMatchIndex !== -1) {
+        const exactMatch = filtered.splice(exactMatchIndex, 1)[0];
+        filtered = [exactMatch, ...filtered];
+      }
+    }
+    // Filter out options that don't start with the search term
+    filtered = filtered.filter((option) => option.toLowerCase().startsWith(input.toLowerCase()));
+    setFilteredOptions(input ? filtered : []);
+  };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      setFilteredOptions([]); // Close the dropdown if clicked outside
+    }
+  };
+
+  const handleOptionClick = (option: string) => {
+    // Construct the dynamic URL based on the clicked item
+    const path = `/stocks/${encodeURIComponent(option)}`;
+    console.log("PATH:", path);
+
+    router.push(path);
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <header className="sticky top-0 z-999 flex w-full bg-white drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none">
       <div className="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
@@ -56,12 +101,7 @@ const Header = (props: {
           {/* <!-- Hamburger Toggle BTN --> */}
 
           <Link className="block flex-shrink-0 lg:hidden" href="/">
-            <Image
-              width={32}
-              height={32}
-              src={"/images/logo/logo-icon.svg"}
-              alt="Logo"
-            />
+            <Image width={32} height={32} src={"/images/logo/logo-icon.svg"} alt="Logo" />
           </Link>
         </div>
 
@@ -95,8 +135,36 @@ const Header = (props: {
               <input
                 type="text"
                 placeholder="Type to search..."
-                className="w-full bg-transparent pl-9 pr-4 font-medium focus:outline-none xl:w-125"
+                className="w-full bg-transparent pl-9 pr-4 text-black dark:text-white font-medium focus:outline-none xl:w-125"
+                onChange={handleInputChange}
+                value={searchTerm}
               />
+
+              {filteredOptions.length > 0 && (
+                <ul ref={dropdownRef} className="absolute z-10 w-full mt-1  bg-white border shadow-lg">
+                  {filteredOptions.map((option) => (
+                    <li
+                      key={option}
+                      className="py-1 px-3 cursor-pointer"
+                      onClick={() => handleOptionClick(option)}
+                      style={{
+                        backgroundColor: "#ffffff", // Set the default background color
+                        transition: "background-color 0.1s", // Add transition effect
+                      }}
+                      onMouseEnter={(e) => {
+                        const target = e.target as HTMLElement; // Cast EventTarget to HTMLElement
+                        target.style.backgroundColor = "#e5e7eb"; // Change background color on hover
+                      }}
+                      onMouseLeave={(e) => {
+                        const target = e.target as HTMLElement; // Cast EventTarget to HTMLElement
+                        target.style.backgroundColor = "#ffffff"; // Restore default background color on mouse leave
+                      }}
+                    >
+                      {option}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </form>
         </div>
