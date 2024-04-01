@@ -27,8 +27,7 @@ export function getDatabaseItems(dbData: STOCK[] = []): Promise<STOCK[]> {
         ":uid": { S: user },
       },
       KeyConditionExpression: "UserID = :uid",
-      ProjectionExpression:
-        "UserID, TransactionID, Notes, StockTicker, AverageCost, DateBought, NumberOfShares",
+      ProjectionExpression: "UserID, TransactionID, StockTicker, AverageCost, DateBought, NumberOfShares, LogoURL",
       TableName: "StockwaveBuys2",
     };
 
@@ -40,11 +39,10 @@ export function getDatabaseItems(dbData: STOCK[] = []): Promise<STOCK[]> {
         data.Items.forEach(function (element) {
           var obj = {
             Ticker: element.StockTicker.S,
+            LogoURL: element.LogoURL ? element.LogoURL.S : "",
             NoShares: parseInt(element.NumberOfShares.S, 10),
             AverageCost: parseFloat(element.AverageCost.S),
-            TotalPaid:
-              parseInt(element.NumberOfShares.S, 10) *
-              parseFloat(element.AverageCost.S),
+            TotalPaid: parseInt(element.NumberOfShares.S, 10) * parseFloat(element.AverageCost.S),
             DateBought: element.DateBought.S,
             TransactionID: element.TransactionID.S,
           };
@@ -60,6 +58,7 @@ export function getDatabaseItems(dbData: STOCK[] = []): Promise<STOCK[]> {
 export function addDatabaseItem(
   userid: string,
   randomHash: string,
+  logoURL: string,
   formData: {
     stockTicker: string;
     numberOfShares: string;
@@ -76,6 +75,7 @@ export function addDatabaseItem(
       UserID: { S: userid },
       DateBought: { S: formData.date || "01/01/2000" },
       StockTicker: { S: formData.stockTicker },
+      LogoURL: { S: logoURL },
       AverageCost: { S: formData.averageCost },
       NumberOfShares: { S: formData.numberOfShares },
     },
@@ -120,9 +120,7 @@ export function generateTransactionID() {
 }
 
 //Same as the function for getting user records but from the Sell table
-export function getDatabaseItemsSell(
-  dbSellData: STOCKSELL[] = [],
-): Promise<STOCKSELL[]> {
+export function getDatabaseItemsSell(dbSellData: STOCKSELL[] = []): Promise<STOCKSELL[]> {
   return new Promise((resolve, reject) => {
     var ddb = connectAWS();
 
@@ -133,8 +131,7 @@ export function getDatabaseItemsSell(
         ":uid": { S: user },
       },
       KeyConditionExpression: "UserID = :uid",
-      ProjectionExpression:
-        "UserID, TransactionID, StockTicker, AverageCost, AverageSellPrice, DateBought, NumberOfShares",
+      ProjectionExpression: "UserID, TransactionID, StockTicker, AverageCost, AverageSellPrice, DateBought, NumberOfShares, LogoURL",
       TableName: "StockwaveSells",
     };
 
@@ -146,6 +143,7 @@ export function getDatabaseItemsSell(
         data.Items.forEach(function (element) {
           var obj = {
             Ticker: element.StockTicker.S,
+            LogoURL: element.LogoURL ? element.LogoURL.S : "",
             NoShares: parseInt(element.NumberOfShares.S, 10),
             AverageCost: parseFloat(element.AverageCost.S),
             AverageSellPrice: parseFloat(element.AverageSellPrice.S),
@@ -164,6 +162,7 @@ export function getDatabaseItemsSell(
 export function addDatabaseItemSell(
   userid: string,
   randomHash: string,
+  logoURL: string,
   formData: {
     stockTicker: string;
     numberOfShares: string;
@@ -181,6 +180,7 @@ export function addDatabaseItemSell(
       UserID: { S: userid },
       DateBought: { S: formData.date || "01/01/2000" },
       StockTicker: { S: formData.stockTicker },
+      LogoURL: { S: logoURL },
       AverageCost: { S: formData.averageCost },
       AverageSellPrice: { S: formData.averageSellPrice },
       NumberOfShares: { S: formData.numberOfShares },
@@ -222,9 +222,7 @@ export function deleteDatabaseItemSell(transactionID: string, userId: string) {
 }
 
 //Same as the function for getting user records but from the Sell table
-export function getDatabaseItemsDividends(
-  dbDividendData: PORTFOLIORECORDEXTRA[] = [],
-): Promise<PORTFOLIORECORDEXTRA[]> {
+export function getDatabaseItemsDividends(dbDividendData: PORTFOLIORECORDEXTRA[] = []): Promise<PORTFOLIORECORDEXTRA[]> {
   return new Promise((resolve, reject) => {
     var ddb = connectAWS();
 
@@ -235,8 +233,7 @@ export function getDatabaseItemsDividends(
         ":uid": { S: user },
       },
       KeyConditionExpression: "UserID = :uid",
-      ProjectionExpression:
-        "UserID, TransactionID, StockTicker, Amount, DateBought",
+      ProjectionExpression: "UserID, TransactionID, StockTicker, Amount, DateBought",
       TableName: "StockwaveDividends",
     };
 

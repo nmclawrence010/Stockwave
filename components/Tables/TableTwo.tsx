@@ -14,22 +14,15 @@ interface TableTwoProps {
   unrealisedGainLoss: number;
 }
 
-const TableTwo: React.FC<TableTwoProps> = ({
-  tableData,
-  additionalTableData,
-  unrealisedGainLoss,
-}) => {
+const TableTwo: React.FC<TableTwoProps> = ({ tableData, additionalTableData, unrealisedGainLoss }) => {
   let [isOpen, setIsOpen] = useState(false);
   let [isOpen2, setIsOpen2] = useState(false);
   let [isOpenMulti, setIsOpenMulti] = useState(false);
   let [deleteItemId, setDeleteItemId] = useState<string | null>(null);
-  let [deleteItemsFromAdditionalTable, setDeleteItemsFromAdditionalTable] =
-    useState<string[]>([]); //For batch delete
+  let [deleteItemsFromAdditionalTable, setDeleteItemsFromAdditionalTable] = useState<string[]>([]); //For batch delete
 
   // Add state for the additional table
-  const [additionalTableVisible, setAdditionalTableVisible] = useState<
-    string | null
-  >(null);
+  const [additionalTableVisible, setAdditionalTableVisible] = useState<string | null>(null);
 
   function closeModal() {
     setIsOpen(false);
@@ -62,10 +55,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
 
   const handleDeleteClick = () => {
     if (deleteItemId) {
-      deleteDatabaseItemSell(
-        deleteItemId,
-        String(sessionStorage.getItem("currentUser")),
-      );
+      deleteDatabaseItemSell(deleteItemId, String(sessionStorage.getItem("currentUser")));
     }
     closeDeleteModal();
   };
@@ -88,9 +78,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
   const [highlightedRow, setHighlightedRow] = useState<string | null>(null);
   // Function to toggle the visibility of the additional table
   const toggleAdditionalTable = (transactionID: string) => {
-    setAdditionalTableVisible((prevVisible) =>
-      prevVisible === transactionID ? null : transactionID,
-    );
+    setAdditionalTableVisible((prevVisible) => (prevVisible === transactionID ? null : transactionID));
 
     if (highlightedRow === transactionID) {
       setHighlightedRow(null); // Remove highlighting if the same row is clicked again
@@ -99,20 +87,12 @@ const TableTwo: React.FC<TableTwoProps> = ({
     }
   };
 
-  useEffect(() => {}, [
-    tableData,
-    additionalTableData,
-    unrealisedGainLoss,
-    deleteItemsFromAdditionalTable,
-  ]);
+  useEffect(() => {}, [tableData, additionalTableData, unrealisedGainLoss, deleteItemsFromAdditionalTable]);
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div style={{ display: "flex", alignItems: "center" }}>
-        <h4
-          className="mb-6 text-xl font-semibold text-black dark:text-white"
-          style={{ paddingRight: "30px", marginTop: "20px" }}
-        >
+        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white" style={{ paddingRight: "30px", marginTop: "20px" }}>
           Sells
         </h4>
         <button
@@ -120,13 +100,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
           className="inline-flex items-center justify-center gap-2.5 rounded-md bg-black py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
         >
           <span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="fill-current"
-              width="20"
-              height="20"
-              viewBox="0 0 448 512"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" className="fill-current" width="20" height="20" viewBox="0 0 448 512">
               <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
             </svg>
           </span>
@@ -134,64 +108,36 @@ const TableTwo: React.FC<TableTwoProps> = ({
         </button>
       </div>
 
-      <div>
-        {isOpen && <SellModal openModal={openModal} closeModal={closeModal} />}
-      </div>
-      <div>
-        {isOpen2 && (
-          <DeleteModal
-            openModal={openDeleteModal}
-            closeModal={closeDeleteModal}
-            onDelete={handleDeleteClick}
-          />
-        )}
-      </div>
+      <div>{isOpen && <SellModal openModal={openModal} closeModal={closeModal} />}</div>
+      <div>{isOpen2 && <DeleteModal openModal={openDeleteModal} closeModal={closeDeleteModal} onDelete={handleDeleteClick} />}</div>
       <div>
         {isOpenMulti && (
-          <MultiDeleteModal
-            openModal={openMultiDeleteModal}
-            closeModal={closeDeleteModal}
-            onDelete={handleMultiDeleteClick}
-          />
+          <MultiDeleteModal openModal={openMultiDeleteModal} closeModal={closeDeleteModal} onDelete={handleMultiDeleteClick} />
         )}
       </div>
       <div className="flex flex-col">
         <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-8">
           <div className="p-2.5 xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Stock
-            </h5>
+            <h5 className="text-sm font-medium uppercase xsm:text-base">Stock</h5>
           </div>
           <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Average Sell Price
-            </h5>
+            <h5 className="text-sm font-medium uppercase xsm:text-base">Average Sell Price</h5>
           </div>
           <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              No. of Shares
-            </h5>
+            <h5 className="text-sm font-medium uppercase xsm:text-base">No. of Shares</h5>
           </div>
           <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Average Cost
-            </h5>
+            <h5 className="text-sm font-medium uppercase xsm:text-base">Average Cost</h5>
           </div>
 
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Transaction Value
-            </h5>
+            <h5 className="text-sm font-medium uppercase xsm:text-base">Transaction Value</h5>
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Total Gain/Loss
-            </h5>
+            <h5 className="text-sm font-medium uppercase xsm:text-base">Total Gain/Loss</h5>
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Total Gain/Loss %
-            </h5>
+            <h5 className="text-sm font-medium uppercase xsm:text-base">Total Gain/Loss %</h5>
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base"></h5>
@@ -201,23 +147,17 @@ const TableTwo: React.FC<TableTwoProps> = ({
         {tableData.map((brand, key) => (
           <div
             className={`grid grid-cols-3 sm:grid-cols-8 ${
-              key === tableData.length - 1
-                ? ""
-                : "border-b border-stroke dark:border-strokedark"
+              key === tableData.length - 1 ? "" : "border-b border-stroke dark:border-strokedark"
             }`}
             key={key}
             style={{
-              backgroundColor:
-                highlightedRow === brand.TransactionID ? "#e5e7eb" : "inherit", // Change the background color based on the highlightedRow state
-              color:
-                highlightedRow === brand.TransactionID
-                  ? "black !important"
-                  : "inherit", // Change the text color to black in the highlighted row with !important
+              backgroundColor: highlightedRow === brand.TransactionID ? "#e5e7eb" : "inherit", // Change the background color based on the highlightedRow state
+              color: highlightedRow === brand.TransactionID ? "black !important" : "inherit", // Change the text color to black in the highlighted row with !important
             }}
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
               <div className="flex-shrink-0">
-                <Image src={brand.LogoURL} alt="Brand" width={48} height={48} />
+                <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} />
               </div>
               <p
                 className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
@@ -238,9 +178,7 @@ const TableTwo: React.FC<TableTwoProps> = ({
               <p
                 className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
               >
-                {Number.isInteger(brand.NoShares)
-                  ? brand.NoShares
-                  : brand.NoShares.toFixed(3)}
+                {Number.isInteger(brand.NoShares) ? brand.NoShares : brand.NoShares.toFixed(3)}
               </p>
             </div>
 
@@ -262,37 +200,21 @@ const TableTwo: React.FC<TableTwoProps> = ({
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <b>
-                <p
-                  className={`${brand.GainLoss < 0 ? "text-meta-1" : "text-meta-3"}`}
-                >
-                  {brand.GainLoss.toFixed(2)}
-                </p>
+                <p className={`${brand.GainLoss < 0 ? "text-meta-1" : "text-meta-3"}`}>{brand.GainLoss.toFixed(2)}</p>
               </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <b>
-                <p
-                  className={`${brand.GainLoss < 0 ? "text-meta-1" : "text-meta-3"}`}
-                >
+                <p className={`${brand.GainLoss < 0 ? "text-meta-1" : "text-meta-3"}`}>
                   {((brand.GainLoss / brand.TotalPaid) * 100).toFixed(2)}%
                 </p>
               </b>
             </div>
 
             <div className="flex items-center space-x-3.5">
-              <button
-                onClick={() => toggleAdditionalTable(brand.TransactionID)}
-                className="hover:text-primary"
-              >
-                <svg
-                  className="fill-current"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 18 18"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+              <button onClick={() => toggleAdditionalTable(brand.TransactionID)} className="hover:text-primary">
+                <svg className="fill-current" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M8.99981 14.8219C3.43106 14.8219 0.674805 9.50624 0.562305 9.28124C0.47793 9.11249 0.47793 8.88749 0.562305 8.71874C0.674805 8.49374 3.43106 3.20624 8.99981 3.20624C14.5686 3.20624 17.3248 8.49374 17.4373 8.71874C17.5217 8.88749 17.5217 9.11249 17.4373 9.28124C17.3248 9.50624 14.5686 14.8219 8.99981 14.8219ZM1.85605 8.99999C2.4748 10.0406 4.89356 13.5562 8.99981 13.5562C13.1061 13.5562 15.5248 10.0406 16.1436 8.99999C15.5248 7.95936 13.1061 4.44374 8.99981 4.44374C4.89356 4.44374 2.4748 7.95936 1.85605 8.99999Z"
                     fill=""
@@ -303,18 +225,8 @@ const TableTwo: React.FC<TableTwoProps> = ({
                   />
                 </svg>
               </button>
-              <button
-                onClick={() => openMultiDeleteModal()}
-                className="hover:text-primary"
-              >
-                <svg
-                  className="fill-current"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 18 18"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+              <button onClick={() => openMultiDeleteModal()} className="hover:text-primary">
+                <svg className="fill-current" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M13.7535 2.47502H11.5879V1.9969C11.5879 1.15315 10.9129 0.478149 10.0691 0.478149H7.90352C7.05977 0.478149 6.38477 1.15315 6.38477 1.9969V2.47502H4.21914C3.40352 2.47502 2.72852 3.15002 2.72852 3.96565V4.8094C2.72852 5.42815 3.09414 5.9344 3.62852 6.1594L4.07852 15.4688C4.13477 16.6219 5.09102 17.5219 6.24414 17.5219H11.7004C12.8535 17.5219 13.8098 16.6219 13.866 15.4688L14.3441 6.13127C14.8785 5.90627 15.2441 5.3719 15.2441 4.78127V3.93752C15.2441 3.15002 14.5691 2.47502 13.7535 2.47502ZM7.67852 1.9969C7.67852 1.85627 7.79102 1.74377 7.93164 1.74377H10.0973C10.2379 1.74377 10.3504 1.85627 10.3504 1.9969V2.47502H7.70664V1.9969H7.67852ZM4.02227 3.96565C4.02227 3.85315 4.10664 3.74065 4.24727 3.74065H13.7535C13.866 3.74065 13.9785 3.82502 13.9785 3.96565V4.8094C13.9785 4.9219 13.8941 5.0344 13.7535 5.0344H4.24727C4.13477 5.0344 4.02227 4.95002 4.02227 4.8094V3.96565ZM11.7285 16.2563H6.27227C5.79414 16.2563 5.40039 15.8906 5.37227 15.3844L4.95039 6.2719H13.0785L12.6566 15.3844C12.6004 15.8625 12.2066 16.2563 11.7285 16.2563Z"
                     fill=""

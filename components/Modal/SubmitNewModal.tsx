@@ -1,7 +1,21 @@
 import { addDatabaseItem, generateTransactionID } from "@/lib/AWSFunctionality";
 import { getCurrentUser } from "@/lib/Auth0Functionality";
+import { fetchLogo } from "@/lib/StockAPIFunctionality";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
+
+async function fetchStockLogoOnSubmit(ticker: string): Promise<string> {
+  try {
+    const logoURL = await fetchLogo(ticker);
+    if (!logoURL) {
+      throw new Error("Logo URL not found");
+    }
+    return logoURL;
+  } catch (error) {
+    console.error("Error fetching stock logo:", error);
+    throw error;
+  }
+}
 
 export default function MyModal({ openModal, closeModal, userId }: any) {
   let [isOpen, setIsOpen] = useState(true);
@@ -17,10 +31,7 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     // Apply validation only to "numberOfShares" and "averageCost" fields
-    if (
-      (name === "numberOfShares" || name === "averageCost") &&
-      (!isNaN(Number(value)) || value === "")
-    ) {
+    if ((name === "numberOfShares" || name === "averageCost") && (!isNaN(Number(value)) || value === "")) {
       setFormData({
         ...formData,
         [name]: value,
@@ -34,14 +45,30 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Call the addDatabaseItem function with the form data
-    addDatabaseItem(userId, generateTransactionID(), formData);
+    try {
+      // Extract the stockTicker from the form data
+      const { stockTicker, numberOfShares, averageCost, date } = formData;
 
-    // Close the modal or perform any other necessary actions
-    closeModal();
+      // Fetch the logo URL asynchronously based on the stockTicker
+      const logoURL = await fetchStockLogoOnSubmit(stockTicker);
+
+      // Call the addDatabaseItem function with the logo URL and form data
+      addDatabaseItem(userId, generateTransactionID(), logoURL, {
+        stockTicker,
+        numberOfShares,
+        averageCost,
+        date,
+      });
+
+      // Close the modal or perform any other necessary actions
+      closeModal();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      // Handle the error gracefully, such as displaying an error message to the user
+    }
   };
 
   return (
@@ -72,10 +99,7 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
-                  >
+                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
                     Add a new transaction
                   </Dialog.Title>
                   <div className="mt-2">
@@ -84,8 +108,7 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
                         <div className="p-6.5">
                           <div className="mb-4.5">
                             <label className="mb-2.5 block text-black dark:text-white">
-                              Ticker Symbol{" "}
-                              <span className="text-meta-1">*</span>
+                              Ticker Symbol <span className="text-meta-1">*</span>
                             </label>
                             <input
                               name="stockTicker"
@@ -99,8 +122,7 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
                           <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                             <div className="w-full xl:w-1/2">
                               <label className="mb-2.5 block text-black dark:text-white">
-                                Number of Shares{" "}
-                                <span className="text-meta-1">*</span>
+                                Number of Shares <span className="text-meta-1">*</span>
                               </label>
                               <input
                                 name="numberOfShares"
@@ -114,8 +136,7 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
 
                             <div className="w-full xl:w-1/2">
                               <label className="mb-2.5 block text-black dark:text-white">
-                                Average Cost{" "}
-                                <span className="text-meta-1">*</span>
+                                Average Cost <span className="text-meta-1">*</span>
                               </label>
                               <input
                                 name="averageCost"
@@ -143,10 +164,7 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
                             </div>
                           </div>
 
-                          <button
-                            type="submit"
-                            className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray"
-                          >
+                          <button type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray">
                             Submit
                           </button>
                         </div>

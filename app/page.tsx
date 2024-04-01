@@ -28,7 +28,6 @@ async function fetchAndCalculateStockData() {
   const promises = dbData.map(async (element) => {
     // Create an array of promises for fetchStockData and fetchLogo
     const stockData = await fetchStockData(element.Ticker);
-    const logoURL = await fetchLogo(element.Ticker);
 
     const currentPrice = stockData.values[0].close; //Returns just the last price of the stock
 
@@ -43,7 +42,7 @@ async function fetchAndCalculateStockData() {
       MarketValue: element.NoShares * parseFloat(currentPrice),
       DateBought: element.DateBought,
       CurrentPrice: currentPrice,
-      LogoURL: logoURL,
+      LogoURL: element.LogoURL,
       GainLoss: parseFloat(currentPrice) * element.NoShares - element.AverageCost * element.NoShares,
       SoldGainLoss: 100,
       TransactionID: element.TransactionID,
@@ -51,19 +50,16 @@ async function fetchAndCalculateStockData() {
   });
 
   const results = await Promise.all(promises); // Wait for all promises to resolve
-
   //For the sell table
   await getDatabaseItemsSell(dbDataSells);
   const promisesSell = dbDataSells.map(async (element) => {
-    const logoURL = await fetchLogo(element.Ticker);
-
     return {
       Ticker: element.Ticker,
       NoShares: element.NoShares,
       AverageCost: element.AverageCost,
       AverageSellPrice: element.AverageSellPrice,
       DateBought: element.DateBought,
-      LogoURL: logoURL,
+      LogoURL: element.LogoURL,
       TotalPaid: element.AverageSellPrice * element.NoShares,
       GainLoss: element.AverageSellPrice * element.NoShares - element.AverageCost * element.NoShares,
       TransactionID: element.TransactionID,
