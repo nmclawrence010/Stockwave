@@ -6,6 +6,7 @@ import DeleteModal from "../Modal/DeleteModal";
 import MultiDeleteModal from "../Modal/MultiDeleteModal";
 import { deleteDatabaseItemSell } from "@/lib/AWSFunctionality";
 import AdditionalTableTwo from "./AdditionalTableTwo";
+import Link from "next/link";
 
 // Define the props type
 interface TableTwoProps {
@@ -161,40 +162,52 @@ const TableTwo: React.FC<TableTwoProps> = ({ tableData, additionalTableData, unr
               <p
                 className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
               >
-                {brand.Ticker}
+                <Link href={`/stocks/${brand.Ticker}`}>
+                  <b>
+                    <span className="text-blue-500 hover:underline">{brand.Ticker}</span>
+                  </b>
+                </Link>
               </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-              >
-                {brand.AverageSellPrice}
-              </p>
+              <b>
+                <p
+                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
+                >
+                  {brand.AverageSellPrice}
+                </p>
+              </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-              >
-                {Number.isInteger(brand.NoShares) ? brand.NoShares : brand.NoShares.toFixed(3)}
-              </p>
+              <b>
+                <p
+                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
+                >
+                  {Number.isInteger(brand.NoShares) ? brand.NoShares : brand.NoShares.toFixed(3)}
+                </p>
+              </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-              >
-                {brand.AverageCost.toFixed(2)}
-              </p>
+              <b>
+                <p
+                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
+                >
+                  {brand.AverageCost.toFixed(2)}
+                </p>
+              </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-              >
-                {brand.TotalPaid.toFixed(2)}
-              </p>
+              <b>
+                <p
+                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
+                >
+                  {brand.TotalPaid.toFixed(2)}
+                </p>
+              </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">

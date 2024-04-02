@@ -1,10 +1,7 @@
-import {
-  addDatabaseItemDividends,
-  generateTransactionID,
-} from "@/lib/AWSFunctionality";
+import { addDatabaseItemDividends, generateTransactionID } from "@/lib/AWSFunctionality";
 import { getCurrentUser } from "@/lib/Auth0Functionality";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 export default function DividendModal({ openModal, closeModal, userId }: any) {
   let [isOpen, setIsOpen] = useState(true);
@@ -14,7 +11,15 @@ export default function DividendModal({ openModal, closeModal, userId }: any) {
     date: "",
   });
 
+  const [formValid, setFormValid] = useState(false); // State to manage form validity
+
   userId = getCurrentUser();
+
+  useEffect(() => {
+    // Check if all required fields are filled out
+    const isValid = Object.values(formData).every((value) => value.trim() !== ""); // Check if any field is empty
+    setFormValid(isValid);
+  }, [formData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -22,6 +27,13 @@ export default function DividendModal({ openModal, closeModal, userId }: any) {
       setFormData({
         ...formData,
         [name]: value,
+      });
+    } else if (name === "stockTicker") {
+      // Convert stockTicker to uppercase and update the state
+      const upperCaseValue = value.toUpperCase();
+      setFormData({
+        ...formData,
+        stockTicker: upperCaseValue,
       });
     } else if (name !== "amount") {
       setFormData({
@@ -33,7 +45,7 @@ export default function DividendModal({ openModal, closeModal, userId }: any) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    if (!formValid) return;
     // Call the addDatabaseItem function with the form data
     addDatabaseItemDividends(userId, generateTransactionID(), formData);
 
@@ -69,10 +81,7 @@ export default function DividendModal({ openModal, closeModal, userId }: any) {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
-                  >
+                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
                     Add Dividend Payment
                   </Dialog.Title>
                   <div className="mt-2">
@@ -82,8 +91,7 @@ export default function DividendModal({ openModal, closeModal, userId }: any) {
                           <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                             <div className="mb-4.5">
                               <label className="mb-2.5 block text-black dark:text-white">
-                                Ticker Symbol{" "}
-                                <span className="text-meta-1">*</span>
+                                Ticker Symbol <span className="text-meta-1">*</span>
                               </label>
                               <input
                                 name="stockTicker"
@@ -95,8 +103,7 @@ export default function DividendModal({ openModal, closeModal, userId }: any) {
                             </div>
                             <div className="w-full xl:w-1/2">
                               <label className="mb-2.5 block text-black dark:text-white">
-                                Amount received{" "}
-                                <span className="text-meta-1">*</span>
+                                Amount received <span className="text-meta-1">*</span>
                               </label>
                               <input
                                 name="amount"
@@ -126,6 +133,7 @@ export default function DividendModal({ openModal, closeModal, userId }: any) {
 
                           <button
                             type="submit"
+                            disabled={!formValid}
                             className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray"
                           >
                             Submit

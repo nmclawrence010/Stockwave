@@ -116,12 +116,15 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
         )}
       </div>
       <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-8">
+        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-9">
           <div className="p-2.5 xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">Stock</h5>
           </div>
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">Current Price</h5>
+          </div>
+          <div className="p-2.5 text-center xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">Today's Change</h5>
           </div>
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">No. of Shares</h5>
@@ -145,7 +148,7 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
 
         {tableData.map((brand, key) => (
           <div
-            className={`grid grid-cols-3 sm:grid-cols-8 ${
+            className={`grid grid-cols-3 sm:grid-cols-9 ${
               key === tableData.length - 1 ? "" : "border-b border-stroke dark:border-strokedark"
             }`}
             key={key}
@@ -158,45 +161,66 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
               <div className="flex-shrink-0">
                 <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} />
               </div>
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-              >
-                <Link href={`/stocks/${brand.Ticker}`}>
-                  <span className="text-blue-500 hover:underline">{brand.Ticker}</span>
-                </Link>
-              </p>
+              <b>
+                <p
+                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
+                >
+                  <Link href={`/stocks/${brand.Ticker}`}>
+                    <b>
+                      <span className="text-blue-500 hover:underline">{brand.Ticker}</span>
+                    </b>
+                  </Link>
+                </p>
+              </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-              >
-                {brand.CurrentPrice}
-              </p>
+              <b>
+                <p
+                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black" : "text-black"} sm:block ${brand.ChangeInPrice < 0 ? "text-meta-1" : "text-meta-3"}`}
+                >
+                  {Number(brand.CurrentPrice).toFixed(2)}
+                </p>
+              </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-              >
-                {Number.isInteger(brand.NoShares) ? brand.NoShares : brand.NoShares.toFixed(3)}
-              </p>
+              <b>
+                <p className={`${brand.ChangeInPrice < 0 ? "text-meta-1" : "text-meta-3"}`}>
+                  {Number(brand.ChangeInPrice).toFixed(2)}&nbsp;&nbsp;&nbsp;&nbsp;
+                  {Number(brand.ChangeInPricePercent).toFixed(2)}%
+                </p>
+              </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-              >
-                {brand.AverageCost.toFixed(2)}
-              </p>
+              <b>
+                <p
+                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
+                >
+                  {Number.isInteger(brand.NoShares) ? brand.NoShares : brand.NoShares.toFixed(3)}
+                </p>
+              </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-              >
-                {brand.MarketValue.toFixed(2)}
-              </p>
+              <b>
+                <p
+                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
+                >
+                  {brand.AverageCost.toFixed(2)}
+                </p>
+              </b>
+            </div>
+
+            <div className="flex items-center justify-center p-2.5 xl:p-5">
+              <b>
+                <p
+                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
+                >
+                  {brand.MarketValue.toFixed(2)}
+                </p>
+              </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">

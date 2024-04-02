@@ -2,7 +2,7 @@ import { addDatabaseItem, generateTransactionID } from "@/lib/AWSFunctionality";
 import { getCurrentUser } from "@/lib/Auth0Functionality";
 import { fetchLogo } from "@/lib/StockAPIFunctionality";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 async function fetchStockLogoOnSubmit(ticker: string): Promise<string> {
   try {
@@ -26,7 +26,15 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
     date: "",
   });
 
+  const [formValid, setFormValid] = useState(false); // State to manage form validity
+
   userId = getCurrentUser();
+
+  useEffect(() => {
+    // Check if all required fields are filled out
+    const isValid = Object.values(formData).every((value) => value.trim() !== ""); // Check if any field is empty
+    setFormValid(isValid);
+  }, [formData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,6 +43,13 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
       setFormData({
         ...formData,
         [name]: value,
+      });
+    } else if (name === "stockTicker") {
+      // Convert stockTicker to uppercase and update the state
+      const upperCaseValue = value.toUpperCase();
+      setFormData({
+        ...formData,
+        stockTicker: upperCaseValue,
       });
     } else if (name !== "numberOfShares" && name !== "averageCost") {
       // For other fields, simply update the state
@@ -47,7 +62,7 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    if (!formValid) return;
     try {
       // Extract the stockTicker from the form data
       const { stockTicker, numberOfShares, averageCost, date } = formData;
@@ -164,7 +179,11 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
                             </div>
                           </div>
 
-                          <button type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray">
+                          <button
+                            type="submit"
+                            disabled={!formValid}
+                            className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray"
+                          >
                             Submit
                           </button>
                         </div>

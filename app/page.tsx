@@ -8,7 +8,7 @@ import TableTwo from "@/components/Tables/TableTwo";
 import TableThree from "@/components/Tables/TableThree";
 import { PORTFOLIORECORD } from "@/types/userPortfolio";
 import { getCurrentUser } from "@/lib/Auth0Functionality";
-import { fetchLogo, fetchStockData } from "@/lib/StockAPIFunctionality";
+import { fetchStockQuote } from "@/lib/StockAPIFunctionality";
 import { STOCK } from "@/types/stocks";
 import { STOCKSELL } from "@/types/stockSell";
 import { getDatabaseItems, getDatabaseItemsDividends, getDatabaseItemsSell } from "@/lib/AWSFunctionality";
@@ -26,13 +26,13 @@ async function fetchAndCalculateStockData() {
   //For the current holdings table
   await getDatabaseItems(dbData);
   const promises = dbData.map(async (element) => {
-    // Create an array of promises for fetchStockData and fetchLogo
-    const stockData = await fetchStockData(element.Ticker);
+    // Create an array of promises for fetchStockData
+    const stockData = await fetchStockQuote(element.Ticker);
 
-    const currentPrice = stockData.values[0].close; //Returns just the last price of the stock
-
-    // Extract close prices for the past 12 months
-    const closePrices = stockData.values.slice(0, 12).map((item: { close: string }) => parseFloat(item.close));
+    //Returns just the last price of the stock
+    const currentPrice = stockData.close;
+    const changeInPrice = stockData.change;
+    const changeInPricePercent = stockData.percent_change;
 
     return {
       Ticker: element.Ticker,
@@ -42,6 +42,8 @@ async function fetchAndCalculateStockData() {
       MarketValue: element.NoShares * parseFloat(currentPrice),
       DateBought: element.DateBought,
       CurrentPrice: currentPrice,
+      ChangeInPrice: changeInPrice,
+      ChangeInPricePercent: changeInPricePercent,
       LogoURL: element.LogoURL,
       GainLoss: parseFloat(currentPrice) * element.NoShares - element.AverageCost * element.NoShares,
       SoldGainLoss: 100,
@@ -50,6 +52,7 @@ async function fetchAndCalculateStockData() {
   });
 
   const results = await Promise.all(promises); // Wait for all promises to resolve
+
   //For the sell table
   await getDatabaseItemsSell(dbDataSells);
   const promisesSell = dbDataSells.map(async (element) => {

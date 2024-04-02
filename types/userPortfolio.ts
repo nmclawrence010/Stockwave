@@ -7,6 +7,8 @@ export type PORTFOLIORECORD = {
   MarketValue: number;
   DateBought: string;
   CurrentPrice: number;
+  ChangeInPrice: number;
+  ChangeInPricePercent: number;
   LogoURL: string;
   GainLoss: number;
   SoldGainLoss: number;
