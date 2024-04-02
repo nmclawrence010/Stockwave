@@ -5,30 +5,35 @@ import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
-import nyseTickers from "../../public/extraStockData/nyse_tickers.json";
+import nyseTickers from "../../public/extraStockData/nyse_full_tickers.json";
+import nasdaqTickers from "../../public/extraStockData/nasdaq_full_tickers.json";
 import { useRouter } from "next/navigation";
 
 const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOpen: (arg0: boolean) => void }) => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
+  const [filteredOptions, setFilteredOptions] = useState<any[]>([]); // Modify the type to match your data structure
   const dropdownRef = useRef<HTMLUListElement>(null);
+  const allTickers = [...nyseTickers, ...nasdaqTickers];
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const input = event.target.value;
     setSearchTerm(input);
+
     // Filter options based on input
-    let filtered = nyseTickers.filter((option) => option.toLowerCase().includes(input.toLowerCase()));
+    let filtered = allTickers.filter((option) => option.name.toLowerCase().includes("common"));
+
     // Prioritize exact matches
     if (input.trim() !== "") {
-      const exactMatchIndex = filtered.findIndex((option) => option.toLowerCase() === input.toLowerCase());
+      const exactMatchIndex = filtered.findIndex((option) => option.symbol.toLowerCase() === input.toLowerCase());
       if (exactMatchIndex !== -1) {
         const exactMatch = filtered.splice(exactMatchIndex, 1)[0];
         filtered = [exactMatch, ...filtered];
       }
     }
+
     // Filter out options that don't start with the search term
-    filtered = filtered.filter((option) => option.toLowerCase().startsWith(input.toLowerCase()));
+    filtered = filtered.filter((option) => option.symbol.toLowerCase().startsWith(input.toLowerCase()));
     setFilteredOptions(input ? filtered : []);
   };
 
@@ -38,10 +43,13 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
     }
   };
 
-  const handleOptionClick = (option: string) => {
+  const handleOptionClick = (option: any) => {
     // Construct the dynamic URL based on the clicked item
-    const path = `/stocks/${encodeURIComponent(option)}`;
+    const path = `/stocks/${encodeURIComponent(option.symbol)}`;
     console.log("PATH:", path);
+
+    // Close the dropdown
+    setFilteredOptions([]);
 
     router.push(path);
   };
@@ -141,15 +149,14 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
               />
 
               {filteredOptions.length > 0 && (
-                <ul ref={dropdownRef} className="absolute z-10 w-full mt-1  bg-white border shadow-lg">
+                <ul ref={dropdownRef} className="absolute z-10 w-full mt-1  bg-white border shadow-lg max-h-80 overflow-y-auto">
                   {filteredOptions.map((option) => (
                     <li
-                      key={option}
+                      key={option.symbol}
                       className="py-1 px-3 cursor-pointer"
                       onClick={() => handleOptionClick(option)}
                       style={{
                         backgroundColor: "#ffffff", // Set the default background color
-                        transition: "background-color 0.1s", // Add transition effect
                       }}
                       onMouseEnter={(e) => {
                         const target = e.target as HTMLElement; // Cast EventTarget to HTMLElement
@@ -160,7 +167,9 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
                         target.style.backgroundColor = "#ffffff"; // Restore default background color on mouse leave
                       }}
                     >
-                      {option}
+                      <span>
+                        {option.symbol} - {option.name}
+                      </span>
                     </li>
                   ))}
                 </ul>

@@ -39,9 +39,12 @@ function StockPage({ params }: { params: { Ticker: string } }) {
               <Image src={stockData.logoURL} alt="logo" width={100} height={100} />
               <div>
                 <h2 className="text-title-xxl font-semibold text-black dark:text-white">
-                  {stockData.quoteData.name}&nbsp;({stockData.quoteData.symbol}) &nbsp;$({stockData.quoteData.close}) &nbsp;
+                  {stockData.quoteData.name}&nbsp;({stockData.quoteData.symbol})
+                </h2>
+                <h2 className="text-title-xxl font-semibold text-black dark:text-white">
+                  ${Number(stockData.quoteData.close).toFixed(2)} &nbsp;
                   <span className={stockData.quoteData.change < 0 ? "text-meta-1" : "text-meta-3"}>
-                    +{Number(stockData.quoteData.change).toFixed(2)}
+                    {Number(stockData.quoteData.change).toFixed(2)}
                   </span>
                   &nbsp;&nbsp;&nbsp;
                   <span className={stockData.quoteData.percent_change < 0 ? "text-meta-1" : "text-meta-3"}>
