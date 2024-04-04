@@ -29,7 +29,7 @@ async function fetchAndCalculateStockData() {
     // Create an array of promises for fetchStockData
     const stockData = await fetchStockQuote(element.Ticker);
 
-    //Returns just the last price of the stock
+    //Extracting some data from our quote data call
     const currentPrice = stockData.close;
     const changeInPrice = stockData.change;
     const changeInPricePercent = stockData.percent_change;

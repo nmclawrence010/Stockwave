@@ -4,6 +4,9 @@ import { fetchLogo } from "@/lib/StockAPIFunctionality";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 
+import nasdaqTickers from "../../public/extraStockData/nasdaq_tickers.json";
+import nyseTickers from "../../public/extraStockData/nyse_tickers.json";
+
 async function fetchStockLogoOnSubmit(ticker: string): Promise<string> {
   try {
     const logoURL = await fetchLogo(ticker);
@@ -27,6 +30,8 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
   });
 
   const [formValid, setFormValid] = useState(false); // State to manage form validity
+  const [validTickers, setValidTickers] = useState<string[]>([]);
+  const [errorMsg, setErrorMsg] = useState<string>("");
 
   userId = getCurrentUser();
 
@@ -34,6 +39,9 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
     // Check if all required fields are filled out
     const isValid = Object.values(formData).every((value) => value.trim() !== ""); // Check if any field is empty
     setFormValid(isValid);
+    //
+    const combinedTickers = [...nasdaqTickers, ...nyseTickers];
+    setValidTickers(combinedTickers);
   }, [formData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,26 +71,31 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formValid) return;
+
     try {
-      // Extract the stockTicker from the form data
-      const { stockTicker, numberOfShares, averageCost, date } = formData;
+      // Check if entered stock ticker is valid
+      const enteredTicker = formData.stockTicker.toUpperCase();
+      if (!validTickers.includes(enteredTicker)) {
+        throw new Error("Invalid stock ticker. Please enter a valid ticker symbol.");
+      }
 
       // Fetch the logo URL asynchronously based on the stockTicker
-      const logoURL = await fetchStockLogoOnSubmit(stockTicker);
+      const logoURL = await fetchStockLogoOnSubmit(enteredTicker);
 
       // Call the addDatabaseItem function with the logo URL and form data
-      addDatabaseItem(userId, generateTransactionID(), logoURL, {
-        stockTicker,
-        numberOfShares,
-        averageCost,
-        date,
+      await addDatabaseItem(userId, generateTransactionID(), logoURL, {
+        stockTicker: enteredTicker,
+        numberOfShares: formData.numberOfShares,
+        averageCost: formData.averageCost,
+        date: formData.date,
       });
 
       // Close the modal or perform any other necessary actions
       closeModal();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting form:", error);
       // Handle the error gracefully, such as displaying an error message to the user
+      setErrorMsg(error.message);
     }
   };
 
@@ -133,7 +146,6 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
                               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                             />
                           </div>
-
                           <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                             <div className="w-full xl:w-1/2">
                               <label className="mb-2.5 block text-black dark:text-white">
@@ -163,7 +175,6 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
                               />
                             </div>
                           </div>
-
                           <div className="mb-4.5">
                             <label className="mb-2.5 block text-black dark:text-white">
                               Date <span className="text-meta-1">*</span>
@@ -178,7 +189,6 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
                               />
                             </div>
                           </div>
-
                           <button
                             type="submit"
                             disabled={!formValid}
@@ -186,6 +196,7 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
                           >
                             Submit
                           </button>
+                          {errorMsg && <div className="text-meta-1 mt-2">{errorMsg}</div>}{" "}
                         </div>
                       </form>
                     </div>
