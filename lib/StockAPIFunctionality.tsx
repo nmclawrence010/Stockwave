@@ -80,3 +80,25 @@ export async function fetchSPX() {
   const data = await res.json();
   return data;
 }
+
+//Fetching a stocks price for the last 12 months
+export async function fetchStockMonthly(ticker: string) {
+  var m = new Date().getMonth() + 1;
+  var y = new Date().getFullYear().toString();
+  if (m < 10) {
+    var mStr: string = "0" + m;
+  } else {
+    var mStr: string = m.toString();
+  }
+  const res = await fetch(
+    "https://api.twelvedata.com/time_series?apikey=adc7d6ddaadc405683b7a833edd5abbc&interval=1month&symbol=" +
+      ticker +
+      "&format=JSON&end_date=" +
+      y +
+      "-" +
+      mStr +
+      "-01 15:10:00&dp=2&outputsize=12",
+  ); //Returns JSON data for S&P500 for the last 12 months
+  const data = await res.json();
+  return data;
+}

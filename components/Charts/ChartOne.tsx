@@ -2,26 +2,83 @@
 import { ApexOptions } from "apexcharts";
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { fetchSPX } from "@/lib/StockAPIFunctionality";
+import { fetchSPX, fetchStockMonthly } from "@/lib/StockAPIFunctionality";
+import { Props } from "react-apexcharts";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-const ChartOne: React.FC = () => {
+const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
   const [chartData, setChartData] = useState<{ name: string; data: number[] }[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await fetchSPX();
-        // Extract "open" values from the API response and reverse the order
         const openValues = data.values.map((item: any) => parseFloat(item.open)).reverse();
+
+        const totalMarketValue = aggregatedData.reduce((total: any, item: any) => total + item.MarketValue, 0);
+        const tickerPercentages = aggregatedData.map((item: any) => ({
+          Ticker: item.Ticker,
+          Percentage: (item.MarketValue / totalMarketValue) * 100,
+        }));
+
+        console.log("Ticker Percentages:", tickerPercentages);
+
+        const allocation = calculateAllocation(tickerPercentages);
+
+        const sharesAndPercentageDifferencesPromises = tickerPercentages.map(async (tickerPercentage: any) => {
+          try {
+            const tickerData = await fetchStockMonthly(tickerPercentage.Ticker);
+            const percentageDifferences = calculatePercentageDifferences(tickerData.values, tickerPercentage.Ticker);
+
+            // Calculate shares for the ticker
+            const shares = calculateShares(
+              tickerData.values[tickerData.values.length - 1],
+              allocation[tickerPercentage.Ticker],
+              tickerPercentage.Ticker,
+            );
+
+            return { ticker: tickerPercentage.Ticker, shares, percentageDifferences };
+          } catch (error) {
+            console.error(`Error fetching data for ${tickerPercentage.Ticker}:`, error);
+            return null;
+          }
+        });
+
+        const sharesAndPercentageDifferences = await Promise.all(sharesAndPercentageDifferencesPromises);
+
+        const sharesAndInvestmentWorthPromises = sharesAndPercentageDifferences.map(async (item: any) => {
+          const investmentWorthPerMonth = calculateInvestmentWorthPerMonth(
+            item.shares.allocatedAmount,
+            item.percentageDifferences.percentageDifferences,
+          );
+          return {
+            ticker: item.ticker,
+            investmentWorthPerMonth,
+          };
+        });
+
+        const sharesAndInvestmentWorth = await Promise.all(sharesAndInvestmentWorthPromises);
+        console.log("Investment worth per month:", sharesAndInvestmentWorth);
+
+        // Call the function with your data
+        const combinedMonthlyValues = combineMonthlyValues(sharesAndInvestmentWorth);
+        console.log("Combined:", combinedMonthlyValues);
+
+        // Prepare investment worth data array
+        const chartData = prepareChartData(combinedMonthlyValues, openValues);
+
+        // Log the investment worth data
+        console.log("Investment Worth Data:", chartData);
+        console.log("OpenValues:", openValues);
+
         setChartData([
           { name: "S&P500", data: openValues },
           {
             name: "Product Two",
-            data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39, 51],
+            data: chartData,
           }, // Example data for Product Two
         ]);
       } catch (error) {
@@ -29,14 +86,114 @@ const ChartOne: React.FC = () => {
       }
     };
 
+    //console.log("AGGREGATED DATA:", aggregatedData);
     fetchData();
-  }, []);
+  }, [aggregatedData]);
 
+  const initialInvestment = 5000;
+
+  // Function to calculate allocation based on ticker percentages
+  const calculateAllocation = (tickerPercentages: any) => {
+    const allocation: any = {};
+    for (const tickerPercentage of tickerPercentages) {
+      allocation[tickerPercentage.Ticker] = (tickerPercentage.Percentage / 100) * initialInvestment;
+    }
+    return allocation;
+  };
+
+  // Function to calculate shares for each ticker
+  const calculateShares = (tickerData: any, allocatedAmount: number, ticker: string) => {
+    const closePrice = parseFloat(tickerData.close);
+    const numberOfShares = allocatedAmount / closePrice;
+    // Return allocated amount instead of number of shares
+    return { ticker, allocatedAmount };
+  };
+
+  // Function to calculate investment worth per month based on percentage differences
+  const calculateInvestmentWorthPerMonth = (initialAmount: number, percentageDifferences: any) => {
+    let currentAmount = initialAmount;
+    const investmentWorthPerMonth: any = {};
+
+    // Loop through each month's percentage difference
+    for (const [month, percentDifference] of Object.entries(percentageDifferences)) {
+      if (typeof percentDifference === "number") {
+        // If the percentage difference is already a number, use it directly
+        currentAmount *= 1 + percentDifference / 100;
+        investmentWorthPerMonth[month] = currentAmount;
+      } else if (typeof percentDifference === "string") {
+        // Parse the percentage difference as a float if it's a string
+        const parsedPercentDifference = parseFloat(percentDifference);
+        if (!isNaN(parsedPercentDifference)) {
+          currentAmount *= 1 + parsedPercentDifference / 100;
+          investmentWorthPerMonth[month] = currentAmount;
+        } else {
+          console.error(`Invalid percentage difference value for ${month}: ${percentDifference}`);
+        }
+      } else {
+        console.error(`Invalid percentage difference type for ${month}: ${typeof percentDifference}`);
+      }
+    }
+
+    return investmentWorthPerMonth;
+  };
+
+  // Function to combine the investment worth per month across all stock tickers
+  const combineMonthlyValues = (data: any) => {
+    const combinedValues: any = {};
+
+    // Loop through each stock ticker data
+    for (const stock of data) {
+      // Loop through each month's investment worth for the stock
+      for (const [month, investmentWorth] of Object.entries(stock.investmentWorthPerMonth)) {
+        // Add the investment worth to the combined values
+        if (!combinedValues[month]) {
+          combinedValues[month] = 0;
+        }
+        combinedValues[month] += investmentWorth;
+      }
+    }
+
+    return combinedValues;
+  };
+
+  // Function to calculate percentage difference for each month
+  const calculatePercentageDifferences = (tickerData: any[], tickerSymbol: string) => {
+    const percentageDifferences: any = {};
+
+    // Loop through each month's data (except the last one)
+    for (let i = 0; i < tickerData.length - 1; i++) {
+      const currentClose = parseFloat(tickerData[i].close);
+      const previousClose = parseFloat(tickerData[i + 1].close);
+
+      // Calculate percentage difference between current and previous close prices
+      const percentDifference = ((currentClose - previousClose) / previousClose) * 100;
+
+      // Store the percentage difference for the month along with the ticker symbol
+      percentageDifferences[`Month${tickerData.length - i}`] = percentDifference;
+    }
+
+    return { ticker: tickerSymbol, percentageDifferences };
+  };
+
+  const prepareChartData = (combinedMonthlyValues: any, openValues: number[]) => {
+    const initialInvestment = openValues[0];
+    const chartData: number[] = [initialInvestment]; // Initialize the chart data array with the initial investment
+
+    // Extract the numbers from combinedMonthlyValues and add them to the chart data array
+    for (const month in combinedMonthlyValues) {
+      const investmentWorth = combinedMonthlyValues[month];
+      chartData.push(parseFloat(investmentWorth.toFixed(2))); // Round to 2 decimal places
+    }
+
+    return chartData;
+  };
+
+  //Get the min and max value to set the x axis
   const maxChartValue = Math.max(...chartData.flatMap((series) => series.data));
   const minChartValue = Math.min(...(chartData.find((item) => item.name === "S&P500")?.data ?? []));
 
-  const currentMonth = new Date().getMonth(); // Get current month (0-indexed)
-  const currentYear = new Date().getFullYear(); // Get current year
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   // Construct categories array starting from 11 months ago to the current month
@@ -167,7 +324,7 @@ const ChartOne: React.FC = () => {
                 <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
               </span>
               <div className="w-full group relative inline-block">
-                <p className="font-semibold text-secondary">Your current holdings</p>
+                <p className="font-semibold text-secondary">Current Holdings</p>
                 <p className="text-sm font-medium">Last 12 months</p>
                 <div className="absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 whitespace-nowrap rounded bg-black px-4.5 py-1.5 text-sm font-medium text-white opacity-0 group-hover:opacity-100">
                   <p className="text-sm font-medium">
@@ -185,7 +342,7 @@ const ChartOne: React.FC = () => {
             options={options}
             series={[
               { name: "S&P500", data: productOneData ?? [] },
-              { name: "Product Two", data: productTwoData ?? [] },
+              { name: "You", data: productTwoData ?? [] },
             ]}
             type="area"
             width="100%"

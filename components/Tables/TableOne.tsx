@@ -90,9 +90,9 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
   useEffect(() => {}, [tableData, additionalTableData, unrealisedGainLoss, deleteItemsFromAdditionalTable]);
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white" style={{ paddingRight: "30px", marginTop: "20px" }}>
+    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h4 className="mb-6 text-title-xl2 font-semibold text-black dark:text-white" style={{ paddingRight: "30px", marginTop: "20px" }}>
           Current Holdings
         </h4>
         <button
