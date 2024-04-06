@@ -468,9 +468,9 @@ function Home() {
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="fill-primary dark:fill-white"
-              width="28"
-              height="22"
+              className="fill-white dark:fill-white"
+              width="40"
+              height="34"
               viewBox="0 0 576 512"
               fill="none"
             >
@@ -485,9 +485,9 @@ function Home() {
             levelUp
           >
             <svg
-              className="fill-primary dark:fill-white"
-              width="28"
-              height="22"
+              className="fill-white dark:fill-white"
+              width="40"
+              height="34"
               viewBox="0 0 576 512"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -503,9 +503,9 @@ function Home() {
             levelUp
           >
             <svg
-              className="fill-primary dark:fill-white"
-              width="28"
-              height="22"
+              className="fill-white dark:fill-white"
+              width="40"
+              height="34"
               viewBox="0 0 576 512"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

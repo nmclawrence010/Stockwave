@@ -24,7 +24,7 @@ const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
           Percentage: (item.MarketValue / totalMarketValue) * 100,
         }));
 
-        console.log("Ticker Percentages:", tickerPercentages);
+        //console.log("Ticker Percentages:", tickerPercentages);
 
         const allocation = calculateAllocation(tickerPercentages);
 
@@ -61,25 +61,25 @@ const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
         });
 
         const sharesAndInvestmentWorth = await Promise.all(sharesAndInvestmentWorthPromises);
-        console.log("Investment worth per month:", sharesAndInvestmentWorth);
+        //console.log("Investment worth per month:", sharesAndInvestmentWorth);
 
-        // Call the function with your data
+        // Combining the separate monthly investment amounts into one
         const combinedMonthlyValues = combineMonthlyValues(sharesAndInvestmentWorth);
-        console.log("Combined:", combinedMonthlyValues);
+        //console.log("Combined:", combinedMonthlyValues);
 
-        // Prepare investment worth data array
+        // Prep data into an array for the chart
         const chartData = prepareChartData(combinedMonthlyValues, openValues);
 
         // Log the investment worth data
-        console.log("Investment Worth Data:", chartData);
-        console.log("OpenValues:", openValues);
+        //console.log("Investment Worth Data:", chartData);
+        //console.log("OpenValues:", openValues);
 
         setChartData([
           { name: "S&P500", data: openValues },
           {
             name: "Product Two",
             data: chartData,
-          }, // Example data for Product Two
+          },
         ]);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -212,7 +212,7 @@ const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
       position: "top",
       horizontalAlign: "left",
     },
-    colors: ["#3C50E0", "#80CAEE"],
+    colors: ["#3C50E0", "#FFA70B"],
     chart: {
       fontFamily: "Satoshi, sans-serif",
       height: 335,
@@ -223,7 +223,7 @@ const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
         top: 10,
         blur: 4,
         left: 0,
-        opacity: 0.1,
+        opacity: 1,
       },
       toolbar: {
         show: false,
@@ -269,11 +269,11 @@ const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
     markers: {
       size: 4,
       colors: "#fff",
-      strokeColors: ["#3056D3", "#80CAEE"],
+      strokeColors: ["#3056D3", "#FFA70B"],
       strokeWidth: 3,
       strokeOpacity: 0.9,
       strokeDashArray: 0,
-      fillOpacity: 1,
+      fillOpacity: 0,
       discrete: [],
       hover: {
         size: undefined,
@@ -312,22 +312,27 @@ const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
                 <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-primary"></span>
               </span>
               <div className="w-full group relative inline-block">
-                <p className="font-semibold text-primary">S&P 500</p>
+                <p className="font-semibold text-primary text-xl">S&P 500</p>
                 <p className="text-sm font-medium">Last 12 months</p>
                 <div className="absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 whitespace-nowrap rounded bg-black px-4.5 py-1.5 text-sm font-medium text-white opacity-0 group-hover:opacity-100">
-                  <p className="text-sm font-medium">SPX on the 1st of each month</p>
+                  <p className="text-md font-medium">SPX on the close of each month</p>
                 </div>
               </div>
             </div>
             <div className="flex min-w-47.5">
-              <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-secondary">
-                <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
+              <span
+                className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border"
+                style={{ borderColor: "#FFA70B" }}
+              >
+                <span className="block h-2.5 w-full max-w-2.5 rounded-full" style={{ backgroundColor: "#FFA70B" }}></span>
               </span>
               <div className="w-full group relative inline-block">
-                <p className="font-semibold text-secondary">Current Holdings</p>
+                <p className="font-semibold text-xl" style={{ color: "#FFA70B" }}>
+                  Current Holdings
+                </p>
                 <p className="text-sm font-medium">Last 12 months</p>
                 <div className="absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 whitespace-nowrap rounded bg-black px-4.5 py-1.5 text-sm font-medium text-white opacity-0 group-hover:opacity-100">
-                  <p className="text-sm font-medium">
+                  <p className="text-md font-medium">
                     How the current make up of your portfolio would have <br />
                     performed vs SPX if the same amount was invested <br />
                     12 months ago
