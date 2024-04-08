@@ -57,8 +57,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     >
       {/* <!-- SIDEBAR HEADER --> */}
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-        <Link href="/">
-          <Image width={250} height={250} src={"/images/logo/untitled2.png"} priority={true} alt="Logo" />
+        <Link href="/" className="flex items-center">
+          {" "}
+          {/* Added 'items-center' class here */}
+          <Image
+            width={450}
+            height={450}
+            className="w-14 h-10 lg:w-18 lg:h-18 inline-block"
+            src={"/images/logo/Stockwavelogo.png"}
+            priority={true}
+            alt="Logo"
+          />
+          <span className="inline-block text-white ml-2 font-bold text-2xl leading-18 sm:leading-[3rem]">Stockwave</span>
         </Link>
 
         <button
@@ -76,6 +86,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           </svg>
         </button>
       </div>
+
       {/* <!-- SIDEBAR HEADER --> */}
 
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">

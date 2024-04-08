@@ -1,6 +1,8 @@
 export async function fetchStockData(ticker: string) {
   const res = await fetch(
-    "https://api.twelvedata.com/time_series?apikey=adc7d6ddaadc405683b7a833edd5abbc&interval=1min&symbol=" +
+    "https://api.twelvedata.com/time_series?apikey=" +
+      process.env.NEXT_PUBLIC_TWELVE_DATA_API_KEY +
+      "&interval=1min&symbol=" +
       ticker +
       "&dp=2&" +
       "format=JSON&outputsize=12",
@@ -15,7 +17,7 @@ export async function fetchStockData(ticker: string) {
 }
 
 export async function fetchLogo(ticker: string) {
-  const res = await fetch("https://api.twelvedata.com/logo?symbol=" + ticker + "&apikey=adc7d6ddaadc405683b7a833edd5abbc");
+  const res = await fetch("https://api.twelvedata.com/logo?symbol=" + ticker + "&apikey=" + process.env.NEXT_PUBLIC_TWELVE_DATA_API_KEY);
   const logoLink = await res.json();
   const logoURL = logoLink.url; //Returns just the URL link to the company logo
   //console.log("LOGO", logoURL);
@@ -24,14 +26,14 @@ export async function fetchLogo(ticker: string) {
 
 // https://twelvedata.com/docs#quote
 export async function fetchStockQuote(ticker: string) {
-  const res = await fetch("https://api.twelvedata.com/quote?apikey=adc7d6ddaadc405683b7a833edd5abbc&symbol=" + ticker);
+  const res = await fetch("https://api.twelvedata.com/quote?apikey=" + process.env.NEXT_PUBLIC_TWELVE_DATA_API_KEY + "&symbol=" + ticker);
   const data = await res.json();
   return data;
 }
 
 // https://twelvedata.com/docs#profile
 export async function fetchStockProfile(ticker: string) {
-  const res = await fetch("https://api.twelvedata.com/profile?apikey=adc7d6ddaadc405683b7a833edd5abbc&symbol=" + ticker);
+  const res = await fetch("https://api.twelvedata.com/profile?apikey=" + process.env.NEXT_PUBLIC_TWELVE_DATA_API_KEY + "&symbol=" + ticker);
   const data = await res.json();
   return data;
 }
@@ -47,7 +49,9 @@ export async function fetchStockDaily5Min(ticker: string) {
     var mStr: string = m.toString();
   }
   const res = await fetch(
-    "https://api.twelvedata.com/time_series?apikey=adc7d6ddaadc405683b7a833edd5abbc&interval=5min&timezone=exchange&start_date=" +
+    "https://api.twelvedata.com/time_series?apikey=" +
+      process.env.NEXT_PUBLIC_TWELVE_DATA_API_KEY +
+      "&interval=5min&timezone=exchange&start_date=" +
       y +
       "-" +
       mStr +
@@ -71,7 +75,9 @@ export async function fetchSPX() {
     var mStr: string = m.toString();
   }
   const res = await fetch(
-    "https://api.twelvedata.com/time_series?apikey=adc7d6ddaadc405683b7a833edd5abbc&interval=1month&symbol=SPX&format=JSON&end_date=" +
+    "https://api.twelvedata.com/time_series?apikey=" +
+      process.env.NEXT_PUBLIC_TWELVE_DATA_API_KEY +
+      "&interval=1month&symbol=SPX&format=JSON&end_date=" +
       y +
       "-" +
       mStr +
@@ -91,7 +97,9 @@ export async function fetchStockMonthly(ticker: string) {
     var mStr: string = m.toString();
   }
   const res = await fetch(
-    "https://api.twelvedata.com/time_series?apikey=adc7d6ddaadc405683b7a833edd5abbc&interval=1month&symbol=" +
+    "https://api.twelvedata.com/time_series?apikey=" +
+      process.env.NEXT_PUBLIC_TWELVE_DATA_API_KEY +
+      "&interval=1month&symbol=" +
       ticker +
       "&format=JSON&end_date=" +
       y +

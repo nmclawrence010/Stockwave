@@ -8,8 +8,8 @@ export function connectAWS() {
   var AWS = require("aws-sdk"); //Load the AWS SDK
   AWS.config.update({
     region: "eu-west-1",
-    accessKeyId: "AKIA2UC3CODSG6HZTVKN",
-    secretAccessKey: "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",
+    accessKeyId: process.env.NEXT_PUBLIC_MY_AWS_ACCESS_KEY,
+    secretAccessKey: process.env.NEXT_PUBLIC_MY_AWS_SECRET_KEY,
   }); //Set the region and keys
 
   var ddb = new AWS.DynamoDB({ apiVersion: "2012-08-10" }); //Creating a DynamoDB service object

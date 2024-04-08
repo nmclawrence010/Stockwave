@@ -461,17 +461,15 @@ function Home() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
           <CardDataStats
             title="Total Gain"
-            total={`$${overallGainLoss.toFixed(2)}`}
+            total={`${overallGainLoss.toFixed(2)}`}
             rate={`${overallPercentageGain.toFixed(2)}%`}
             specificCard="1"
             levelUp
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="fill-white dark:fill-white"
-              width="40"
-              height="34"
-              viewBox="0 0 576 512"
+              className="fill-white dark:fill-white w-8 2xl:w-10 h-[34px]"
+              viewBox="0 0 640 512"
               fill="none"
             >
               <path d="M384 160c-17.7 0-32-14.3-32-32s14.3-32 32-32H544c17.7 0 32 14.3 32 32V288c0 17.7-14.3 32-32 32s-32-14.3-32-32V205.3L342.6 374.6c-12.5 12.5-32.8 12.5-45.3 0L192 269.3 54.6 406.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l160-160c12.5-12.5 32.8-12.5 45.3 0L320 306.7 466.7 160H384z" />
@@ -479,16 +477,14 @@ function Home() {
           </CardDataStats>
           <CardDataStats
             title="Unrealised Gain"
-            total={`$${unrealisedGainLoss.toFixed(2)}`}
+            total={`${unrealisedGainLoss.toFixed(2)}`}
             rate={`${unrealisedPercentageGain.toFixed(2)}%`}
             specificCard="2"
             levelUp
           >
             <svg
-              className="fill-white dark:fill-white"
-              width="40"
-              height="34"
-              viewBox="0 0 576 512"
+              className="fill-white dark:fill-white w-8 2xl:w-10 h-[34px]"
+              viewBox="0 0 640 512"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
@@ -497,16 +493,14 @@ function Home() {
           </CardDataStats>
           <CardDataStats
             title="Realised Gain"
-            total={`$${realisedGainLossIncDividend.toFixed(2)}`}
+            total={`${realisedGainLossIncDividend.toFixed(2)}`}
             rate={`${realisedPercentageGain.toFixed(2)}%`}
             specificCard="3"
             levelUp
           >
             <svg
-              className="fill-white dark:fill-white"
-              width="40"
-              height="34"
-              viewBox="0 0 576 512"
+              className="fill-white dark:fill-white w-8 2xl:w-10 h-[34px]"
+              viewBox="0 0 640 512"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
@@ -529,7 +523,7 @@ function Home() {
           <div className="col-span-12 xl:col-span-12">
             <TableTwo tableData={tableDataSells} additionalTableData={additionalTableDataSells} unrealisedGainLoss={unrealisedGainLoss} />
           </div>
-          <div className="col-span-12 xl:col-span-12">
+          <div className="col-span-12 xl:col-span-8">
             <TableThree tableData={tableDataDividends} additionalTableData={additionalTableDataDividends} />
           </div>
         </div>

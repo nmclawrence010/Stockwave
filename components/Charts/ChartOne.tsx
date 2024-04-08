@@ -188,9 +188,15 @@ const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
     return chartData;
   };
 
+  //Combine the two so we can get the min value
+  const sp500DataMin = chartData.find((item) => item.name === "S&P500")?.data ?? [];
+  const productTwoDataMin = chartData.find((item) => item.name === "Product Two")?.data ?? [];
+  const allData = [...sp500DataMin, ...productTwoDataMin];
+
   //Get the min and max value to set the x axis
   const maxChartValue = Math.max(...chartData.flatMap((series) => series.data));
-  const minChartValue = Math.min(...(chartData.find((item) => item.name === "S&P500")?.data ?? []));
+  //const minChartValue = Math.min(...(chartData.find((item) => item.name === "S&P500")?.data ?? []));
+  const minChartValue = Math.min(...allData);
 
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -199,7 +205,7 @@ const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
   // Construct categories array starting from 11 months ago to the current month
   const categories = [];
   for (let i = currentMonth; i >= currentMonth - 11; i--) {
-    const monthIndex = i < 0 ? 12 + i : i; // Handle negative indices (wrap around to previous year)
+    const monthIndex = i < 0 ? 12 + i : i; // Handle negative indices (loop back around to previous year)
     categories.push(`${months[monthIndex]}`);
   }
 
