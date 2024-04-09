@@ -1,7 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 
-export default function DeleteModal({ openModal, closeModal, onDelete }: any) {
+export default function DeleteModal({ openModal, closeModal, onDelete, onDeleteSuccess }: any) {
   let [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -42,16 +42,11 @@ export default function DeleteModal({ openModal, closeModal, onDelete }: any) {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-black-500"
-                  >
+                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-black-500">
                     Are you sure you want to delete?
                   </Dialog.Title>
                   <div className="mt-2">
-                    <p className="text-sm text-black-500">
-                      This record will be permanently removed.
-                    </p>
+                    <p className="text-sm text-black-500">This record will be permanently removed.</p>
                   </div>
 
                   <div className="mt-4">
@@ -61,6 +56,7 @@ export default function DeleteModal({ openModal, closeModal, onDelete }: any) {
                       onClick={() => {
                         onDelete(); // Call onDelete when the user confirms deletion
                         closeModal(); // Close the modal
+                        onDeleteSuccess(); // Call onDeleteSuccess to show a success message
                       }}
                     >
                       Yes, Im sure

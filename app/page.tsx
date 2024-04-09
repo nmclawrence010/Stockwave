@@ -213,7 +213,7 @@ function Home() {
   sessionStorage.setItem("currentUser", getCurrentUser());
 
   useEffect(() => {
-    const getServerSideProps = async () => {
+    const fetchInitialData = async () => {
       const {
         results,
         resultsSells,
@@ -251,12 +251,47 @@ function Home() {
       setDonutDataLabels(chartThreeData.labels as never[]);
     };
 
-    getServerSideProps();
+    fetchInitialData();
   }, []);
 
   //Displaying different HTML when the user isn't logged in
   const { user } = useUser(); // Auth0 user
   //console.log("TESTINGUSER:", user?.email);
+
+  const refreshData = async () => {
+    const newData = await fetchAndCalculateStockData(); // Or however you get your new data
+    // Update any other relevant states here
+    const {
+      results,
+      resultsSells,
+      resultsDividends,
+      unrealisedGainLoss,
+      unrealisedPercentageGain,
+      realisedGainLoss,
+      realisedPercentageGain,
+      realisedGainLossIncludingDividends,
+      overallGainLoss,
+      overallGainLossPercentage,
+      aggregatedData,
+      aggregatedDataSells,
+      aggregatedDataDividends,
+      chartThreeData,
+    } = newData; // Declare the variables
+    setTableData(aggregatedData); // Update the state that your TableOne component uses
+    setAdditionalTableData(results);
+    // console.log(
+    //   "Updated data:",
+    //   aggregatedData,
+    //   results,
+    //   resultsSells,
+    //   resultsDividends
+    // );
+    // console.log("Data refreshed");
+  };
+
+  useEffect(() => {
+    refreshData(); // Initial fetch of data
+  }, []);
 
   if (!user?.email) {
     return (
@@ -518,7 +553,13 @@ function Home() {
             }}
           />
           <div className="col-span-12 xl:col-span-12">
-            <TableOne tableData={tableData} additionalTableData={additionalTableData} unrealisedGainLoss={unrealisedGainLoss} />
+            <TableOne
+              tableData={tableData}
+              additionalTableData={additionalTableData}
+              unrealisedGainLoss={unrealisedGainLoss}
+              onSubmitSuccess={refreshData}
+              onDeleteSuccess={refreshData}
+            />
           </div>
           <div className="col-span-12 xl:col-span-12">
             <TableTwo tableData={tableDataSells} additionalTableData={additionalTableDataSells} unrealisedGainLoss={unrealisedGainLoss} />

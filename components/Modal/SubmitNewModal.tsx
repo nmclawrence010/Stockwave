@@ -20,7 +20,7 @@ async function fetchStockLogoOnSubmit(ticker: string): Promise<string> {
   }
 }
 
-export default function MyModal({ openModal, closeModal, userId }: any) {
+export default function MyModal({ openModal, closeModal, userId, onSubmitSuccess }: any) {
   let [isOpen, setIsOpen] = useState(true);
   let [formData, setFormData] = useState({
     stockTicker: "",
@@ -91,6 +91,7 @@ export default function MyModal({ openModal, closeModal, userId }: any) {
       });
 
       // Close the modal or perform any other necessary actions
+      onSubmitSuccess();
       closeModal();
     } catch (error: any) {
       console.error("Error submitting form:", error);
