@@ -13,9 +13,11 @@ interface TableTwoProps {
   tableData: PORTFOLIORECORDSELL[];
   additionalTableData: PORTFOLIORECORDSELL[]; //For the sub table under the stocks
   unrealisedGainLoss: number;
+  onSubmitSuccess?: () => void; // Add the onSubmitSuccess property
+  onDeleteSuccess?: () => void; // Add the onSubmitSuccess property
 }
 
-const TableTwo: React.FC<TableTwoProps> = ({ tableData, additionalTableData, unrealisedGainLoss }) => {
+const TableTwo: React.FC<TableTwoProps> = ({ tableData, additionalTableData, unrealisedGainLoss, onSubmitSuccess, onDeleteSuccess }) => {
   let [isOpen, setIsOpen] = useState(false);
   let [isOpen2, setIsOpen2] = useState(false);
   let [isOpenMulti, setIsOpenMulti] = useState(false);
@@ -61,6 +63,9 @@ const TableTwo: React.FC<TableTwoProps> = ({ tableData, additionalTableData, unr
       deleteDatabaseItemSell(deleteItemId, String(sessionStorage.getItem("currentUser")));
     }
     closeDeleteModal();
+    if (onDeleteSuccess) {
+      onDeleteSuccess();
+    }
   };
 
   const handleMultiDeleteClick = () => {
@@ -73,6 +78,9 @@ const TableTwo: React.FC<TableTwoProps> = ({ tableData, additionalTableData, unr
       });
     }
     closeDeleteModal();
+    if (onDeleteSuccess) {
+      onDeleteSuccess();
+    }
   };
 
   const [highlightedRow, setHighlightedRow] = useState<string | null>(null);
@@ -85,13 +93,22 @@ const TableTwo: React.FC<TableTwoProps> = ({ tableData, additionalTableData, unr
     } else {
       setHighlightedRow(transactionID); // Highlight the clicked row
     }
+    if (onDeleteSuccess) {
+      onDeleteSuccess();
+    }
   };
 
   useEffect(() => {}, [tableData, additionalTableData, unrealisedGainLoss, deleteItemsFromAdditionalTable]);
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <h4 className="mb-6 text-title-xl2 font-semibold text-black dark:text-white" style={{ paddingRight: "30px", marginTop: "20px" }}>
           Sells
         </h4>
@@ -108,11 +125,29 @@ const TableTwo: React.FC<TableTwoProps> = ({ tableData, additionalTableData, unr
         </button>
       </div>
 
-      <div>{isOpen && <SellModal openModal={openModal} closeModal={closeModal} />}</div>
-      <div>{isOpen2 && <DeleteModal openModal={openDeleteModal} closeModal={closeDeleteModal} onDelete={handleDeleteClick} />}</div>
+      <div>
+        {isOpen && (
+          <SellModal openModal={openModal} closeModal={closeModal} onSubmitSuccess={onSubmitSuccess} onDeleteSuccess={onDeleteSuccess} />
+        )}
+      </div>
+      <div>
+        {isOpen2 && (
+          <DeleteModal
+            openModal={openDeleteModal}
+            closeModal={closeDeleteModal}
+            onDelete={handleDeleteClick}
+            onDeleteSuccess={onDeleteSuccess}
+          />
+        )}
+      </div>
       <div>
         {isOpenMulti && (
-          <MultiDeleteModal openModal={openMultiDeleteModal} closeModal={closeDeleteModal} onDelete={handleMultiDeleteClick} />
+          <MultiDeleteModal
+            openModal={openMultiDeleteModal}
+            closeModal={closeDeleteModal}
+            onDelete={handleMultiDeleteClick}
+            onDeleteSuccess={onDeleteSuccess}
+          />
         )}
       </div>
       <div className="flex flex-col">
@@ -156,7 +191,15 @@ const TableTwo: React.FC<TableTwoProps> = ({ tableData, additionalTableData, unr
             }}
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
-              <div className="flex-shrink-0" style={{ height: "40px", display: "flex", alignItems: "center" }}>
+              <div
+                className="flex-shrink-0"
+                style={{
+                  height: "40px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                {" "}
                 <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} />
               </div>
               <p
@@ -272,6 +315,8 @@ const TableTwo: React.FC<TableTwoProps> = ({ tableData, additionalTableData, unr
                 unrealisedGainLoss={unrealisedGainLoss}
                 transactionID={brand.TransactionID}
                 additionalData={additionalTableData}
+                onSubmitSuccess={onSubmitSuccess}
+                onDeleteSuccess={onDeleteSuccess}
               />
             </div>
           </div>

@@ -10,8 +10,8 @@ interface AdditionalTableProps {
   unrealisedGainLoss: number;
   transactionID: string;
   additionalData: PORTFOLIORECORD[];
-  onSubmitSuccess?: () => void; // Add the onSubmitSuccess property
-  onDeleteSuccess?: () => void; // Add the onSubmitSuccess property
+  onSubmitSuccess?: () => void;
+  onDeleteSuccess?: () => void;
 }
 
 const AdditionalTable: React.FC<AdditionalTableProps> = ({

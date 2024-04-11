@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/Auth0Functionality";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 
-export default function DividendModal({ openModal, closeModal, userId }: any) {
+export default function DividendModal({ openModal, closeModal, userId, onSubmitSuccess }: any) {
   let [isOpen, setIsOpen] = useState(true);
   let [formData, setFormData] = useState({
     stockTicker: "",
@@ -50,6 +50,7 @@ export default function DividendModal({ openModal, closeModal, userId }: any) {
     addDatabaseItemDividends(userId, generateTransactionID(), formData);
 
     // Close the modal or perform any other necessary actions
+    onSubmitSuccess();
     closeModal();
   };
 

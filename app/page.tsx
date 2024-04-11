@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import CardDataStats from "../components/CardDataStats";
-import ChartOne from "../components/Charts/ChartOne";
-import ChartThree from "../components/Charts/ChartThree";
+import ChartOne from "../components/Charts/SPXChart";
+import ChartThree from "../components/Charts/DonutChart";
 import TableOne from "../components/Tables/TableOne";
 import TableTwo from "@/components/Tables/TableTwo";
 import TableThree from "@/components/Tables/TableThree";
@@ -258,39 +258,41 @@ function Home() {
   const { user } = useUser(); // Auth0 user
   //console.log("TESTINGUSER:", user?.email);
 
-  const refreshData = async () => {
-    const newData = await fetchAndCalculateStockData(); // Or however you get your new data
-    // Update any other relevant states here
-    const {
-      results,
-      resultsSells,
-      resultsDividends,
-      unrealisedGainLoss,
-      unrealisedPercentageGain,
-      realisedGainLoss,
-      realisedPercentageGain,
-      realisedGainLossIncludingDividends,
-      overallGainLoss,
-      overallGainLossPercentage,
-      aggregatedData,
-      aggregatedDataSells,
-      aggregatedDataDividends,
-      chartThreeData,
-    } = newData; // Declare the variables
+  //For refreshing the table immediately when new things are added
+  //Current Holdings Table
+  const refreshDataCurrentHoldings = async () => {
+    const newData = await fetchAndCalculateStockData();
+    const { results, aggregatedData } = newData; // Declare the variables
     setTableData(aggregatedData); // Update the state that your TableOne component uses
     setAdditionalTableData(results);
-    // console.log(
-    //   "Updated data:",
-    //   aggregatedData,
-    //   results,
-    //   resultsSells,
-    //   resultsDividends
-    // );
-    // console.log("Data refreshed");
   };
 
   useEffect(() => {
-    refreshData(); // Initial fetch of data
+    refreshDataCurrentHoldings();
+  }, []);
+
+  //Sell Table
+  const refreshDataSells = async () => {
+    const newData = await fetchAndCalculateStockData();
+    const { resultsSells, aggregatedDataSells } = newData;
+    setTableDataSells(aggregatedDataSells);
+    setAdditionalTableDataSells(resultsSells);
+  };
+
+  useEffect(() => {
+    refreshDataSells();
+  }, []);
+
+  //Divi Table
+  const refreshDataDividends = async () => {
+    const newData = await fetchAndCalculateStockData();
+    const { resultsDividends, aggregatedDataDividends } = newData; // Declare the variables
+    setTableDataDividends(aggregatedDataDividends); // Update the state that your TableOne component uses
+    setAdditionalTableDataDividends(resultsDividends);
+  };
+
+  useEffect(() => {
+    refreshDataDividends();
   }, []);
 
   if (!user?.email) {
@@ -557,15 +559,26 @@ function Home() {
               tableData={tableData}
               additionalTableData={additionalTableData}
               unrealisedGainLoss={unrealisedGainLoss}
-              onSubmitSuccess={refreshData}
-              onDeleteSuccess={refreshData}
+              onSubmitSuccess={refreshDataCurrentHoldings}
+              onDeleteSuccess={refreshDataCurrentHoldings}
             />
           </div>
           <div className="col-span-12 xl:col-span-12">
-            <TableTwo tableData={tableDataSells} additionalTableData={additionalTableDataSells} unrealisedGainLoss={unrealisedGainLoss} />
+            <TableTwo
+              tableData={tableDataSells}
+              additionalTableData={additionalTableDataSells}
+              unrealisedGainLoss={unrealisedGainLoss}
+              onSubmitSuccess={refreshDataSells}
+              onDeleteSuccess={refreshDataSells}
+            />
           </div>
           <div className="col-span-12 xl:col-span-8">
-            <TableThree tableData={tableDataDividends} additionalTableData={additionalTableDataDividends} />
+            <TableThree
+              tableData={tableDataDividends}
+              additionalTableData={additionalTableDataDividends}
+              onSubmitSuccess={refreshDataDividends}
+              onDeleteSuccess={refreshDataDividends}
+            />
           </div>
         </div>
       </React.StrictMode>

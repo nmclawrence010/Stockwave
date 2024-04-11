@@ -10,9 +10,11 @@ import AdditionalTableThree from "./AdditionalTableThree";
 interface TableThreeProps {
   tableData: PORTFOLIORECORDEXTRA[];
   additionalTableData: PORTFOLIORECORDEXTRA[];
+  onSubmitSuccess?: () => void; // Add the onSubmitSuccess property
+  onDeleteSuccess?: () => void; // Add the onSubmitSuccess property
 }
 
-const TableThree: React.FC<TableThreeProps> = ({ tableData, additionalTableData }) => {
+const TableThree: React.FC<TableThreeProps> = ({ tableData, additionalTableData, onSubmitSuccess, onDeleteSuccess }) => {
   let [isOpen, setIsOpen] = useState(false);
   let [isOpen2, setIsOpen2] = useState(false);
   let [isOpenMulti, setIsOpenMulti] = useState(false);
@@ -57,6 +59,9 @@ const TableThree: React.FC<TableThreeProps> = ({ tableData, additionalTableData 
       deleteDatabaseItemExtra(deleteItemId, String(sessionStorage.getItem("currentUser")));
     }
     closeDeleteModal();
+    if (onDeleteSuccess) {
+      onDeleteSuccess();
+    }
   };
 
   const handleMultiDeleteClick = () => {
@@ -69,6 +74,9 @@ const TableThree: React.FC<TableThreeProps> = ({ tableData, additionalTableData 
       });
     }
     closeDeleteModal();
+    if (onDeleteSuccess) {
+      onDeleteSuccess();
+    }
   };
 
   const [highlightedRow, setHighlightedRow] = useState<string | null>(null);
@@ -80,6 +88,9 @@ const TableThree: React.FC<TableThreeProps> = ({ tableData, additionalTableData 
       setHighlightedRow(null); // Remove highlighting if the same row is clicked again
     } else {
       setHighlightedRow(transactionID); // Highlight the clicked row
+    }
+    if (onDeleteSuccess) {
+      onDeleteSuccess();
     }
   };
 
@@ -110,11 +121,34 @@ const TableThree: React.FC<TableThreeProps> = ({ tableData, additionalTableData 
         </button>
       </div>
 
-      <div>{isOpen && <DividendModal openModal={openModal} closeModal={closeModal} />}</div>
-      <div>{isOpen2 && <DeleteModal openModal={openDeleteModal} closeModal={closeDeleteModal} onDelete={handleDeleteClick} />}</div>
+      <div>
+        {isOpen && (
+          <DividendModal
+            openModal={openModal}
+            closeModal={closeModal}
+            onSubmitSuccess={onSubmitSuccess}
+            onDeleteSuccess={onDeleteSuccess}
+          />
+        )}
+      </div>
+      <div>
+        {isOpen2 && (
+          <DeleteModal
+            openModal={openDeleteModal}
+            closeModal={closeDeleteModal}
+            onDelete={handleDeleteClick}
+            onDeleteSuccess={onDeleteSuccess}
+          />
+        )}
+      </div>
       <div>
         {isOpenMulti && (
-          <MultiDeleteModal openModal={openMultiDeleteModal} closeModal={closeDeleteModal} onDelete={handleMultiDeleteClick} />
+          <MultiDeleteModal
+            openModal={openMultiDeleteModal}
+            closeModal={closeDeleteModal}
+            onDelete={handleMultiDeleteClick}
+            onDeleteSuccess={onDeleteSuccess}
+          />
         )}
       </div>
       <div className="flex flex-col">
@@ -214,7 +248,13 @@ const TableThree: React.FC<TableThreeProps> = ({ tableData, additionalTableData 
                   : "hidden"
               }`}
             >
-              <AdditionalTableThree tableData={tableData} transactionID={brand.TransactionID} additionalData={additionalTableData} />
+              <AdditionalTableThree
+                tableData={tableData}
+                transactionID={brand.TransactionID}
+                additionalData={additionalTableData}
+                onSubmitSuccess={onSubmitSuccess}
+                onDeleteSuccess={onDeleteSuccess}
+              />
             </div>
           </div>
         ))}

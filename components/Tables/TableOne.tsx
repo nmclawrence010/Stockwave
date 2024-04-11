@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PORTFOLIORECORD } from "@/types/userPortfolio";
-import MyModal from "@/components/Modal/SubmitNewModal";
+import MyModal from "@/components/Modal/SubmitNewBuy";
 import DeleteModal from "../Modal/DeleteModal";
 import { deleteDatabaseItem } from "@/lib/AWSFunctionality";
 import AdditionalTable from "./AdditionalTable";
