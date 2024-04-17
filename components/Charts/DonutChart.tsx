@@ -80,17 +80,6 @@ const ChartThree: React.FC<ChartThreeProps> = ({ donutData }) => {
   // Calculate the percentage for each item and update the array
   const updatedSeries = donutData.series.map((value) => (value / totalMarketValue) * 100);
 
-  const [state, setState] = useState<ChartThreeState>({
-    series: updatedSeries,
-  });
-
-  useEffect(() => {
-    // Update the series state when donutData changes
-    setState({
-      series: updatedSeries,
-    });
-  }, [donutData, updatedSeries]);
-
   const percentageLabels = donutData.labels.map((label, index) => ({
     name: `${label}`,
   }));
