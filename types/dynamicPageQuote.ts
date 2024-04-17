@@ -16,5 +16,8 @@ export type QUOTE = {
   percent_change: number;
   average_volume: number;
   is_market_open: boolean;
-  fifty_two_week: object;
+  fifty_two_week: {
+    high: number;
+    low: number;
+  };
 };

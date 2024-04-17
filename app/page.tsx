@@ -7,7 +7,7 @@ import TableOne from "../components/Tables/TableOne";
 import TableTwo from "@/components/Tables/TableTwo";
 import TableThree from "@/components/Tables/TableThree";
 import { PORTFOLIORECORD } from "@/types/userPortfolio";
-import { getCurrentUser } from "@/lib/Auth0Functionality";
+import { GetCurrentUser } from "@/lib/Auth0Functionality";
 import { fetchStockQuote } from "@/lib/StockAPIFunctionality";
 import { STOCK } from "@/types/stocks";
 import { STOCKSELL } from "@/types/stockSell";
@@ -210,7 +210,7 @@ function Home() {
   const [donutDataLabels, setDonutDataLabels] = useState([]);
 
   //Setting the current user into session storage for later use
-  sessionStorage.setItem("currentUser", getCurrentUser());
+  sessionStorage.setItem("currentUser", GetCurrentUser());
 
   useEffect(() => {
     const fetchInitialData = async () => {

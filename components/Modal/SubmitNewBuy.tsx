@@ -1,5 +1,5 @@
 import { addDatabaseItem, generateTransactionID } from "@/lib/AWSFunctionality";
-import { getCurrentUser } from "@/lib/Auth0Functionality";
+import { GetCurrentUser } from "@/lib/Auth0Functionality";
 import { fetchLogo } from "@/lib/StockAPIFunctionality";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
@@ -33,7 +33,7 @@ export default function MyModal({ openModal, closeModal, userId, onSubmitSuccess
   const [validTickers, setValidTickers] = useState<string[]>([]);
   const [errorMsg, setErrorMsg] = useState<string>("");
 
-  userId = getCurrentUser();
+  userId = GetCurrentUser();
 
   useEffect(() => {
     // Check if all required fields are filled out

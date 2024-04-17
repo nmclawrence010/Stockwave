@@ -1,5 +1,5 @@
 import { addDatabaseItemDividends, generateTransactionID } from "@/lib/AWSFunctionality";
-import { getCurrentUser } from "@/lib/Auth0Functionality";
+import { GetCurrentUser } from "@/lib/Auth0Functionality";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 
@@ -13,7 +13,7 @@ export default function DividendModal({ openModal, closeModal, userId, onSubmitS
 
   const [formValid, setFormValid] = useState(false); // State to manage form validity
 
-  userId = getCurrentUser();
+  userId = GetCurrentUser();
 
   useEffect(() => {
     // Check if all required fields are filled out
