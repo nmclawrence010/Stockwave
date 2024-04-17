@@ -89,7 +89,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({ donutData }) => {
     setState({
       series: updatedSeries,
     });
-  }, [donutData]);
+  }, [donutData, updatedSeries]);
 
   const percentageLabels = donutData.labels.map((label, index) => ({
     name: `${label}`,
