@@ -1,8 +1,9 @@
+import { Dialog, Transition } from "@headlessui/react";
+import { Fragment, useEffect, useState } from "react";
+
 import { addDatabaseItemSell, generateTransactionID } from "@/lib/AWSFunctionality";
 import { GetCurrentUser } from "@/lib/Auth0Functionality";
 import { fetchLogo } from "@/lib/StockAPIFunctionality";
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
 
 import nasdaqTickers from "../../public/extraStockData/nasdaq_tickers.json";
 import nyseTickers from "../../public/extraStockData/nyse_tickers.json";

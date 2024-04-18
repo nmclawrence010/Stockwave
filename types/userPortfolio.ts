@@ -11,5 +11,4 @@ export type PORTFOLIORECORD = {
   ChangeInPricePercent: number;
   LogoURL: string;
   GainLoss: number;
-  SoldGainLoss: number;
 };

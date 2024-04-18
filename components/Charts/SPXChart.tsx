@@ -1,15 +1,17 @@
 "use client";
+
 import { ApexOptions } from "apexcharts";
+import { Props } from "react-apexcharts";
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+
 import { fetchSPX, fetchStockMonthly } from "@/lib/StockAPIFunctionality";
-import { Props } from "react-apexcharts";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
+const SPXChart: React.FC<Props> = ({ aggregatedData }) => {
   const [chartData, setChartData] = useState<{ name: string; data: number[] }[]>([]);
 
   useEffect(() => {
@@ -348,7 +350,7 @@ const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
             </div>
           </div>
         </div>
-        <div id="chartOne" className="-ml-5 h-[355px] w-[105%]">
+        <div id="spxchart" className="-ml-5 h-[355px] w-[105%]">
           <ReactApexChart
             options={options}
             series={[
@@ -365,4 +367,4 @@ const ChartOne: React.FC<Props> = ({ aggregatedData }) => {
   );
 };
 
-export default ChartOne;
+export default SPXChart;

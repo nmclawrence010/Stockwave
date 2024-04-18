@@ -1,8 +1,9 @@
+import { Dialog, Transition } from "@headlessui/react";
+import { Fragment, useEffect, useState } from "react";
+
 import { addDatabaseItem, generateTransactionID } from "@/lib/AWSFunctionality";
 import { GetCurrentUser } from "@/lib/Auth0Functionality";
 import { fetchLogo } from "@/lib/StockAPIFunctionality";
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
 
 import nasdaqTickers from "../../public/extraStockData/nasdaq_tickers.json";
 import nyseTickers from "../../public/extraStockData/nyse_tickers.json";
@@ -20,7 +21,7 @@ async function fetchStockLogoOnSubmit(ticker: string): Promise<string> {
   }
 }
 
-export default function MyModal({ openModal, closeModal, userId, onSubmitSuccess }: any) {
+export default function BuyModal({ openModal, closeModal, userId, onSubmitSuccess }: any) {
   let [isOpen, setIsOpen] = useState(true);
   let [formData, setFormData] = useState({
     stockTicker: "",

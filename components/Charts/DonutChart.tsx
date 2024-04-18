@@ -1,16 +1,14 @@
 "use client";
+
 import { ApexOptions } from "apexcharts";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import dynamic from "next/dynamic";
+
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-interface ChartThreeState {
-  series: number[];
-}
-
-interface ChartThreeProps {
+interface DonutChartProps {
   donutData: {
     labels: string[];
     series: number[];
@@ -73,7 +71,7 @@ const options: ApexOptions = {
   ],
 };
 
-const ChartThree: React.FC<ChartThreeProps> = ({ donutData }) => {
+const DonutChart: React.FC<DonutChartProps> = ({ donutData }) => {
   // Calculate the total sum of MarketValue
   const totalMarketValue = donutData.series.reduce((sum, value) => sum + value, 0);
 
@@ -157,4 +155,4 @@ const ChartThree: React.FC<ChartThreeProps> = ({ donutData }) => {
   );
 };
 
-export default ChartThree;
+export default DonutChart;

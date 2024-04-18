@@ -1,8 +1,7 @@
-import Image from "next/image";
 import { useEffect, useState } from "react";
-import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
 import DeleteModal from "../Modal/DeleteModal";
 import { deleteDatabaseItemExtra } from "@/lib/AWSFunctionality";
+import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
 
 // Define the props type
 interface AdditionalTableProps {
@@ -13,7 +12,7 @@ interface AdditionalTableProps {
   onDeleteSuccess?: () => void;
 }
 
-const AdditionalTableThree: React.FC<AdditionalTableProps> = ({
+const DividendsSubTable: React.FC<AdditionalTableProps> = ({
   tableData,
   transactionID,
   additionalData,
@@ -126,4 +125,4 @@ const AdditionalTableThree: React.FC<AdditionalTableProps> = ({
   );
 };
 
-export default AdditionalTableThree;
+export default DividendsSubTable;

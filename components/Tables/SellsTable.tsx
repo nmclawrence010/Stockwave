@@ -1,27 +1,28 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { PORTFOLIORECORD } from "@/types/userPortfolio";
-import MyModal from "@/components/Modal/SubmitNewBuy";
+
+import SellsSubTable from "./SellsSubTable";
+import SellModal from "@/components/Modal/SubmitNewSell";
 import DeleteModal from "../Modal/DeleteModal";
-import { deleteDatabaseItem } from "@/lib/AWSFunctionality";
-import AdditionalTable from "./AdditionalTable";
 import MultiDeleteModal from "../Modal/MultiDeleteModal";
 
-// Define the props type
-interface TableOneProps {
-  tableData: PORTFOLIORECORD[];
-  additionalTableData: PORTFOLIORECORD[]; //For the sub table under the stocks
-  unrealisedGainLoss: number;
-  onSubmitSuccess?: () => void; // Add the onSubmitSuccess property
-  onDeleteSuccess?: () => void; // Add the onSubmitSuccess property
+import { deleteDatabaseItemSell } from "@/lib/AWSFunctionality";
+
+import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
+
+interface TableProps {
+  tableData: PORTFOLIORECORDSELL[];
+  additionalTableData: PORTFOLIORECORDSELL[];
+  onSubmitSuccess?: () => void;
+  onDeleteSuccess?: () => void;
 }
 
-const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unrealisedGainLoss, onSubmitSuccess, onDeleteSuccess }) => {
+const SellsTable: React.FC<TableProps> = ({ tableData, additionalTableData, onSubmitSuccess, onDeleteSuccess }) => {
   let [isOpen, setIsOpen] = useState(false);
   let [isOpen2, setIsOpen2] = useState(false);
   let [isOpenMulti, setIsOpenMulti] = useState(false);
-  let [deleteItemId, setDeleteItemId] = useState<string | null>(null); //For singular transactions
+  let [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   let [deleteItemsFromAdditionalTable, setDeleteItemsFromAdditionalTable] = useState<string[]>([]); //For batch delete
 
   // Add state for the additional table
@@ -46,7 +47,7 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
     setDeleteItemId(transactionID);
   }
 
-  function openMultiDeleteModal(clickedRowData: PORTFOLIORECORD) {
+  function openMultiDeleteModal(clickedRowData: PORTFOLIORECORDSELL) {
     // Get the ticker from the clicked row data
     const clickedRowTicker = clickedRowData.Ticker;
 
@@ -60,7 +61,7 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
 
   const handleDeleteClick = () => {
     if (deleteItemId) {
-      deleteDatabaseItem(deleteItemId, String(sessionStorage.getItem("currentUser")));
+      deleteDatabaseItemSell(deleteItemId, String(sessionStorage.getItem("currentUser")));
     }
     closeDeleteModal();
     if (onDeleteSuccess) {
@@ -74,7 +75,7 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
       // Loop through the list of TransactionIDs and pass each to our AWS delete function
       deleteItemsFromAdditionalTable.forEach((id) => {
         console.log("TransactionID:", id);
-        deleteDatabaseItem(id, String(sessionStorage.getItem("currentUser")));
+        deleteDatabaseItemSell(id, String(sessionStorage.getItem("currentUser")));
       });
     }
     closeDeleteModal();
@@ -83,11 +84,11 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
     }
   };
 
-  //For highlighting the currently open row
   const [highlightedRow, setHighlightedRow] = useState<string | null>(null);
   // Function to toggle the visibility of the additional table
   const toggleAdditionalTable = (transactionID: string) => {
     setAdditionalTableVisible((prevVisible) => (prevVisible === transactionID ? null : transactionID));
+
     if (highlightedRow === transactionID) {
       setHighlightedRow(null); // Remove highlighting if the same row is clicked again
     } else {
@@ -98,7 +99,7 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
     }
   };
 
-  useEffect(() => {}, [tableData, additionalTableData, unrealisedGainLoss, deleteItemsFromAdditionalTable]);
+  useEffect(() => {}, [tableData, additionalTableData, deleteItemsFromAdditionalTable]);
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -110,7 +111,7 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
         }}
       >
         <h4 className="mb-6 text-title-xl2 font-semibold text-black dark:text-white" style={{ paddingRight: "30px", marginTop: "20px" }}>
-          Current Holdings
+          Sells
         </h4>
         <button
           onClick={openModal}
@@ -127,7 +128,7 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
 
       <div>
         {isOpen && (
-          <MyModal openModal={openModal} closeModal={closeModal} onSubmitSuccess={onSubmitSuccess} onDeleteSuccess={onDeleteSuccess} />
+          <SellModal openModal={openModal} closeModal={closeModal} onSubmitSuccess={onSubmitSuccess} onDeleteSuccess={onDeleteSuccess} />
         )}
       </div>
       <div>
@@ -151,15 +152,12 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
         )}
       </div>
       <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-md bg-black font-medium text-white text-center  dark:bg-meta-4 sm:grid-cols-9">
+        <div className="grid grid-cols-3 rounded-md bg-black font-medium text-white text-center  dark:bg-meta-4 sm:grid-cols-8">
           <div className="p-2.5 xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Stocks</h5>
+            <h5 className="text-sm font-medium uppercase xsm:text-base">Stock</h5>
           </div>
           <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Current Price</h5>
-          </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Today&apos;s Change</h5>
+            <h5 className="text-sm font-medium uppercase xsm:text-base">Average Sell Price</h5>
           </div>
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">No. of Shares</h5>
@@ -167,8 +165,9 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">Average Cost</h5>
           </div>
+
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Market Value</h5>
+            <h5 className="text-sm font-medium uppercase xsm:text-base">Transaction Value</h5>
           </div>
           <div className="hidden p-2.5 text-center sm:block xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">Total Gain/Loss</h5>
@@ -183,13 +182,13 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
 
         {tableData.map((brand, key) => (
           <div
-            className={`grid grid-cols-3 sm:grid-cols-9 ${
+            className={`grid grid-cols-3 sm:grid-cols-8 ${
               key === tableData.length - 1 ? "" : "border-b border-stroke dark:border-strokedark"
             }`}
             key={key}
             style={{
-              backgroundColor: highlightedRow === brand.TransactionID ? "#E5E7EB" : "inherit", // Change the background color based on the highlightedRow state
-              color: highlightedRow === brand.TransactionID ? "text-black" : "inherit", // Change the text color to black in the highlighted row with !important
+              backgroundColor: highlightedRow === brand.TransactionID ? "#e5e7eb" : "inherit", // Change the background color based on the highlightedRow state
+              color: highlightedRow === brand.TransactionID ? "black !important" : "inherit", // Change the text color to black in the highlighted row with !important
             }}
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
@@ -201,6 +200,7 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
                   alignItems: "center",
                 }}
               >
+                {" "}
                 <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} />
               </div>
               <p
@@ -217,19 +217,9 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <b>
                 <p
-                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black" : "text-black"} sm:block ${brand.ChangeInPrice < 0 ? "text-meta-1" : "text-meta-3"}`}
+                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
                 >
-                  {Number(brand.CurrentPrice).toFixed(2)}
-                </p>
-              </b>
-            </div>
-
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <b>
-                <p className={`${brand.ChangeInPrice < 0 ? "text-meta-1" : "text-meta-3"}`}>
-                  {Number(brand.ChangeInPrice).toFixed(2)}
-                  &nbsp;&nbsp;&nbsp;&nbsp;
-                  {Number(brand.ChangeInPricePercent).toFixed(2)}%
+                  {brand.AverageSellPrice}
                 </p>
               </b>
             </div>
@@ -259,7 +249,7 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
                 <p
                   className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
                 >
-                  {brand.MarketValue.toFixed(2)}
+                  {brand.TotalPaid.toFixed(2)}
                 </p>
               </b>
             </div>
@@ -321,9 +311,8 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
                   : "hidden"
               }`}
             >
-              <AdditionalTable
+              <SellsSubTable
                 tableData={tableData}
-                unrealisedGainLoss={unrealisedGainLoss}
                 transactionID={brand.TransactionID}
                 additionalData={additionalTableData}
                 onSubmitSuccess={onSubmitSuccess}
@@ -337,7 +326,7 @@ const TableOne: React.FC<TableOneProps> = ({ tableData, additionalTableData, unr
   );
 };
 
-export default TableOne;
+export default SellsTable;
 function setIsOpen(arg0: boolean) {
   throw new Error("Function not implemented.");
 }

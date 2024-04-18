@@ -1,27 +1,18 @@
-import Image from "next/image";
 import { useEffect, useState } from "react";
-import { PORTFOLIORECORD } from "@/types/userPortfolio";
 import DeleteModal from "../Modal/DeleteModal";
-import { deleteDatabaseItem } from "@/lib/AWSFunctionality";
+import { deleteDatabaseItemSell } from "@/lib/AWSFunctionality";
+import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
 
 // Define the props type
 interface AdditionalTableProps {
-  tableData: PORTFOLIORECORD[];
-  unrealisedGainLoss: number;
+  tableData: PORTFOLIORECORDSELL[];
   transactionID: string;
-  additionalData: PORTFOLIORECORD[];
+  additionalData: PORTFOLIORECORDSELL[];
   onSubmitSuccess?: () => void;
   onDeleteSuccess?: () => void;
 }
 
-const AdditionalTable: React.FC<AdditionalTableProps> = ({
-  tableData,
-  unrealisedGainLoss,
-  transactionID,
-  additionalData,
-  onSubmitSuccess,
-  onDeleteSuccess,
-}) => {
+const SellsSubTable: React.FC<AdditionalTableProps> = ({ tableData, transactionID, additionalData, onSubmitSuccess, onDeleteSuccess }) => {
   // Find the corresponding Ticker from tableData
   const correspondingTicker = tableData.find((data) => data.TransactionID === transactionID)?.Ticker;
 
@@ -42,7 +33,7 @@ const AdditionalTable: React.FC<AdditionalTableProps> = ({
 
   const handleDeleteClick = () => {
     if (deleteItemId) {
-      deleteDatabaseItem(deleteItemId, String(sessionStorage.getItem("currentUser")));
+      deleteDatabaseItemSell(deleteItemId, String(sessionStorage.getItem("currentUser")));
     }
     closeDeleteModal();
     if (onDeleteSuccess) {
@@ -50,14 +41,14 @@ const AdditionalTable: React.FC<AdditionalTableProps> = ({
     }
   };
 
-  useEffect(() => {}, [tableData, unrealisedGainLoss]);
+  useEffect(() => {}, [tableData]);
 
   //   console.log("MATCHING", filteredTableData);
   //   console.log("tableData:", tableData);
   //   console.log("transactionID:", transactionID);
 
   return (
-    <div className=" bg-white pb-2.5 dark:border-strokedark dark:bg-boxdark xl:pb-1">
+    <div className="bg-white pb-2.5 dark:border-strokedark dark:bg-boxdark xl:pb-1">
       <div>
         {isOpen2 && (
           <DeleteModal
@@ -69,24 +60,19 @@ const AdditionalTable: React.FC<AdditionalTableProps> = ({
         )}
       </div>
       <div className="flex flex-col"></div>
-
       {filteredTableData.map((data, index) => (
         <div
           key={index}
-          className={`grid grid-cols-3 sm:grid-cols-9 ${
+          className={`grid grid-cols-3 sm:grid-cols-8 ${
             index === filteredTableData.length - 1 ? "" : "border-b border-stroke dark:border-strokedark"
           }`}
         >
           <div className="flex items-center gap-3 p-2.5 xl:p-5">
-            <p className="hidden text-black dark:text-white sm:block"></p>
-          </div>
-
-          <div className="flex items-center gap-3 p-2.5 xl:p-5">
-            <p className="hidden text-black dark:text-white sm:block"></p>
+            <p className="hidden text-black dark:text-white sm:block">{data.DateBought}</p>
           </div>
 
           <div className="flex items-center justify-center p-2.5 xl:p-5">
-            <p className="text-black dark:text-white">{data.DateBought}</p>
+            <p className="text-black dark:text-white">{data.AverageSellPrice}</p>
           </div>
 
           <div className="flex items-center justify-center p-2.5 xl:p-5">
@@ -94,11 +80,11 @@ const AdditionalTable: React.FC<AdditionalTableProps> = ({
           </div>
 
           <div className="flex items-center justify-center p-2.5 xl:p-5">
-            <p className="text-black dark:text-white">{data.AverageCost}</p>
+            <p className="text-black dark:text-white">{data.AverageSellPrice}</p>
           </div>
 
           <div className="flex items-center justify-center p-2.5 xl:p-5">
-            <p className="text-black dark:text-white">{data.MarketValue.toFixed(2)}</p>
+            <p className="text-black dark:text-white">{data.TotalPaid.toFixed(2)}</p>
           </div>
 
           <div className="flex items-center justify-center p-2.5 xl:p-5">
@@ -119,7 +105,6 @@ const AdditionalTable: React.FC<AdditionalTableProps> = ({
                 margin: "0",
               }}
             ></button>
-
             <button
               onClick={() => {
                 openDeleteModal(data.TransactionID);
@@ -153,4 +138,4 @@ const AdditionalTable: React.FC<AdditionalTableProps> = ({
   );
 };
 
-export default AdditionalTable;
+export default SellsSubTable;

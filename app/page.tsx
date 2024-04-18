@@ -1,21 +1,25 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
-import CardDataStats from "../components/CardDataStats";
-import ChartOne from "../components/Charts/SPXChart";
-import ChartThree from "../components/Charts/DonutChart";
-import TableOne from "../components/Tables/TableOne";
-import TableTwo from "@/components/Tables/TableTwo";
-import TableThree from "@/components/Tables/TableThree";
-import { PORTFOLIORECORD } from "@/types/userPortfolio";
-import { GetCurrentUser } from "@/lib/Auth0Functionality";
-import { fetchStockQuote } from "@/lib/StockAPIFunctionality";
-import { STOCK } from "@/types/stocks";
-import { STOCKSELL } from "@/types/stockSell";
-import { getDatabaseItems, getDatabaseItemsDividends, getDatabaseItemsSell } from "@/lib/AWSFunctionality";
-import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
-import { useUser } from "@auth0/nextjs-auth0/client";
 import Link from "next/link";
 import Image from "next/image";
+import { useUser } from "@auth0/nextjs-auth0/client";
+
+import CardDataStats from "../components/CardDataStats";
+import SPXChart from "../components/Charts/SPXChart";
+import DonutChart from "../components/Charts/DonutChart";
+import CurrentHoldingsTable from "../components/Tables/CurrentHoldingsTable";
+import SellsTable from "@/components/Tables/SellsTable";
+import DividendsTable from "@/components/Tables/DividendsTable";
+
+import { GetCurrentUser } from "@/lib/Auth0Functionality";
+import { fetchStockQuote } from "@/lib/StockAPIFunctionality";
+import { getDatabaseItems, getDatabaseItemsDividends, getDatabaseItemsSell } from "@/lib/AWSFunctionality";
+
+import { STOCK } from "@/types/stocks";
+import { STOCKSELL } from "@/types/stockSell";
+import { PORTFOLIORECORD } from "@/types/userPortfolio";
+import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
 import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
 
 async function fetchAndCalculateStockData() {
@@ -46,7 +50,6 @@ async function fetchAndCalculateStockData() {
       ChangeInPricePercent: changeInPricePercent,
       LogoURL: element.LogoURL,
       GainLoss: parseFloat(currentPrice) * element.NoShares - element.AverageCost * element.NoShares,
-      SoldGainLoss: 100,
       TransactionID: element.TransactionID,
     };
   });
@@ -89,41 +92,40 @@ async function fetchAndCalculateStockData() {
 
   //Card Calculations
   // Unrealised (Summing the Gain/Loss from each transaction in the Current Holdings)
-  const unrealisedGainLoss = results.reduce((sum, result) => sum + result.GainLoss, 0);
-
-  // Adding up the dividends
-  const dividendGain = resultsDividends.reduce((sum, result) => sum + result.Amount, 0);
+  const unrealisedTotal = results.reduce((sum, result) => sum + result.GainLoss, 0);
 
   // Realised (Summing the Gain/Loss from each transaction in the Sell Table)
-  const realisedGainLoss = resultsSells.reduce((sum, result) => sum + result.GainLoss, 0);
+  const realisedTotal = resultsSells.reduce((sum, result) => sum + result.GainLoss, 0);
 
-  const realisedGainLossIncludingDividends = realisedGainLoss + dividendGain;
+  // Summing the dividends
+  const dividendTotal = resultsDividends.reduce((sum, result) => sum + result.Amount, 0);
 
-  const overallGainLoss = unrealisedGainLoss + realisedGainLoss + dividendGain; // Overall gain
+  // Creating a value for realised that includes dividends
+  const realisedTotalWithDividends = realisedTotal + dividendTotal;
 
-  // Summing the total spend for the current holdings so we can work out the percentage gain/loss
-  const totalTotalPaid = results.reduce((sum, result) => sum + result.TotalPaid, 0);
+  // Adding all three together for the total gain/loss
+  const overallTotal = unrealisedTotal + realisedTotal + dividendTotal;
 
-  // Summing the total spend for the current holdings so we can work out the percentage gain/loss
-  const totalTotalPaidSells = resultsSells.reduce((sum, result) => sum + result.TotalPaid, 0);
+  // Calculating the percentage changes for the totals
+  const unrealisedTotalPaid = results.reduce((sum, result) => sum + result.TotalPaid, 0);
+  const realisedTotalPaid = resultsSells.reduce((sum, result) => sum + result.TotalPaid, 0);
 
-  //Percentage calcs for the overall portfolio
-  const unrealisedPercentageGain = (unrealisedGainLoss / totalTotalPaid) * 100; // Unrealised gain %
-  const realisedPercentageGain = (realisedGainLoss / totalTotalPaidSells) * 100; // Realised gain %
-  const overallGainLossPercentage = ((unrealisedGainLoss + realisedGainLoss) / (totalTotalPaid + totalTotalPaidSells)) * 100; // Overall gain %
+  const unrealisedPercentage = (unrealisedTotal / unrealisedTotalPaid) * 100;
+  const realisedPercentage = (realisedTotal / realisedTotalPaid) * 100;
+  const overallPercentage = ((unrealisedTotal + realisedTotal) / (unrealisedTotalPaid + realisedTotalPaid)) * 100;
 
   //Aggregating rows from results to display different transactions on the same stock together to show your overall position
   //Aggregated current holdings
-  const aggregatedData = results.reduce((result: Array<PORTFOLIORECORD>, currentItem) => {
-    const existingItem = result.find((item) => item.Ticker === currentItem.Ticker);
+  const aggregatedDataCurrent = results.reduce((result: Array<PORTFOLIORECORD>, currentItem) => {
+    const existingItemCurrent = result.find((item) => item.Ticker === currentItem.Ticker);
 
-    if (existingItem) {
-      // If a matching Ticker is found, update the values
-      existingItem.NoShares += currentItem.NoShares;
-      existingItem.TotalPaid += currentItem.TotalPaid;
-      existingItem.MarketValue += currentItem.MarketValue;
-      existingItem.GainLoss += currentItem.GainLoss;
-      existingItem.AverageCost = existingItem.TotalPaid / existingItem.NoShares;
+    if (existingItemCurrent) {
+      // If a matching Ticker is found, add the values together
+      existingItemCurrent.NoShares += currentItem.NoShares;
+      existingItemCurrent.TotalPaid += currentItem.TotalPaid;
+      existingItemCurrent.MarketValue += currentItem.MarketValue;
+      existingItemCurrent.GainLoss += currentItem.GainLoss;
+      existingItemCurrent.AverageCost = existingItemCurrent.TotalPaid / existingItemCurrent.NoShares;
     } else {
       // If no matching Ticker is found, add the current item to the result
       result.push({ ...currentItem });
@@ -131,69 +133,67 @@ async function fetchAndCalculateStockData() {
 
     return result;
   }, []);
+
   //Aggregated Sells
   const aggregatedDataSells = resultsSells.reduce((result: Array<PORTFOLIORECORDSELL>, currentItem) => {
     const existingItemSell = result.find((item) => item.Ticker === currentItem.Ticker);
 
     if (existingItemSell) {
-      // If a matching Ticker is found, update the values
       existingItemSell.NoShares += currentItem.NoShares;
       existingItemSell.TotalPaid += currentItem.TotalPaid;
       existingItemSell.AverageSellPrice += currentItem.AverageSellPrice;
       existingItemSell.GainLoss += currentItem.GainLoss;
       existingItemSell.AverageCost = existingItemSell.TotalPaid / existingItemSell.NoShares;
     } else {
-      // If no matching Ticker is found, add the current item to the result
       result.push({ ...currentItem });
     }
 
     return result;
   }, []);
+
   //Aggregated Dividends
   const aggregatedDataDividends = resultsDividends.reduce((result: Array<PORTFOLIORECORDEXTRA>, currentItem) => {
     const existingItemDividend = result.find((item) => item.Ticker === currentItem.Ticker);
 
     if (existingItemDividend) {
-      // If a matching Ticker is found, update the values
       existingItemDividend.Amount += currentItem.Amount;
     } else {
-      // If no matching Ticker is found, add the current item to the result
       result.push({ ...currentItem });
     }
 
     return result;
   }, []);
 
-  // Extract Ticker and MarketValue for ChartThree (Donut Chart)
-  const chartThreeData = {
-    labels: aggregatedData.map((item) => item.Ticker),
-    series: aggregatedData.map((item) => item.MarketValue),
+  // Extract Ticker and MarketValue to pass to the Donut Chart
+  const DonutData = {
+    labels: aggregatedDataCurrent.map((item) => item.Ticker),
+    series: aggregatedDataCurrent.map((item) => item.MarketValue),
   };
 
   return {
     results,
-    resultsSells, // The two results are the ungrouped transactions
-    resultsDividends,
-    unrealisedGainLoss,
-    unrealisedPercentageGain,
-    realisedGainLoss,
-    realisedGainLossIncludingDividends,
-    realisedPercentageGain,
-    overallGainLoss,
-    overallGainLossPercentage,
-    aggregatedData, // The aggreagated data is the transactions grouped together by their matching stock ticker
+    resultsSells,
+    resultsDividends, //Results are the ungrouped transactions from AWS
+    unrealisedTotal,
+    unrealisedPercentage,
+    realisedTotal,
+    realisedTotalWithDividends,
+    realisedPercentage,
+    overallTotal,
+    overallPercentage,
+    aggregatedDataCurrent, // Aggregated are the grouped transactions by ticker
     aggregatedDataSells,
     aggregatedDataDividends,
-    chartThreeData,
+    DonutData,
   };
 }
 
 function Home() {
   //Data for users transactions
-  const [tableData, setTableData] = useState<PORTFOLIORECORD[]>([]);
+  const [tableDataCurrentHoldings, setTableData] = useState<PORTFOLIORECORD[]>([]);
   const [tableDataSells, setTableDataSells] = useState<PORTFOLIORECORDSELL[]>([]);
   const [tableDataDividends, setTableDataDividends] = useState<PORTFOLIORECORDEXTRA[]>([]);
-  //FOr the sub table
+  //For the sub table of ungrouped transactions
   const [additionalTableData, setAdditionalTableData] = useState<PORTFOLIORECORD[]>([]);
   const [additionalTableDataSells, setAdditionalTableDataSells] = useState<PORTFOLIORECORDSELL[]>([]);
   const [additionalTableDataDividends, setAdditionalTableDataDividends] = useState<PORTFOLIORECORDEXTRA[]>([]);
@@ -218,52 +218,45 @@ function Home() {
         results,
         resultsSells,
         resultsDividends,
-        unrealisedGainLoss,
-        unrealisedPercentageGain,
-        realisedGainLoss,
-        realisedPercentageGain,
-        realisedGainLossIncludingDividends,
-        overallGainLoss,
-        overallGainLossPercentage,
-        aggregatedData,
+        unrealisedTotal,
+        unrealisedPercentage,
+        realisedTotal,
+        realisedPercentage,
+        realisedTotalWithDividends,
+        overallTotal,
+        overallPercentage,
+        aggregatedDataCurrent,
         aggregatedDataSells,
         aggregatedDataDividends,
-        chartThreeData,
+        DonutData,
       } = await fetchAndCalculateStockData();
-      //For table and sub table
-      setTableData(aggregatedData);
+      setTableData(aggregatedDataCurrent);
       setTableDataSells(aggregatedDataSells);
       setTableDataDividends(aggregatedDataDividends);
       setAdditionalTableData(results);
       setAdditionalTableDataSells(resultsSells);
       setAdditionalTableDataDividends(resultsDividends);
-      /////////////////////////
-      setUnrealisedGainLoss(unrealisedGainLoss);
-      setUnrealisedGainLossPercentage(unrealisedPercentageGain);
-      setRealisedGainLoss(realisedGainLoss);
-      setRealisedGainLossIncDividend(realisedGainLossIncludingDividends);
-      setRealisedGainLossPercentage(realisedPercentageGain);
-      setOverallGainLoss(overallGainLoss);
-      setOverallGainLossPercentage(overallGainLossPercentage);
+      setUnrealisedGainLoss(unrealisedTotal);
+      setUnrealisedGainLossPercentage(unrealisedPercentage);
+      setRealisedGainLoss(realisedTotal);
+      setRealisedGainLossIncDividend(realisedTotalWithDividends);
+      setRealisedGainLossPercentage(realisedPercentage);
+      setOverallGainLoss(overallTotal);
+      setOverallGainLossPercentage(overallPercentage);
 
-      // Pass data to ChartThree
-      setDonutData(aggregatedData);
-      setDonutDataLabels(chartThreeData.labels as never[]);
+      setDonutData(aggregatedDataCurrent);
+      setDonutDataLabels(DonutData.labels as never[]);
     };
 
     fetchInitialData();
   }, []);
 
-  //Displaying different HTML when the user isn't logged in
-  const { user } = useUser(); // Auth0 user
-  //console.log("TESTINGUSER:", user?.email);
-
   //For refreshing the table immediately when new things are added
   //Current Holdings Table
   const refreshDataCurrentHoldings = async () => {
     const newData = await fetchAndCalculateStockData();
-    const { results, aggregatedData } = newData; // Declare the variables
-    setTableData(aggregatedData); // Update the state that your TableOne component uses
+    const { results, aggregatedDataCurrent } = newData;
+    setTableData(aggregatedDataCurrent);
     setAdditionalTableData(results);
   };
 
@@ -283,7 +276,7 @@ function Home() {
     refreshDataSells();
   }, []);
 
-  //Divi Table
+  //Dividend Table
   const refreshDataDividends = async () => {
     const newData = await fetchAndCalculateStockData();
     const { resultsDividends, aggregatedDataDividends } = newData; // Declare the variables
@@ -294,6 +287,9 @@ function Home() {
   useEffect(() => {
     refreshDataDividends();
   }, []);
+
+  //Displaying different HTML when the user isn't logged in
+  const { user } = useUser();
 
   if (!user?.email) {
     return (
@@ -309,7 +305,7 @@ function Home() {
                     src={"/images/logo/Stockwavelogowithtext.png"}
                     priority={true}
                     alt="Logo"
-                    style={{ margin: "0 auto" }} // Apply margin: 0 auto; to horizontally center the image
+                    style={{ margin: "0 auto" }}
                   />
                 </Link>
                 <p className="2xl:px-20">
@@ -500,8 +496,7 @@ function Home() {
             title="Total Gain"
             total={`${overallGainLoss.toFixed(2)}`}
             rate={`${overallPercentageGain.toFixed(2)}%`}
-            specificCard="1"
-            levelUp
+            tooltipText="Gain on current, sells and dividends"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -516,8 +511,7 @@ function Home() {
             title="Unrealised Gain"
             total={`${unrealisedGainLoss.toFixed(2)}`}
             rate={`${unrealisedPercentageGain.toFixed(2)}%`}
-            specificCard="2"
-            levelUp
+            tooltipText="Gain on current holdings"
           >
             <svg
               className="fill-white dark:fill-white w-8 2xl:w-10 h-[34px]"
@@ -532,8 +526,7 @@ function Home() {
             title="Realised Gain"
             total={`${realisedGainLossIncDividend.toFixed(2)}`}
             rate={`${realisedPercentageGain.toFixed(2)}%`}
-            specificCard="3"
-            levelUp
+            tooltipText="Unrealised gain includes dividends <br /> but the percentage does not"
           >
             <svg
               className="fill-white dark:fill-white w-8 2xl:w-10 h-[34px]"
@@ -547,33 +540,31 @@ function Home() {
         </div>
 
         <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-          <ChartOne aggregatedData={tableData} />
-          <ChartThree
+          <SPXChart aggregatedData={tableDataCurrentHoldings} />
+          <DonutChart
             donutData={{
               labels: donutDataLabels,
               series: donutData.map((item) => item.MarketValue),
             }}
           />
           <div className="col-span-12 xl:col-span-12">
-            <TableOne
-              tableData={tableData}
+            <CurrentHoldingsTable
+              tableData={tableDataCurrentHoldings}
               additionalTableData={additionalTableData}
-              unrealisedGainLoss={unrealisedGainLoss}
               onSubmitSuccess={refreshDataCurrentHoldings}
               onDeleteSuccess={refreshDataCurrentHoldings}
             />
           </div>
           <div className="col-span-12 xl:col-span-12">
-            <TableTwo
+            <SellsTable
               tableData={tableDataSells}
               additionalTableData={additionalTableDataSells}
-              unrealisedGainLoss={unrealisedGainLoss}
               onSubmitSuccess={refreshDataSells}
               onDeleteSuccess={refreshDataSells}
             />
           </div>
           <div className="col-span-12 xl:col-span-8">
-            <TableThree
+            <DividendsTable
               tableData={tableDataDividends}
               additionalTableData={additionalTableDataDividends}
               onSubmitSuccess={refreshDataDividends}

@@ -1,13 +1,16 @@
 "use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
-import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+
 import nyseTickers from "../../public/extraStockData/nyse_full_tickers.json";
 import nasdaqTickers from "../../public/extraStockData/nasdaq_full_tickers.json";
-import { useRouter } from "next/navigation";
 
 const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOpen: (arg0: boolean) => void }) => {
   const router = useRouter();

@@ -4,38 +4,13 @@ interface CardDataStatsProps {
   title: string;
   total: string;
   rate: string;
-  specificCard: string;
-  levelUp?: boolean;
-  levelDown?: boolean;
   children: ReactNode;
   height?: string;
+  tooltipText: string;
 }
 
-const CardDataStats: React.FC<CardDataStatsProps> = ({
-  title,
-  total,
-  rate,
-  specificCard,
-  levelUp,
-  levelDown,
-  children,
-  height = "auto",
-}) => {
-  let additionalText = "";
-
-  switch (specificCard) {
-    case "1":
-      additionalText = "Gain on current, sells and dividends";
-      break;
-    case "2":
-      additionalText = "Gain on current holdings";
-      break;
-    case "3":
-      additionalText = "Unrealised gain includes dividends <br /> but the percentage does not.";
-      break;
-    default:
-      additionalText = "";
-  }
+const CardDataStats: React.FC<CardDataStatsProps> = ({ title, total, rate, children, height = "auto", tooltipText }) => {
+  let additionalText = tooltipText;
 
   // For changing the negative numbers to display as (-$1000) instead of ($-1000)
   const totalNumber = parseFloat(total);

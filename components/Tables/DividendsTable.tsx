@@ -1,20 +1,21 @@
-import Image from "next/image";
 import { useEffect, useState } from "react";
+
+import DividendsSubTable from "./DividendsSubTable";
 import DeleteModal from "../Modal/DeleteModal";
 import MultiDeleteModal from "../Modal/MultiDeleteModal";
+import DividendModal from "../Modal/SubmitNewDividend";
+
 import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
 import { deleteDatabaseItemExtra } from "@/lib/AWSFunctionality";
-import DividendModal from "../Modal/SubmitNewDividend";
-import AdditionalTableThree from "./AdditionalTableThree";
 
-interface TableThreeProps {
+interface TableProps {
   tableData: PORTFOLIORECORDEXTRA[];
   additionalTableData: PORTFOLIORECORDEXTRA[];
-  onSubmitSuccess?: () => void; // Add the onSubmitSuccess property
-  onDeleteSuccess?: () => void; // Add the onSubmitSuccess property
+  onSubmitSuccess?: () => void;
+  onDeleteSuccess?: () => void;
 }
 
-const TableThree: React.FC<TableThreeProps> = ({ tableData, additionalTableData, onSubmitSuccess, onDeleteSuccess }) => {
+const DividendsTable: React.FC<TableProps> = ({ tableData, additionalTableData, onSubmitSuccess, onDeleteSuccess }) => {
   let [isOpen, setIsOpen] = useState(false);
   let [isOpen2, setIsOpen2] = useState(false);
   let [isOpenMulti, setIsOpenMulti] = useState(false);
@@ -248,7 +249,7 @@ const TableThree: React.FC<TableThreeProps> = ({ tableData, additionalTableData,
                   : "hidden"
               }`}
             >
-              <AdditionalTableThree
+              <DividendsSubTable
                 tableData={tableData}
                 transactionID={brand.TransactionID}
                 additionalData={additionalTableData}
@@ -263,7 +264,7 @@ const TableThree: React.FC<TableThreeProps> = ({ tableData, additionalTableData,
   );
 };
 
-export default TableThree;
+export default DividendsTable;
 function setIsOpen(arg0: boolean) {
   throw new Error("Function not implemented.");
 }

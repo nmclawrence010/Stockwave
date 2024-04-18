@@ -1,7 +1,8 @@
-import { addDatabaseItemDividends, generateTransactionID } from "@/lib/AWSFunctionality";
-import { GetCurrentUser } from "@/lib/Auth0Functionality";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
+
+import { addDatabaseItemDividends, generateTransactionID } from "@/lib/AWSFunctionality";
+import { GetCurrentUser } from "@/lib/Auth0Functionality";
 
 export default function DividendModal({ openModal, closeModal, userId, onSubmitSuccess }: any) {
   let [isOpen, setIsOpen] = useState(true);
