@@ -1,6 +1,7 @@
 import { v4 } from "uuid"; //To generate random IDs for the transactions
 import { STOCK } from "@/types/stocks";
 import { STOCKSELL } from "@/types/stockSell";
+import { STOCKWATCHLIST } from "@/types/stockWatchlist";
 import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
 
 //Connecting to the AWS DynamoDB function so it can be reused for the different CRUD functions
@@ -158,7 +159,7 @@ export function getDatabaseItemsSell(dbSellData: STOCKSELL[] = []): Promise<STOC
   });
 }
 
-//Modified version of the ADD function for the SELL table
+//Sells
 export function addDatabaseItemSell(
   userid: string,
   randomHash: string,
@@ -187,7 +188,6 @@ export function addDatabaseItemSell(
     },
   };
 
-  // Call DynamoDB to add the item to the table
   ddb.putItem(params, function (err: any, data: any) {
     if (err) {
       console.log("Error", err);
@@ -197,11 +197,8 @@ export function addDatabaseItemSell(
   });
 }
 
-///Modified version of the DELETE function for the SELL table
 export function deleteDatabaseItemSell(transactionID: string, userId: string) {
   var ddb = connectAWS();
-  console.log("AWS ITEM 1:", transactionID);
-  console.log("AWS ITEM 2:", userId);
 
   var params = {
     TableName: "StockwaveSells",
@@ -211,7 +208,6 @@ export function deleteDatabaseItemSell(transactionID: string, userId: string) {
     },
   };
 
-  // Call DynamoDB to delete the item from the table
   ddb.deleteItem(params, function (err: any, data: any) {
     if (err) {
       console.log("Error", err);
@@ -221,7 +217,7 @@ export function deleteDatabaseItemSell(transactionID: string, userId: string) {
   });
 }
 
-//Same as the function for getting user records but from the Sell table
+//Dividends
 export function getDatabaseItemsDividends(dbDividendData: PORTFOLIORECORDEXTRA[] = []): Promise<PORTFOLIORECORDEXTRA[]> {
   return new Promise((resolve, reject) => {
     var ddb = connectAWS();
@@ -257,7 +253,6 @@ export function getDatabaseItemsDividends(dbDividendData: PORTFOLIORECORDEXTRA[]
   });
 }
 
-//Modified version of the ADD function for the SELL table
 export function addDatabaseItemDividends(
   userid: string,
   randomHash: string,
@@ -280,7 +275,6 @@ export function addDatabaseItemDividends(
     },
   };
 
-  // Call DynamoDB to add the item to the table
   ddb.putItem(params, function (err: any, data: any) {
     if (err) {
       console.log("Error", err);
@@ -290,11 +284,8 @@ export function addDatabaseItemDividends(
   });
 }
 
-///Modified version of the DELETE function for the EXTRA dividend/cash table
-export function deleteDatabaseItemExtra(transactionID: string, userId: string) {
+export function deleteDatabaseItemDividends(transactionID: string, userId: string) {
   var ddb = connectAWS();
-  console.log("AWS ITEM 1:", transactionID);
-  console.log("AWS ITEM 2:", userId);
 
   var params = {
     TableName: "StockwaveSells",
@@ -304,7 +295,97 @@ export function deleteDatabaseItemExtra(transactionID: string, userId: string) {
     },
   };
 
-  // Call DynamoDB to delete the item from the table
+  ddb.deleteItem(params, function (err: any, data: any) {
+    if (err) {
+      console.log("Error", err);
+    } else {
+      console.log("Success", data);
+    }
+  });
+}
+
+//Watchlist
+export function getDatabaseItemsWatchlist(dbWatchlistData: STOCKWATCHLIST[] = []): Promise<STOCKWATCHLIST[]> {
+  return new Promise((resolve, reject) => {
+    var ddb = connectAWS();
+
+    var user = sessionStorage.getItem("currentUser");
+
+    var params = {
+      ExpressionAttributeValues: {
+        ":uid": { S: user },
+      },
+      KeyConditionExpression: "UserID = :uid",
+      ProjectionExpression: "UserID, TransactionID, StockTicker, TargetPrice, DateBought, StockNotes",
+      TableName: "StockwaveWatchlist",
+    };
+
+    ddb.query(params, function (err: any, data: { Items: any[] }) {
+      if (err) {
+        console.log("Error", err);
+        reject(err);
+      } else {
+        data.Items.forEach(function (element) {
+          var obj = {
+            Ticker: element.StockTicker.S,
+            TargetPrice: element.TargetPrice.S,
+            DateAdded: element.DateAdded.S,
+            TransactionID: element.TransactionID.S,
+            LogoURL: element.LogoURL ? element.LogoURL.S : "",
+            StockNotes: element.StockNotes.S,
+          };
+          dbWatchlistData.push(obj);
+        });
+        resolve(dbWatchlistData);
+      }
+    });
+  });
+}
+
+export function addDatabaseItemWatchlist(
+  userid: string,
+  randomHash: string,
+  formData: {
+    stockTicker: string;
+    date: string;
+    targetPrice: string;
+    stockNotes: string;
+  },
+) {
+  var ddb = connectAWS();
+
+  var params = {
+    TableName: "StockwaveWatchlist",
+    Item: {
+      TransactionID: { S: randomHash },
+      UserID: { S: userid },
+      DateAdded: { S: formData.date || "01/01/2000" },
+      StockTicker: { S: formData.stockTicker },
+      TargetPrice: { S: formData.targetPrice || "0" },
+      StockNotes: { S: formData.stockNotes || "" },
+    },
+  };
+
+  ddb.putItem(params, function (err: any, data: any) {
+    if (err) {
+      console.log("Error", err);
+    } else {
+      console.log("Success", data);
+    }
+  });
+}
+
+export function deleteDatabaseItemWatchlist(transactionID: string, userId: string) {
+  var ddb = connectAWS();
+
+  var params = {
+    TableName: "StockwaveWatchlist",
+    Key: {
+      TransactionID: { S: transactionID },
+      UserID: { S: userId },
+    },
+  };
+
   ddb.deleteItem(params, function (err: any, data: any) {
     if (err) {
       console.log("Error", err);

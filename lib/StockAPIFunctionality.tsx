@@ -38,6 +38,15 @@ export async function fetchStockProfile(ticker: string) {
   return data;
 }
 
+// https://twelvedata.com/docs#statistics
+export async function fetchStockStatistics(ticker: string) {
+  const res = await fetch(
+    "https://api.twelvedata.com/statistics?apikey=" + process.env.NEXT_PUBLIC_TWELVE_DATA_API_KEY + "&symbol=" + ticker,
+  );
+  const data = await res.json();
+  return data;
+}
+
 // Getting the price at 5 min intervals starting at 9:30 for trading days
 export async function fetchStockDaily5Min(ticker: string) {
   var d = new Date().getDay();

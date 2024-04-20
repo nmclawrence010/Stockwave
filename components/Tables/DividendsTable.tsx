@@ -6,7 +6,7 @@ import MultiDeleteModal from "../Modal/MultiDeleteModal";
 import DividendModal from "../Modal/SubmitNewDividend";
 
 import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
-import { deleteDatabaseItemExtra } from "@/lib/AWSFunctionality";
+import { deleteDatabaseItemDividends } from "@/lib/AWSFunctionality";
 
 interface TableProps {
   tableData: PORTFOLIORECORDEXTRA[];
@@ -57,7 +57,7 @@ const DividendsTable: React.FC<TableProps> = ({ tableData, additionalTableData, 
 
   const handleDeleteClick = () => {
     if (deleteItemId) {
-      deleteDatabaseItemExtra(deleteItemId, String(sessionStorage.getItem("currentUser")));
+      deleteDatabaseItemDividends(deleteItemId, String(sessionStorage.getItem("currentUser")));
     }
     closeDeleteModal();
     if (onDeleteSuccess) {
@@ -71,7 +71,7 @@ const DividendsTable: React.FC<TableProps> = ({ tableData, additionalTableData, 
       // Loop through the list of TransactionIDs and pass each to our AWS delete function
       deleteItemsFromAdditionalTable.forEach((id) => {
         console.log("TransactionID:", id);
-        deleteDatabaseItemExtra(id, String(sessionStorage.getItem("currentUser")));
+        deleteDatabaseItemDividends(id, String(sessionStorage.getItem("currentUser")));
       });
     }
     closeDeleteModal();
