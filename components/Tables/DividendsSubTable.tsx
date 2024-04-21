@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import DeleteModal from "../Modal/DeleteModal";
-import { deleteDatabaseItemExtra } from "@/lib/AWSFunctionality";
+import { deleteDatabaseItemDividends } from "@/lib/AWSFunctionality";
 import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
 
 // Define the props type
@@ -39,7 +39,7 @@ const DividendsSubTable: React.FC<AdditionalTableProps> = ({
 
   const handleDeleteClick = () => {
     if (deleteItemId) {
-      deleteDatabaseItemExtra(deleteItemId, String(sessionStorage.getItem("currentUser")));
+      deleteDatabaseItemDividends(deleteItemId, String(sessionStorage.getItem("currentUser")));
     }
     closeDeleteModal();
     if (onDeleteSuccess) {

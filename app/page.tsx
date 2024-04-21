@@ -9,8 +9,8 @@ import CardDataStats from "../components/CardDataStats";
 import SPXChart from "../components/Charts/SPXChart";
 import DonutChart from "../components/Charts/DonutChart";
 import CurrentHoldingsTable from "../components/Tables/CurrentHoldingsTable";
-import SellsTable from "@/components/Tables/SellsTable";
 import DividendsTable from "@/components/Tables/DividendsTable";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 
 import { GetCurrentUser } from "@/lib/Auth0Functionality";
 import { fetchStockQuote } from "@/lib/StockAPIFunctionality";
@@ -191,11 +191,9 @@ async function fetchAndCalculateStockData() {
 function Home() {
   //Data for users transactions
   const [tableDataCurrentHoldings, setTableData] = useState<PORTFOLIORECORD[]>([]);
-  const [tableDataSells, setTableDataSells] = useState<PORTFOLIORECORDSELL[]>([]);
   const [tableDataDividends, setTableDataDividends] = useState<PORTFOLIORECORDEXTRA[]>([]);
   //For the sub table of ungrouped transactions
   const [additionalTableData, setAdditionalTableData] = useState<PORTFOLIORECORD[]>([]);
-  const [additionalTableDataSells, setAdditionalTableDataSells] = useState<PORTFOLIORECORDSELL[]>([]);
   const [additionalTableDataDividends, setAdditionalTableDataDividends] = useState<PORTFOLIORECORDEXTRA[]>([]);
   //Data for the Cards
   const [unrealisedGainLoss, setUnrealisedGainLoss] = useState<number>(0);
@@ -231,10 +229,8 @@ function Home() {
         DonutData,
       } = await fetchAndCalculateStockData();
       setTableData(aggregatedDataCurrent);
-      setTableDataSells(aggregatedDataSells);
       setTableDataDividends(aggregatedDataDividends);
       setAdditionalTableData(results);
-      setAdditionalTableDataSells(resultsSells);
       setAdditionalTableDataDividends(resultsDividends);
       setUnrealisedGainLoss(unrealisedTotal);
       setUnrealisedGainLossPercentage(unrealisedPercentage);
@@ -262,18 +258,6 @@ function Home() {
 
   useEffect(() => {
     refreshDataCurrentHoldings();
-  }, []);
-
-  //Sell Table
-  const refreshDataSells = async () => {
-    const newData = await fetchAndCalculateStockData();
-    const { resultsSells, aggregatedDataSells } = newData;
-    setTableDataSells(aggregatedDataSells);
-    setAdditionalTableDataSells(resultsSells);
-  };
-
-  useEffect(() => {
-    refreshDataSells();
   }, []);
 
   //Dividend Table
@@ -491,6 +475,7 @@ function Home() {
   return (
     <>
       <React.StrictMode>
+        <Breadcrumb pageName="Current Portfolio" />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
           <CardDataStats
             title="Total Gain"
@@ -555,14 +540,7 @@ function Home() {
               onDeleteSuccess={refreshDataCurrentHoldings}
             />
           </div>
-          <div className="col-span-12 xl:col-span-12">
-            <SellsTable
-              tableData={tableDataSells}
-              additionalTableData={additionalTableDataSells}
-              onSubmitSuccess={refreshDataSells}
-              onDeleteSuccess={refreshDataSells}
-            />
-          </div>
+
           <div className="col-span-12 xl:col-span-8">
             <DividendsTable
               tableData={tableDataDividends}

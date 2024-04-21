@@ -1,7 +1,10 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 import SellsTable from "@/components/Tables/SellsTable";
 import CardDataStats from "@/components/CardDataStats";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 
 import { getDatabaseItemsSell } from "@/lib/AWSFunctionality";
 
@@ -90,6 +93,7 @@ function soldStocksPage() {
 
   return (
     <>
+      <Breadcrumb pageName="Sold Stocks" />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
         <CardDataStats
           title="Realised Gain"
