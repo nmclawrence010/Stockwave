@@ -2,11 +2,7 @@ const defaultTheme = require("tailwindcss/defaultTheme");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./pages/**/*.{js,ts,jsx,tsx,mdx}", "./components/**/*.{js,ts,jsx,tsx,mdx}", "./app/**/*.{js,ts,jsx,tsx,mdx}"],
   darkMode: "class",
   theme: {
     fontFamily: {
@@ -48,6 +44,15 @@ module.exports = {
       success: "#219653",
       danger: "#D34053",
       warning: "#FFA70B",
+      stockwaveblue: "#09315a",
+      stockwaveblue2: "#072748",
+      stockwaveblue3: "#051d36",
+      stockwaveyellow: "#f9ab07",
+      stockwavedark: "#081e2d",
+      stockwavedark2: "#061b28",
+      stockwavegray: "#212d34",
+      simplybackground: "#151b24",
+      simplyforeground: "#1d2430",
     },
     screens: {
       "2xsm": "375px",
@@ -223,8 +228,7 @@ module.exports = {
         default: "0px 8px 13px -3px rgba(0, 0, 0, 0.07)",
         card: "0px 1px 3px rgba(0, 0, 0, 0.12)",
         "card-2": "0px 1px 2px rgba(0, 0, 0, 0.05)",
-        switcher:
-          "0px 2px 4px rgba(0, 0, 0, 0.2), inset 0px 2px 2px #FFFFFF, inset 0px -1px 1px rgba(0, 0, 0, 0.1)",
+        switcher: "0px 2px 4px rgba(0, 0, 0, 0.2), inset 0px 2px 2px #FFFFFF, inset 0px -1px 1px rgba(0, 0, 0, 0.1)",
         "switch-1": "0px 0px 5px rgba(0, 0, 0, 0.15)",
         1: "0px 1px 3px rgba(0, 0, 0, 0.08)",
         2: "0px 1px 4px rgba(0, 0, 0, 0.12)",

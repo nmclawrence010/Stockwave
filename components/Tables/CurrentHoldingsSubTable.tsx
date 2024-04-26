@@ -53,7 +53,7 @@ const CurrentHoldingsSubTable: React.FC<AdditionalTableProps> = ({
   //   console.log("transactionID:", transactionID);
 
   return (
-    <div className=" bg-white pb-2.5 dark:border-strokedark dark:bg-boxdark xl:pb-1">
+    <div className=" bg-white pb-2.5 dark:border-strokedark dark:bg-black xl:pb-1">
       <div>
         {isOpen2 && (
           <DeleteModal

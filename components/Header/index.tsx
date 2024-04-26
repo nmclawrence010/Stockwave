@@ -65,7 +65,7 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
   }, []);
 
   return (
-    <header className="sticky top-0 z-999 flex w-full bg-white drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none">
+    <header className="sticky top-0 z-999 flex w-full bg-white drop-shadow-1 dark:bg-black dark:drop-shadow-none">
       <div className="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
           {/* <!-- Hamburger Toggle BTN --> */}
@@ -118,7 +118,7 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
 
         <div className="hidden sm:block">
           <div className="relative">
-            <button className="absolute left-0 top-1/2 -translate-y-1/2">
+            <button className="absolute left-0 top-1/2 -translate-y-1/2 pl-1">
               <svg
                 className="fill-body hover:fill-primary dark:fill-bodydark dark:hover:fill-primary"
                 width="20"
@@ -145,7 +145,7 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
             <input
               type="text"
               placeholder="Type to search..."
-              className="w-full bg-transparent pl-9 pr-4 text-black dark:text-white font-medium focus:outline-none xl:w-125"
+              className="w-full bg-transparent pl-9 pr-4 pt-1 pb-1 text-black dark:text-white font-medium focus:outline-none xl:w-125 rounded-xl border border-stroke dark:border-strokedark"
               onChange={handleInputChange}
               value={searchTerm}
             />

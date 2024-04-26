@@ -18,11 +18,11 @@ const CardDataStats: React.FC<CardDataStatsProps> = ({ title, total, rate, child
 
   return (
     <div
-      className="relative flex flex-col justify-center rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark"
+      className="relative flex flex-col justify-center rounded-xl border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-black dark:bg-black"
       style={{ height }}
     >
       {/* Left-hand color strip */}
-      <div className="absolute left-0 h-full bg-black" style={{ width: "21%" }}></div>
+      <div className="absolute left-0 h-full bg-stockwaveblue dark:bg-boxdark rounded-l-xl" style={{ width: "21%" }}></div>
 
       <div className="relative flex justify-center items-center mb-4">
         <div className="absolute top-1/2 2xl:left-0 -left-4">{children}</div>

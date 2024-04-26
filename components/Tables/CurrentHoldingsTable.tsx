@@ -102,7 +102,7 @@ const CurrentHoldingsTable: React.FC<TableProps> = ({ tableData, additionalTable
   useEffect(() => {}, [tableData, additionalTableData, deleteItemsFromAdditionalTable]);
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+    <div className="rounded-xl border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-strokedark dark:bg-black sm:px-7.5 xl:pb-1">
       <div
         style={{
           display: "flex",
@@ -115,7 +115,7 @@ const CurrentHoldingsTable: React.FC<TableProps> = ({ tableData, additionalTable
         </h4>
         <button
           onClick={openModal}
-          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-black py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+          className="inline-flex items-center justify-center gap-2.5 rounded-md bg-stockwaveblue dark:bg-boxdark py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 dark:hover:bg-opacity-70 lg:px-8 xl:px-10"
         >
           <span>
             <svg xmlns="http://www.w3.org/2000/svg" className="fill-current" width="20" height="20" viewBox="0 0 448 512">
@@ -152,7 +152,7 @@ const CurrentHoldingsTable: React.FC<TableProps> = ({ tableData, additionalTable
         )}
       </div>
       <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-md bg-black font-medium text-white text-center  dark:bg-meta-4 sm:grid-cols-9">
+        <div className="grid grid-cols-3 rounded-md bg-stockwaveblue   font-medium text-white text-center  dark:bg-boxdark sm:grid-cols-9">
           <div className="p-2.5 xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">Stocks</h5>
           </div>
@@ -197,13 +197,17 @@ const CurrentHoldingsTable: React.FC<TableProps> = ({ tableData, additionalTable
               <div
                 className="flex-shrink-0"
                 style={{
-                  height: "40px",
+                  height: "50px",
+                  width: "50px",
                   display: "flex",
                   alignItems: "center",
+                  borderRadius: "0.25rem", // Adjust the value for the desired rounding
+                  overflow: "hidden", // Ensures the image stays within the rounded boundaries
                 }}
               >
-                <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} />
+                <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} style={{ width: "100%", height: "100%" }} />
               </div>
+
               <p
                 className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
               >

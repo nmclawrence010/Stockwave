@@ -51,12 +51,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <aside
       ref={sidebar}
-      className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
+      className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-stockwaveblue duration-300 ease-linear dark:bg-black lg:static lg:translate-x-0 ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
       {/* <!-- SIDEBAR HEADER --> */}
-      <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
+      <div className="flex items-center justify-center px-6 pt-5.5 lg:pt-6.5 lg:px-6">
         <Link href="/" className="flex items-center">
           {" "}
           {/* Added 'items-center' class here */}
@@ -64,11 +64,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             width={450}
             height={450}
             className="w-14 h-10 lg:w-18 lg:h-18 inline-block"
-            src={"/images/logo/Stockwavelogo.png"}
+            src={"/images/logo/sidebarlogo.png"}
             priority={true}
             alt="Logo"
+            style={{ width: "120px", height: "120px" }} // Adjust width and height here
           />
-          <span className="inline-block text-white ml-2 font-bold text-2xl leading-18 sm:leading-[3rem]">Stockwave</span>
         </Link>
 
         <button
@@ -104,8 +104,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <Link
                         href=""
-                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                          (pathname === "/" || pathname.includes("dashboard")) && "bg-graydark dark:bg-meta-4"
+                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-stockwaveblue3 dark:hover:bg-meta-4 ${
+                          (pathname === "/" || pathname.includes("dashboard")) && "bg-stockwaveblue2 dark:bg-meta-4"
                         }`}
                         onClick={(e) => {
                           e.preventDefault();
