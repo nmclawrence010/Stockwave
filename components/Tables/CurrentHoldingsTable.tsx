@@ -102,7 +102,7 @@ const CurrentHoldingsTable: React.FC<TableProps> = ({ tableData, additionalTable
   useEffect(() => {}, [tableData, additionalTableData, deleteItemsFromAdditionalTable]);
 
   return (
-    <div className="rounded-xl border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-strokedark dark:bg-black sm:px-7.5 xl:pb-1">
+    <div className="rounded-xl border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-black dark:bg-black sm:px-7.5 xl:pb-1">
       <div
         style={{
           display: "flex",

@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <UserProvider>
         <body suppressHydrationWarning={true}>
-          <div className="dark:bg-boxdark-2 dark:text-bodydark">
+          <div className="dark:bg-simplybackground dark:text-bodydark">
             {loading ? (
               <Loader />
             ) : (

@@ -153,7 +153,7 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
             {filteredOptions.length > 0 && (
               <ul
                 ref={dropdownRef}
-                className="absolute z-10 w-[500px] top-12 border-t-0 lg:w-[800px] mt-1  bg-white border shadow-lg max-h-80 overflow-y-auto"
+                className="absolute z-10 w-[500px] top-12 border-t-0 lg:w-[800px] mt-1  bg-white border shadow-lg max-h-80 overflow-y-auto rounded-md"
               >
                 {filteredOptions.map((option) => (
                   <li
