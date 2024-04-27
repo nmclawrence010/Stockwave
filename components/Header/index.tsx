@@ -145,7 +145,7 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
             <input
               type="text"
               placeholder="Type to search..."
-              className="w-full bg-transparent pl-9 pr-4 pt-1 pb-1 text-black dark:text-white font-medium focus:outline-none xl:w-125 rounded-xl border border-stroke dark:border-strokedark"
+              className="w-full bg-boxdark pl-9 pr-4 pt-2 pb-2 text-black dark:text-white font-medium focus:outline-none xl:w-125 rounded-lg dark:border-strokedark"
               onChange={handleInputChange}
               value={searchTerm}
             />
@@ -153,12 +153,12 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
             {filteredOptions.length > 0 && (
               <ul
                 ref={dropdownRef}
-                className="absolute z-10 w-[500px] top-12 border-t-0 lg:w-[800px] mt-1  bg-white border shadow-lg max-h-80 overflow-y-auto rounded-md"
+                className="absolute z-10 w-[500px] top-12 border-t-0 lg:w-[800px] mt-1  bg-boxdark border shadow-lg max-h-80 overflow-y-auto rounded-b-md"
               >
                 {filteredOptions.map((option) => (
                   <li
                     key={option.symbol}
-                    className="py-1 px-3 cursor-pointer bg-white hover:bg-black hover:text-white dark:bg-black dark:hover:bg-bodydark2 dark:hover:text-black"
+                    className="py-1 px-3 cursor-pointer bg-white hover:bg-black hover:text-white dark:bg-black dark:hover:bg-primary dark:hover:text-white"
                     onClick={() => handleOptionClick(option)}
                   >
                     <span>
@@ -174,7 +174,7 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
         <div className="flex items-center gap-3 2xsm:gap-7">
           <ul className="flex items-center gap-2 2xsm:gap-4">
             {/* <!-- Dark Mode Toggler --> */}
-            <DarkModeSwitcher />
+            {/* <!-- <DarkModeSwitcher /> --> */}
             {/* <!-- Dark Mode Toggler --> */}
 
             {/* <!-- Notification Menu Area --> */}
