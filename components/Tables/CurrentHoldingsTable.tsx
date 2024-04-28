@@ -102,17 +102,9 @@ const CurrentHoldingsTable: React.FC<TableProps> = ({ tableData, additionalTable
   useEffect(() => {}, [tableData, additionalTableData, deleteItemsFromAdditionalTable]);
 
   return (
-    <div className="rounded-xl border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-black dark:bg-black sm:px-7.5 xl:pb-1">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h4 className="mb-6 text-title-xl2 font-semibold text-black dark:text-white" style={{ paddingRight: "30px", marginTop: "20px" }}>
-          Current Holdings
-        </h4>
+    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-simplybackground dark:bg-simplybackground sm:px-7.5 xl:pb-1">
+      <div className="border-b border-stroke dark:border-strokedark flex justify-between items-center">
+        <h4 className="mb-1 mt-4.5 text-title-xl2 font-semibold text-black dark:text-white">Current Holdings</h4>
         <button
           onClick={openModal}
           className="inline-flex items-center justify-center gap-2.5 rounded-md bg-stockwaveblue dark:bg-boxdark py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 dark:hover:bg-opacity-70 lg:px-8 xl:px-10"
@@ -152,80 +144,57 @@ const CurrentHoldingsTable: React.FC<TableProps> = ({ tableData, additionalTable
         )}
       </div>
       <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-md bg-stockwaveblue   font-medium text-white text-center  dark:bg-boxdark sm:grid-cols-9">
-          <div className="p-2.5 xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Stocks</h5>
+        <div className="mb-1 justify-evenly grid grid-cols-3 rounded-md bg-stockwaveblue font-medium text-white text-center dark:text-bodydark2 dark:bg-simplybackground sm:grid-cols-9">
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">Stock</h5>
           </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Current Price</h5>
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">Current Price</h5>
           </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Today&apos;s Change</h5>
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">Today&apos;s Change</h5>
           </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">No. of Shares</h5>
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">No. of Shares</h5>
           </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Average Cost</h5>
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">Average Cost</h5>
           </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Market Value</h5>
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">Value</h5>
           </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Total Gain/Loss</h5>
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">P&L</h5>
           </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Total Gain/Loss %</h5>
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">P&L %</h5>
           </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base"></h5>
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base"></h5>
           </div>
         </div>
 
         {tableData.map((brand, key) => (
           <div
             className={`grid grid-cols-3 sm:grid-cols-9 ${
-              key === tableData.length - 1 ? "" : "border-b border-stroke dark:border-strokedark"
+              key === tableData.length - 0 ? "" : "rounded-xl border-b mb-3 border-stroke dark:border-strokedark dark:bg-boxdark"
             }`}
             key={key}
-            style={{
-              backgroundColor: highlightedRow === brand.TransactionID ? "#E5E7EB" : "inherit", // Change the background color based on the highlightedRow state
-              color: highlightedRow === brand.TransactionID ? "text-black" : "inherit", // Change the text color to black in the highlighted row with !important
-            }}
           >
-            <div className="flex items-center gap-3 p-2.5 xl:p-5">
-              <div
-                className="flex-shrink-0"
-                style={{
-                  height: "50px",
-                  width: "50px",
-                  display: "flex",
-                  alignItems: "center",
-                  borderRadius: "0.25rem", // Adjust the value for the desired rounding
-                  overflow: "hidden", // Ensures the image stays within the rounded boundaries
-                }}
-              >
-                <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} style={{ width: "100%", height: "100%" }} />
+            <Link href={`/stocks/${brand.Ticker}`}>
+              <div className="group flex items-center gap-3 p-2.5 xl:p-5">
+                <div className="flex-shrink-0 items-center h-45px w-45px flex rounded-md overflow-hidden ring-4 ring-boxdark group-hover:ring-stockwaveyellow">
+                  <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} style={{ width: "100%", height: "100%" }} />
+                </div>
+                <p className="text-lg group-hover:text-stockwaveyellow group-hover:underline underline-offset-2 text-black dark:text-white font-bold">
+                  <span className="ml-3">{brand.Ticker}</span>
+                </p>
               </div>
-
-              <p
-                className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-              >
-                <Link href={`/stocks/${brand.Ticker}`}>
-                  <b>
-                    <span className="text-blue-500 hover:underline">{brand.Ticker}</span>
-                  </b>
-                </Link>
-              </p>
-            </div>
+            </Link>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <b>
-                <p
-                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black" : "text-black"} sm:block ${brand.ChangeInPrice < 0 ? "text-meta-1" : "text-meta-3"}`}
-                >
-                  {Number(brand.CurrentPrice).toFixed(2)}
-                </p>
+                <p className={brand.ChangeInPrice < 0 ? "text-meta-1" : "text-meta-3"}>{Number(brand.CurrentPrice).toFixed(2)}</p>
               </b>
             </div>
 
@@ -240,33 +209,17 @@ const CurrentHoldingsTable: React.FC<TableProps> = ({ tableData, additionalTable
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <b>
-                <p
-                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-                >
-                  {Number.isInteger(brand.NoShares) ? brand.NoShares : brand.NoShares.toFixed(3)}
-                </p>
-              </b>
+              <p className="text-black dark:text-white font-bold">
+                {Number.isInteger(brand.NoShares) ? brand.NoShares : brand.NoShares.toFixed(3)}
+              </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <b>
-                <p
-                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-                >
-                  {brand.AverageCost.toFixed(2)}
-                </p>
-              </b>
+              <p className="text-black dark:text-white font-bold">{brand.AverageCost.toFixed(2)}</p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <b>
-                <p
-                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-                >
-                  {brand.MarketValue.toFixed(2)}
-                </p>
-              </b>
+              <p className="text-black dark:text-white font-bold">{brand.MarketValue.toFixed(2)}</p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">

@@ -177,35 +177,35 @@ const SellsTableV2: React.FC<TableProps> = ({ tableData, additionalTableData, on
             }`}
             key={key}
           >
-            <div className="flex items-center gap-3 p-2.5 xl:p-5">
-              <div className="flex-shrink-0 items-center h-45px w-45px flex rounded-lg overflow-hidden">
-                <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} style={{ width: "100%", height: "100%" }} />
-              </div>
-              <p className=" text-lg dark:hover:text-stockwaveyellowdark text-black dark:text-white font-medium">
-                <Link href={`/stocks/${brand.Ticker}`}>
+            <Link href={`/stocks/${brand.Ticker}`}>
+              <div className="group flex items-center gap-3 p-2.5 xl:p-5">
+                <div className="flex-shrink-0 items-center h-45px w-45px flex rounded-md overflow-hidden ring-4 ring-boxdark group-hover:ring-stockwaveyellow">
+                  <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} style={{ width: "100%", height: "100%" }} />
+                </div>
+                <p className="text-lg group-hover:text-stockwaveyellow group-hover:underline underline-offset-2 text-black dark:text-white font-bold">
                   <span className="ml-3">{brand.Ticker}</span>
-                </Link>
-              </p>
+                </p>
+              </div>
+            </Link>
+
+            <div className="flex items-center justify-center p-2.5 xl:p-5">
+              <p className="text-black dark:text-white font-bold">{brand.AverageSellPrice.toFixed(2)}</p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white font-medium">{brand.AverageSellPrice}</p>
-            </div>
-
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white font-medium">
+              <p className="text-black dark:text-white font-bold">
                 {Number.isInteger(brand.NoShares) ? brand.NoShares : brand.NoShares.toFixed(3)}
               </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
               <b>
-                <p className="text-black dark:text-white font-medium">{brand.AverageCost.toFixed(2)}</p>
+                <p className="text-black dark:text-white font-bold">{brand.AverageCost.toFixed(2)}</p>
               </b>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white font-medium">{brand.TotalPaid.toFixed(2)}</p>
+              <p className="text-black dark:text-white font-bold">{brand.TotalPaid.toFixed(2)}</p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">

@@ -98,17 +98,9 @@ const DividendsTable: React.FC<TableProps> = ({ tableData, additionalTableData, 
   useEffect(() => {}, [tableData, additionalTableData, deleteItemsFromAdditionalTable]);
 
   return (
-    <div className="rounded-xl border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-black dark:bg-black sm:px-7.5 xl:pb-1 w-[100%]">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h4 className="mb-6 text-title-xl2 font-semibold text-black dark:text-white" style={{ paddingRight: "30px", marginTop: "20px" }}>
-          Dividends Received
-        </h4>
+    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-simplybackground dark:bg-simplybackground sm:px-7.5 xl:pb-1">
+      <div className="border-b border-stroke dark:border-strokedark flex justify-between items-center">
+        <h4 className="mb-1 mt-4.5 text-title-xl2 font-semibold text-black dark:text-white">Dividends</h4>
         <button
           onClick={openModal}
           className="inline-flex items-center justify-center gap-2.5 rounded-md bg-stockwaveblue dark:bg-boxdark py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 dark:hover:bg-opacity-70 lg:px-8 xl:px-10"
@@ -153,57 +145,35 @@ const DividendsTable: React.FC<TableProps> = ({ tableData, additionalTableData, 
         )}
       </div>
       <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-md bg-stockwaveblue font-medium text-white text-center  dark:bg-boxdark sm:grid-cols-4">
-          <div className="p-2.5 xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Stock</h5>
+        <div className="mb-1 justify-evenly grid grid-cols-3 rounded-md bg-stockwaveblue font-medium text-white text-center dark:text-bodydark2 dark:bg-simplybackground sm:grid-cols-4">
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">Stock</h5>
           </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Date</h5>
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">Date</h5>
           </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">Amount</h5>
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">Amount</h5>
           </div>
         </div>
 
         {tableData.map((brand, key) => (
           <div
             className={`grid grid-cols-3 sm:grid-cols-4 ${
-              key === tableData.length - 1 ? "" : "border-b border-stroke dark:border-strokedark"
+              key === tableData.length - 0 ? "" : "rounded-xl border-b mb-3 border-stroke dark:border-strokedark dark:bg-boxdark"
             }`}
             key={key}
-            style={{
-              backgroundColor: highlightedRow === brand.TransactionID ? "#e5e7eb" : "inherit", // Change the background color based on the highlightedRow state
-              color: highlightedRow === brand.TransactionID ? "black !important" : "inherit", // Change the text color to black in the highlighted row with !important
-            }}
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5 justify-center">
-              <b>
-                <p
-                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium "} sm:block`}
-                >
-                  {brand.Ticker}
-                </p>
-              </b>
+              <p className="text-black dark:text-white font-bold">{brand.Ticker}</p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <b>
-                <p
-                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-                >
-                  {brand.DateBought}
-                </p>
-              </b>
+              <p className="text-black dark:text-white font-bold">{brand.DateBought}</p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <b>
-                <p
-                  className={`hidden ${highlightedRow === brand.TransactionID ? "text-black !important" : "text-black dark:text-white font-medium"} sm:block`}
-                >
-                  {brand.Amount}
-                </p>
-              </b>
+              <p className="text-black dark:text-white font-bold">{brand.Amount}</p>
             </div>
 
             <div className="flex items-center space-x-3.5">

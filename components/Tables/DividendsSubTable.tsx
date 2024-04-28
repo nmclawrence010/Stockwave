@@ -50,8 +50,7 @@ const DividendsSubTable: React.FC<AdditionalTableProps> = ({
   useEffect(() => {}, [tableData]);
 
   return (
-    <div className="rounded-sm border border-stroke bg-white pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:pb-1">
-      <div style={{ display: "flex", alignItems: "center" }}></div>
+    <div className="rounded-b-xl border-t border-stroke bg-white pb-2.5 dark:border-strokedark dark:bg-boxdark xl:pb-1">
       <div>
         {isOpen2 && (
           <DeleteModal

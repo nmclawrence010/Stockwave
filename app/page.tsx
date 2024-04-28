@@ -540,15 +540,6 @@ function Home() {
               onDeleteSuccess={refreshDataCurrentHoldings}
             />
           </div>
-
-          <div className="col-span-12 xl:col-span-8">
-            <DividendsTable
-              tableData={tableDataDividends}
-              additionalTableData={additionalTableDataDividends}
-              onSubmitSuccess={refreshDataDividends}
-              onDeleteSuccess={refreshDataDividends}
-            />
-          </div>
         </div>
       </React.StrictMode>
     </>

@@ -53,7 +53,7 @@ const CurrentHoldingsSubTable: React.FC<AdditionalTableProps> = ({
   //   console.log("transactionID:", transactionID);
 
   return (
-    <div className=" bg-white pb-2.5 dark:border-strokedark dark:bg-black xl:pb-1">
+    <div className="rounded-b-xl border-t border-stroke bg-white pb-2.5 dark:border-strokedark dark:bg-boxdark xl:pb-1">
       <div>
         {isOpen2 && (
           <DeleteModal
@@ -70,7 +70,7 @@ const CurrentHoldingsSubTable: React.FC<AdditionalTableProps> = ({
         <div
           key={index}
           className={`grid grid-cols-3 sm:grid-cols-9 ${
-            index === filteredTableData.length - 1 ? "" : "border-b border-stroke dark:border-strokedark"
+            index === filteredTableData.length - 1 ? "" : "border-stroke dark:border-strokedark"
           }`}
         >
           <div className="flex items-center gap-3 p-2.5 xl:p-5">

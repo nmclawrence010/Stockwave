@@ -70,7 +70,7 @@ const SellsSubTableV2: React.FC<AdditionalTableProps> = ({
         <div
           key={index}
           className={`grid grid-cols-3 sm:grid-cols-8 ${
-            index === filteredTableData.length - 1 ? "" : "border-b border-stroke dark:border-strokedark"
+            index === filteredTableData.length - 1 ? "" : " border-stroke dark:border-strokedark"
           }`}
         >
           <div className="flex items-center gap-3 p-2.5 xl:p-5">

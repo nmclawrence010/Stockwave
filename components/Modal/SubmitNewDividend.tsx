@@ -82,7 +82,7 @@ export default function DividendModal({ openModal, closeModal, userId, onSubmitS
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-black border dark:border-form-strokedark p-6 text-left align-middle shadow-xl transition-all">
                   <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
                     Add Dividend Payment
                   </Dialog.Title>
@@ -91,7 +91,7 @@ export default function DividendModal({ openModal, closeModal, userId, onSubmitS
                       <form onSubmit={handleSubmit}>
                         <div className="p-6.5">
                           <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="mb-4.5">
+                            <div className="mb-4.5 w-full xl:w-1/2 flex-grow">
                               <label className="mb-2.5 block text-black dark:text-white">
                                 Ticker Symbol <span className="text-meta-1">*</span>
                               </label>
@@ -99,8 +99,8 @@ export default function DividendModal({ openModal, closeModal, userId, onSubmitS
                                 name="stockTicker"
                                 value={formData.stockTicker}
                                 onChange={handleInputChange}
-                                placeholder="Enter the stock ticker"
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                                placeholder="AAPL, MSFT, etc"
+                                className="dark:text-white w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium placeholder:font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                               />
                             </div>
                             <div className="w-full xl:w-1/2">
@@ -113,7 +113,7 @@ export default function DividendModal({ openModal, closeModal, userId, onSubmitS
                                 onChange={handleInputChange}
                                 type="text"
                                 placeholder=""
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                                className="dark:text-white w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium placeholder:font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                               />
                             </div>
                           </div>

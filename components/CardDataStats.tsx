@@ -17,10 +17,7 @@ const CardDataStats: React.FC<CardDataStatsProps> = ({ title, total, rate, child
   const formattedTotal = totalNumber < 0 ? `-$${Math.abs(totalNumber)}` : `$${totalNumber}`;
 
   return (
-    <div
-      className="relative flex flex-col justify-center rounded-xl border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-black dark:bg-black"
-      style={{ height }}
-    >
+    <div className="relative flex flex-col justify-center rounded-xl border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-black dark:bg-black">
       {/* Left-hand color strip */}
       <div className="absolute left-0 h-full bg-stockwaveblue dark:bg-boxdark rounded-l-xl" style={{ width: "21%" }}></div>
 
