@@ -96,6 +96,28 @@ export async function fetchSPX() {
   return data;
 }
 
+export async function fetchSPX52Weekly() {
+  const res = await fetch(
+    "https://api.twelvedata.com/time_series?apikey=" +
+      process.env.NEXT_PUBLIC_TWELVE_DATA_API_KEY +
+      "&interval=1week&symbol=SPX&outputsize=52&format=JSON",
+  );
+  const data = await res.json();
+  return data.values;
+}
+
+export async function fetchStock52Weekly(ticker: string) {
+  const res = await fetch(
+    "https://api.twelvedata.com/time_series?apikey=" +
+      process.env.NEXT_PUBLIC_TWELVE_DATA_API_KEY +
+      "&interval=1week&symbol=" +
+      ticker +
+      "&outputsize=52&format=JSON",
+  );
+  const data = await res.json();
+  return data.values;
+}
+
 //Fetching a stocks price for the last 12 months
 export async function fetchStockMonthly(ticker: string) {
   var m = new Date().getMonth() + 1;

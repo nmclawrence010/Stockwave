@@ -164,6 +164,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 pathname === "/" && "text-white"
                               } `}
                             >
+                              Home
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/current-holdings"
+                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                                pathname === "/current-holdings" && "text-white"
+                              } `}
+                            >
                               Current Portfolio
                             </Link>
                           </li>

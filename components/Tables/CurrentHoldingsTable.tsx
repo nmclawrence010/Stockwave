@@ -104,7 +104,7 @@ const CurrentHoldingsTable: React.FC<TableProps> = ({ tableData, additionalTable
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-simplybackground dark:bg-simplybackground sm:px-7.5 xl:pb-1">
       <div className="border-b border-stroke dark:border-strokedark flex justify-between items-center">
-        <h4 className="mb-1 mt-4.5 text-title-xl2 font-semibold text-black dark:text-white">Current Holdings</h4>
+        <h4 className="mb-1 mt-4.5 text-title-xl2 font-semibold text-black dark:text-white">My Stocks</h4>
         <button
           onClick={openModal}
           className="inline-flex items-center justify-center gap-2.5 rounded-md bg-stockwaveblue dark:bg-boxdark py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 dark:hover:bg-opacity-70 lg:px-8 xl:px-10"
