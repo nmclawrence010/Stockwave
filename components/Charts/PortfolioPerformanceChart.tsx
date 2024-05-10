@@ -31,13 +31,15 @@ const PortfolioPerformanceChart: React.FC<Props> = ({
       try {
         // Calculate the total value of the portfolio
         const totalMarketValue = unAggregatedData.reduce((total: any, item: any) => total + item.MarketValue, 0);
-
         // Then work out what percentage of the portfolio each stock makes up
         const transactionPercentages = unAggregatedData.map((item: any) => ({
           Ticker: item.Ticker,
           Percentage: (item.MarketValue / totalMarketValue) * 100, // Calculate percentage based on filtered transactions
           DateBought: item.DateBought,
+          NoShares: item.NoShares,
+          AverageCost: item.AverageCost,
         }));
+        //console.log("transactionPercentages:", transactionPercentages);
 
         const aggregatedCloseValues = [];
         const aggregatedCloseValuesSPX = [];
@@ -50,6 +52,14 @@ const PortfolioPerformanceChart: React.FC<Props> = ({
               (week: { datetime: string | number | Date }) => new Date(week.datetime) >= purchaseDate,
             );
             const closeValues = filteredStockData.map((week: any) => parseFloat(week.close));
+
+            // Check if the closeValues array has less than 52 elements
+            if (closeValues.length < 52) {
+              // Replace the last value with the AverageCost
+              closeValues[closeValues.length - 1] = transaction.AverageCost;
+            }
+            //console.log("Close values:", closeValues);
+
             // Calculate differences in reverse order
             const differences = closeValues
               .slice()
@@ -87,7 +97,7 @@ const PortfolioPerformanceChart: React.FC<Props> = ({
         const paddedDifferencesSPX = [...differencesSPX, ...Array(52 - differencesSPX.length).fill(0)];
         aggregatedCloseValuesSPX.push(paddedDifferencesSPX);
 
-        // console.log("Close values:", aggregatedCloseValues);
+        // console.log("aggregatedCloseValues:", aggregatedCloseValues);
         // console.log("Close values SPX:", aggregatedCloseValuesSPX);
 
         // Calculate weighted sum of percentage differences for each week
@@ -103,6 +113,7 @@ const PortfolioPerformanceChart: React.FC<Props> = ({
         }
 
         weightedSums.reverse();
+        //console.log("weightedSums:", weightedSums);
 
         // Calculate percentage change from the last updated value
         const calculatePercentageChange = (value: number, percentageChange: number): number => {
@@ -123,6 +134,7 @@ const PortfolioPerformanceChart: React.FC<Props> = ({
           // Store the updated value
           updatedValues.push(currentValue);
         }
+        //console.log("updatedValues:", updatedValues);
 
         // Adjust updatedValues to represent percentage change from 100
         const adjustedValues = updatedValues.map((value) => Number((Number(value) - 100).toFixed(2)));
@@ -306,35 +318,73 @@ const PortfolioPerformanceChart: React.FC<Props> = ({
     <div className="col-span-12 rounded-xl border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-black dark:bg-black sm:px-7.5 xl:col-span-8">
       <div className="mb-5.5 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h4 className="text-title-sm2 font-bold text-black dark:text-white">Annual Returns</h4>
+          <h4 className="text-title-sm2 font-bold text-black dark:text-white">You vs S&P500 in the previous 12 months</h4>
         </div>
       </div>
 
       <div className="mb-3 flex flex-wrap gap-6">
         <div>
-          <p className="mb-1.5 text-sm font-medium">Invested Value</p>
+          <p className="mb-1.5 text-sm font-medium">Total Current Portfolio Value</p>
           <div className="flex items-center gap-2.5">
             <p className="font-medium text-black dark:text-white">${unrealisedMarketValue.toFixed(2)}</p>
-            <p className="flex items-center gap-1 font-medium text-meta-3">
+            <p className={`flex items-center gap-1 font-medium ${unrealisedPercentage < 0 ? "text-meta-1" : "text-meta-3"}`}>
               {unrealisedPercentage.toFixed(2)}%
-              <svg className="fill-current" width="11" height="8" viewBox="0 0 11 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5.77105 0.0465078L10.7749 7.54651L0.767256 7.54651L5.77105 0.0465078Z" fill="" />
-              </svg>
+              {unrealisedPercentage < 0 ? (
+                <svg className="fill-current" width="11" height="8" viewBox="0 0 11 8" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5.83246 8.41748L0.828662 0.91748L10.8363 0.91748L5.83246 8.41748Z" fill="" />
+                </svg>
+              ) : (
+                <svg className="fill-current" width="11" height="8" viewBox="0 0 11 8" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5.77105 0.0465078L10.7749 7.54651L0.767256 7.54651L5.77105 0.0465078Z" fill="" />
+                </svg>
+              )}
             </p>
           </div>
         </div>
 
         <div>
-          <p className="mb-1.5 text-sm font-medium">Unrealised Returns</p>
+          <p className="mb-1.5 text-sm font-medium">52 Week Return</p>
           <div className="flex items-center gap-2.5">
-            <p className="font-medium text-black dark:text-white">${unrealisedTotal.toFixed(2)}</p>
-            <p className="flex items-center gap-1 font-medium text-meta-3">
-              {state.series.length > 0 && state.series[0].data.length > 0 && (
-                <>{state.series[0].data[state.series[0].data.length - 1][1]}%</>
+            <p className="font-medium text-black dark:text-white">
+              $
+              {(
+                unrealisedMarketValue -
+                unrealisedMarketValue /
+                  (1 +
+                    (state.series.length > 0 &&
+                    state.series[0].data.length > 0 &&
+                    typeof state.series[0].data[state.series[0].data.length - 1][1] === "number"
+                      ? state.series[0].data[state.series[0].data.length - 1][1] / 100
+                      : 0))
+              ).toFixed(2)}
+            </p>
+            <p
+              className={`flex items-center gap-1 font-medium ${
+                state.series.length > 0 &&
+                state.series[0].data.length > 0 &&
+                typeof state.series[0].data[state.series[0].data.length - 1][1] === "number" &&
+                state.series[0].data[state.series[0].data.length - 1][1] < 0
+                  ? "text-meta-1"
+                  : "text-meta-3"
+              }`}
+            >
+              {state.series.length > 0 &&
+                state.series[0].data.length > 0 &&
+                typeof state.series[0].data[state.series[0].data.length - 1][1] === "number" && (
+                  <>{state.series[0].data[state.series[0].data.length - 1][1]}%</>
+                )}
+              {state.series.length > 0 &&
+              state.series[0].data.length > 0 &&
+              typeof state.series[0].data[state.series[0].data.length - 1][1] === "number" &&
+              state.series[0].data[state.series[0].data.length - 1][1] < 0 ? (
+                <svg className="fill-current" width="11" height="8" viewBox="0 0 11 8" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5.83246 8.41748L0.828662 0.91748L10.8363 0.91748L5.83246 8.41748Z" fill="" />
+                </svg>
+              ) : (
+                <svg className="fill-current" width="11" height="8" viewBox="0 0 11 8" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5.77105 0.0465078L10.7749 7.54651L0.767256 7.54651L5.77105 0.0465078Z" fill="" />
+                </svg>
               )}
-              <svg className="fill-current" width="11" height="8" viewBox="0 0 11 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5.77105 0.0465078L10.7749 7.54651L0.767256 7.54651L5.77105 0.0465078Z" fill="" />
-              </svg>
             </p>
           </div>
         </div>

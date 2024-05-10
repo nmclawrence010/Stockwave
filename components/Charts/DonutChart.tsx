@@ -13,65 +13,10 @@ interface DonutChartProps {
     labels: string[];
     series: number[];
   };
+  totalValue?: number;
 }
 
-const options: ApexOptions = {
-  chart: {
-    type: "donut",
-  },
-  colors: [
-    "#10B981",
-    "#375E83",
-    "#259AE6",
-    "#FFA70B",
-    "#FF715B",
-    "#4C5B5C",
-    "#9191E9",
-    "#F487B6",
-    "#DB7F67",
-    "#5D2A42",
-    "#93E1D8",
-    "#AA4465",
-    "#462255",
-  ],
-  labels: ["Remote", "Hybrid", "Onsite", "Leave"],
-  legend: {
-    show: false,
-    position: "bottom",
-  },
-
-  plotOptions: {
-    pie: {
-      donut: {
-        size: "65%",
-        background: "transparent",
-      },
-    },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  responsive: [
-    {
-      breakpoint: 2600,
-      options: {
-        chart: {
-          width: 380,
-        },
-      },
-    },
-    {
-      breakpoint: 640,
-      options: {
-        chart: {
-          width: 200,
-        },
-      },
-    },
-  ],
-};
-
-const DonutChart: React.FC<DonutChartProps> = ({ donutData }) => {
+const DonutChart: React.FC<DonutChartProps> = ({ donutData, totalValue }) => {
   // Calculate the total sum of MarketValue
   const totalMarketValue = donutData.series.reduce((sum, value) => sum + value, 0);
 
@@ -86,6 +31,89 @@ const DonutChart: React.FC<DonutChartProps> = ({ donutData }) => {
   const percentageSeries = donutData.series.map((value) =>
     ((value / donutData.series.reduce((acc, cur) => acc + cur, 0)) * 100).toFixed(2),
   );
+
+  const options: ApexOptions = {
+    chart: {
+      type: "donut",
+    },
+    colors: ["#f43f5e", "#d946ef", "#8b5cf6", "#3b82f6", "#06b6d4", "#10b981", "#eab308", "#f97316", "#a1ed99", "#9e315f"],
+    labels: ["Remote", "Hybrid", "Onsite", "Leave"],
+    legend: {
+      show: false,
+      position: "bottom",
+    },
+    plotOptions: {
+      pie: {
+        expandOnClick: true,
+        donut: {
+          size: "65%",
+          background: "transparent",
+          labels: {
+            show: true,
+            name: {
+              show: true,
+              fontSize: "22px",
+              fontFamily: "Helvetica, Arial, sans-serif",
+              fontWeight: 600,
+              color: undefined,
+              offsetY: -10,
+              formatter: function (val) {
+                return val;
+              },
+            },
+            value: {
+              show: true,
+              fontSize: "16px",
+              fontFamily: "Helvetica, Arial, sans-serif",
+              fontWeight: 400,
+              color: undefined,
+              offsetY: 16,
+              formatter: function (val) {
+                return val + "%";
+              },
+            },
+            total: {
+              show: true,
+              showAlways: false,
+              label: "Total",
+              fontSize: "22px",
+              fontFamily: "Helvetica, Arial, sans-serif",
+              fontWeight: 600,
+              color: "#373d3f",
+              formatter: function (w) {
+                const totalVal = totalValue !== undefined ? totalValue : w.globals.seriesTotals.reduce((a: any, b: any) => a + b, 0);
+                return totalVal.toFixed(2); // Round the total value to two decimal places
+              },
+            },
+          },
+        },
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    tooltip: {
+      enabled: false,
+    },
+    responsive: [
+      {
+        breakpoint: 2600,
+        options: {
+          chart: {
+            width: 380,
+          },
+        },
+      },
+      {
+        breakpoint: 640,
+        options: {
+          chart: {
+            width: 200,
+          },
+        },
+      },
+    ],
+  };
 
   return (
     <div className="col-span-12 rounded-xl border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-black dark:bg-black sm:px-7.5 xl:col-span-4">

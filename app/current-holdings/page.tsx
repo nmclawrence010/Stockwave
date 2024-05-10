@@ -498,6 +498,7 @@ function CurrentHoldings() {
               labels: donutDataLabels,
               series: donutData.map((item) => item.MarketValue),
             }}
+            totalValue={unrealisedmarketValue}
           />
           <div className="col-span-12 xl:col-span-12">
             <CurrentHoldingsTable

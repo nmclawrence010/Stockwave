@@ -118,7 +118,7 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
 
         <div className="hidden sm:block">
           <div className="relative">
-            <button className="absolute left-0 top-1/2 -translate-y-1/2 pl-1">
+            <button className="absolute left-0 top-1/2 -translate-y-1/2 pl-3">
               <svg
                 className="fill-body hover:fill-primary dark:fill-bodydark dark:hover:fill-primary"
                 width="20"
@@ -145,7 +145,7 @@ const Header = (props: { sidebarOpen: string | boolean | undefined; setSidebarOp
             <input
               type="text"
               placeholder="Type to search..."
-              className="w-full bg-boxdark pl-9 pr-4 pt-2 pb-2 text-black dark:text-white font-medium focus:outline-none xl:w-125 rounded-lg dark:border-strokedark"
+              className="w-full bg-boxdark pl-10 pr-4 pt-2 pb-2 text-black dark:text-white font-medium focus:outline-none xl:w-125 rounded-lg dark:border-strokedark border-2"
               onChange={handleInputChange}
               value={searchTerm}
             />
