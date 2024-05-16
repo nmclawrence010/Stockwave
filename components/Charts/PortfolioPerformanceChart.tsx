@@ -314,19 +314,23 @@ const PortfolioPerformanceChart: React.FC<Props> = ({
     ],
   };
 
+  // For the all time nominal return
+  const value = parseFloat((unrealisedMarketValue * (0.01 * unrealisedPercentage)).toFixed(2));
+  const formattedValue = value < 0 ? `-$${Math.abs(value).toFixed(2)}` : `$${value.toFixed(2)}`;
+
   return (
     <div className="col-span-12 rounded-xl border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-black dark:bg-black sm:px-7.5 xl:col-span-8">
-      <div className="mb-5.5 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h4 className="text-title-sm2 font-bold text-black dark:text-white">You vs S&P500 in the previous 12 months</h4>
-        </div>
-      </div>
-
       <div className="mb-3 flex flex-wrap gap-6">
-        <div>
-          <p className="mb-1.5 text-sm font-medium">Total Current Portfolio Value</p>
+        <div className="border-l-2 pl-2">
+          <p className="mb-1.5 text-sm font-medium">Portfolio Value</p>
           <div className="flex items-center gap-2.5">
             <p className="font-medium text-black dark:text-white">${unrealisedMarketValue.toFixed(2)}</p>
+          </div>
+        </div>
+        <div className="border-l-2 pl-2">
+          <p className="mb-1.5 text-sm font-medium">Total Return</p>
+          <div className="flex items-center gap-2.5">
+            <p className="font-medium text-black dark:text-white">{formattedValue}</p>
             <p className={`flex items-center gap-1 font-medium ${unrealisedPercentage < 0 ? "text-meta-1" : "text-meta-3"}`}>
               {unrealisedPercentage.toFixed(2)}%
               {unrealisedPercentage < 0 ? (
@@ -342,7 +346,7 @@ const PortfolioPerformanceChart: React.FC<Props> = ({
           </div>
         </div>
 
-        <div>
+        <div className="border-l-2 pl-2">
           <p className="mb-1.5 text-sm font-medium">52 Week Return</p>
           <div className="flex items-center gap-2.5">
             <p className="font-medium text-black dark:text-white">

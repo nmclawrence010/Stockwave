@@ -75,7 +75,7 @@ const DonutChart: React.FC<DonutChartProps> = ({ donutData, totalValue }) => {
             total: {
               show: true,
               showAlways: false,
-              label: "Total",
+              label: "TOTAL",
               fontSize: "22px",
               fontFamily: "Helvetica, Arial, sans-serif",
               fontWeight: 600,
