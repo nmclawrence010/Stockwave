@@ -15,28 +15,43 @@ import { fetchStockQuote } from "@/lib/StockAPIFunctionality";
 import { getDatabaseItems, getDatabaseItemsDividends, getDatabaseItemsSell } from "@/lib/AWSFunctionality";
 
 import { STOCK } from "@/types/stocks";
-import { STOCKSELL } from "@/types/stockSell";
 import { PORTFOLIORECORD } from "@/types/userPortfolio";
-import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
 import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
 
 async function fetchAndCalculateStockData() {
   const dbData: STOCK[] = [];
-  const dbDataSells: STOCKSELL[] = [];
   const dbDataDividends: PORTFOLIORECORDEXTRA[] = [];
 
   //For the current holdings table
   await getDatabaseItems(dbData);
-  const promises = dbData.map(async (element) => {
-    // Create an array of promises for fetchStockData
-    const stockData = await fetchStockQuote(element.Ticker);
+  console.log("dbData", dbData);
 
-    //Extracting some data from our quote data call
-    const currentPrice = stockData.close;
-    const changeInPrice = stockData.change;
-    const changeInPricePercent = stockData.percent_change;
+  const cache: { [key: string]: any } = {}; // Initialize a cache object
+  const results: any[] = [];
+
+  const fetchAndCacheStockData = async (ticker: string) => {
+    if (cache[ticker] === undefined) {
+      const stockData = await fetchStockQuote(ticker);
+      cache[ticker] = stockData;
+      console.log("IFcache[ticker]", cache[ticker]);
+    } else {
+      console.log("ELSEcache[ticker]", cache[ticker]);
+    }
+
+    const { close: currentPrice, change: changeInPrice, percent_change: changeInPricePercent } = cache[ticker];
 
     return {
+      ticker,
+      currentPrice,
+      changeInPrice,
+      changeInPricePercent,
+    };
+  };
+
+  for (const element of dbData) {
+    const { ticker, currentPrice, changeInPrice, changeInPricePercent } = await fetchAndCacheStockData(element.Ticker);
+
+    results.push({
       Ticker: element.Ticker,
       NoShares: element.NoShares,
       AverageCost: element.AverageCost,
@@ -49,28 +64,12 @@ async function fetchAndCalculateStockData() {
       LogoURL: element.LogoURL,
       GainLoss: parseFloat(currentPrice) * element.NoShares - element.AverageCost * element.NoShares,
       TransactionID: element.TransactionID,
-    };
-  });
+    });
+  }
 
-  const results = await Promise.all(promises); // Wait for all promises to resolve
-
-  //For the sell table
-  await getDatabaseItemsSell(dbDataSells);
-  const promisesSell = dbDataSells.map(async (element) => {
-    return {
-      Ticker: element.Ticker,
-      NoShares: element.NoShares,
-      AverageCost: element.AverageCost,
-      AverageSellPrice: element.AverageSellPrice,
-      DateBought: element.DateBought,
-      LogoURL: element.LogoURL,
-      TotalPaid: element.AverageSellPrice * element.NoShares,
-      GainLoss: element.AverageSellPrice * element.NoShares - element.AverageCost * element.NoShares,
-      TransactionID: element.TransactionID,
-    };
-  });
-
-  const resultsSells = await Promise.all(promisesSell);
+  //const results = await Promise.all(promises); // Wait for all promises to resolve
+  //console.log("Final results:", results);
+  //console.log("Cache content:", cache);
 
   //For the sell table
   await getDatabaseItemsDividends(dbDataDividends);
@@ -95,25 +94,13 @@ async function fetchAndCalculateStockData() {
   //For the overall gain on the portfolio performance chart
   const unrealisedMarketValue = results.reduce((sum, result) => sum + result.MarketValue, 0);
 
-  // Realised (Summing the Gain/Loss from each transaction in the Sell Table)
-  const realisedTotal = resultsSells.reduce((sum, result) => sum + result.GainLoss, 0);
-
   // Summing the dividends
   const dividendTotal = resultsDividends.reduce((sum, result) => sum + result.Amount, 0);
 
-  // Creating a value for realised that includes dividends
-  const realisedTotalWithDividends = realisedTotal + dividendTotal;
-
-  // Adding all three together for the total gain/loss
-  const overallTotal = unrealisedTotal + realisedTotal + dividendTotal;
-
   // Calculating the percentage changes for the totals
   const unrealisedTotalPaid = results.reduce((sum, result) => sum + result.TotalPaid, 0);
-  const realisedTotalPaid = resultsSells.reduce((sum, result) => sum + result.TotalPaid, 0);
 
   const unrealisedPercentage = (unrealisedTotal / unrealisedTotalPaid) * 100;
-  const realisedPercentage = (realisedTotal / realisedTotalPaid) * 100;
-  const overallPercentage = ((unrealisedTotal + realisedTotal) / (unrealisedTotalPaid + realisedTotalPaid)) * 100;
 
   //Aggregating rows from results to display different transactions on the same stock together to show your overall position
   //Aggregated current holdings
@@ -129,23 +116,6 @@ async function fetchAndCalculateStockData() {
       existingItemCurrent.AverageCost = existingItemCurrent.TotalPaid / existingItemCurrent.NoShares;
     } else {
       // If no matching Ticker is found, add the current item to the result
-      result.push({ ...currentItem });
-    }
-
-    return result;
-  }, []);
-
-  //Aggregated Sells
-  const aggregatedDataSells = resultsSells.reduce((result: Array<PORTFOLIORECORDSELL>, currentItem) => {
-    const existingItemSell = result.find((item) => item.Ticker === currentItem.Ticker);
-
-    if (existingItemSell) {
-      existingItemSell.NoShares += currentItem.NoShares;
-      existingItemSell.TotalPaid += currentItem.TotalPaid;
-      existingItemSell.AverageSellPrice += currentItem.AverageSellPrice;
-      existingItemSell.GainLoss += currentItem.GainLoss;
-      existingItemSell.AverageCost = existingItemSell.TotalPaid / existingItemSell.NoShares;
-    } else {
       result.push({ ...currentItem });
     }
 
@@ -173,18 +143,11 @@ async function fetchAndCalculateStockData() {
 
   return {
     results,
-    resultsSells,
     resultsDividends, //Results are the ungrouped transactions from AWS
     unrealisedTotal,
     unrealisedMarketValue,
     unrealisedPercentage,
-    realisedTotal,
-    realisedTotalWithDividends,
-    realisedPercentage,
-    overallTotal,
-    overallPercentage,
     aggregatedDataCurrent, // Aggregated are the grouped transactions by ticker
-    aggregatedDataSells,
     aggregatedDataDividends,
     DonutData,
   };
@@ -201,11 +164,7 @@ function CurrentHoldings() {
   const [unrealisedGainLoss, setUnrealisedGainLoss] = useState<number>(0);
   const [unrealisedmarketValue, setUnrealisedMarketValue] = useState<number>(0);
   const [unrealisedPercentageGain, setUnrealisedGainLossPercentage] = useState<number>(0);
-  const [realisedGainLoss, setRealisedGainLoss] = useState<number>(0);
-  const [realisedGainLossIncDividend, setRealisedGainLossIncDividend] = useState<number>(0);
-  const [realisedPercentageGain, setRealisedGainLossPercentage] = useState<number>(0);
-  const [overallGainLoss, setOverallGainLoss] = useState<number>(0);
-  const [overallPercentageGain, setOverallGainLossPercentage] = useState<number>(0);
+
   //Data for the Donut chart
   const [donutData, setDonutData] = useState<PORTFOLIORECORD[]>([]);
   const [donutDataLabels, setDonutDataLabels] = useState([]);
@@ -217,18 +176,11 @@ function CurrentHoldings() {
     const fetchInitialData = async () => {
       const {
         results,
-        resultsSells,
         resultsDividends,
         unrealisedTotal,
         unrealisedMarketValue,
         unrealisedPercentage,
-        realisedTotal,
-        realisedPercentage,
-        realisedTotalWithDividends,
-        overallTotal,
-        overallPercentage,
         aggregatedDataCurrent,
-        aggregatedDataSells,
         aggregatedDataDividends,
         DonutData,
       } = await fetchAndCalculateStockData();
@@ -239,12 +191,6 @@ function CurrentHoldings() {
       setUnrealisedGainLoss(unrealisedTotal);
       setUnrealisedMarketValue(unrealisedMarketValue);
       setUnrealisedGainLossPercentage(unrealisedPercentage);
-      setRealisedGainLoss(realisedTotal);
-      setRealisedGainLossIncDividend(realisedTotalWithDividends);
-      setRealisedGainLossPercentage(realisedPercentage);
-      setOverallGainLoss(overallTotal);
-      setOverallGainLossPercentage(overallPercentage);
-
       setDonutData(aggregatedDataCurrent);
       setDonutDataLabels(DonutData.labels as never[]);
     };
@@ -262,19 +208,7 @@ function CurrentHoldings() {
   };
 
   useEffect(() => {
-    refreshDataCurrentHoldings();
-  }, []);
-
-  //Dividend Table
-  const refreshDataDividends = async () => {
-    const newData = await fetchAndCalculateStockData();
-    const { resultsDividends, aggregatedDataDividends } = newData; // Declare the variables
-    setTableDataDividends(aggregatedDataDividends); // Update the state that your TableOne component uses
-    setAdditionalTableDataDividends(resultsDividends);
-  };
-
-  useEffect(() => {
-    refreshDataDividends();
+    refreshDataCurrentHoldings;
   }, []);
 
   //Displaying different HTML when the user isn't logged in

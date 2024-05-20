@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import SellsSubTableV2 from "./PortfolioSubTableV2";
+import SellsSubTableV2 from "./SellsSubTableV2";
 import SellModal from "@/components/Modal/SubmitNewSell";
 import DeleteModal from "../Modal/DeleteModal";
 import MultiDeleteModal from "../Modal/MultiDeleteModal";
@@ -97,7 +97,16 @@ const SellsTableV2: React.FC<TableProps> = ({ tableData, additionalTableData, on
     }
   };
 
+  // For the open closed eye buttons
+  const primaryPath =
+    "M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z";
+  const toggledPath =
+    "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z";
+
   useEffect(() => {}, [tableData, additionalTableData, deleteItemsFromAdditionalTable]);
+
+  // Sort the tableData by MarketValue in descending order
+  const sortedTableData = [...tableData].sort((a, b) => b.TotalPaid - a.TotalPaid);
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-simplybackground dark:bg-simplybackground sm:px-7.5 xl:pb-1">
@@ -147,17 +156,16 @@ const SellsTableV2: React.FC<TableProps> = ({ tableData, additionalTableData, on
             <h5 className="text-sm font-medium xsm:text-base">Stock</h5>
           </div>
           <div className="p-1.5 text-center xl:p-3">
-            <h5 className="text-sm font-medium xsm:text-base">Sell Price</h5>
-          </div>
-          <div className="p-1.5 text-center xl:p-3">
             <h5 className="text-sm font-medium xsm:text-base">No. of Shares</h5>
           </div>
           <div className="p-1.5 text-center xl:p-3">
             <h5 className="text-sm font-medium xsm:text-base">Cost Basis</h5>
           </div>
-
           <div className="p-1.5 text-center xl:p-3">
-            <h5 className="text-sm font-medium xsm:text-base">Value</h5>
+            <h5 className="text-sm font-medium xsm:text-base">Avg Sell Price</h5>
+          </div>
+          <div className="p-1.5 text-center xl:p-3">
+            <h5 className="text-sm font-medium xsm:text-base">Transaction Value</h5>
           </div>
           <div className="p-1.5 text-center xl:p-3">
             <h5 className="text-sm font-medium xsm:text-base">P&L</h5>
@@ -170,7 +178,7 @@ const SellsTableV2: React.FC<TableProps> = ({ tableData, additionalTableData, on
           </div>
         </div>
 
-        {tableData.map((brand, key) => (
+        {sortedTableData.map((brand, key) => (
           <div
             className={`grid grid-cols-3 sm:grid-cols-8  ${
               key === tableData.length - 0 ? "" : "rounded-xl border-b mb-3 border-stroke dark:border-strokedark dark:bg-boxdark"
@@ -178,9 +186,9 @@ const SellsTableV2: React.FC<TableProps> = ({ tableData, additionalTableData, on
             key={key}
           >
             <Link href={`/stocks/${brand.Ticker}`}>
-              <div className="group flex items-center gap-3 p-2.5 xl:p-5">
-                <div className="flex-shrink-0 items-center h-45px w-45px flex rounded-md overflow-hidden ring-4 ring-boxdark group-hover:ring-stockwaveyellow">
-                  <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} style={{ width: "100%", height: "100%" }} />
+              <div className="group flex items-center gap-3 p-2.5 xl:p-5 h-20">
+                <div className="flex-shrink-0 items-center h-12 w-12 flex rounded-md overflow-hidden ring-4 ring-boxdark group-hover:ring-stockwaveyellow">
+                  <Image src={brand.LogoURL} alt="Missing Logo :(" width={48} height={48} className="object-contain" />
                 </div>
                 <p className="text-lg group-hover:text-stockwaveyellow group-hover:underline underline-offset-2 text-black dark:text-white font-bold">
                   <span className="ml-3">{brand.Ticker}</span>
@@ -189,23 +197,21 @@ const SellsTableV2: React.FC<TableProps> = ({ tableData, additionalTableData, on
             </Link>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white font-bold">{brand.AverageSellPrice.toFixed(2)}</p>
-            </div>
-
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
               <p className="text-black dark:text-white font-bold">
                 {Number.isInteger(brand.NoShares) ? brand.NoShares : brand.NoShares.toFixed(3)}
               </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <b>
-                <p className="text-black dark:text-white font-bold">{brand.AverageCost.toFixed(2)}</p>
-              </b>
+              <p className="text-black dark:text-white font-bold">{brand.AverageCost.toFixed(2)}</p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white font-bold">{brand.TotalPaid.toFixed(2)}</p>
+              <p className="text-black dark:text-white font-bold">{brand.AverageSellPrice.toFixed(2)}</p>
+            </div>
+
+            <div className="flex items-center justify-center p-2.5 xl:p-5">
+              <p className="text-black dark:text-white font-bold">{brand.TotalSold.toFixed(2)}</p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
@@ -224,35 +230,13 @@ const SellsTableV2: React.FC<TableProps> = ({ tableData, additionalTableData, on
 
             <div className="flex items-center space-x-3.5">
               <button onClick={() => toggleAdditionalTable(brand.TransactionID)} className="hover:text-primary">
-                <svg className="fill-current" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M8.99981 14.8219C3.43106 14.8219 0.674805 9.50624 0.562305 9.28124C0.47793 9.11249 0.47793 8.88749 0.562305 8.71874C0.674805 8.49374 3.43106 3.20624 8.99981 3.20624C14.5686 3.20624 17.3248 8.49374 17.4373 8.71874C17.5217 8.88749 17.5217 9.11249 17.4373 9.28124C17.3248 9.50624 14.5686 14.8219 8.99981 14.8219ZM1.85605 8.99999C2.4748 10.0406 4.89356 13.5562 8.99981 13.5562C13.1061 13.5562 15.5248 10.0406 16.1436 8.99999C15.5248 7.95936 13.1061 4.44374 8.99981 4.44374C4.89356 4.44374 2.4748 7.95936 1.85605 8.99999Z"
-                    fill=""
-                  />
-                  <path
-                    d="M9 11.3906C7.67812 11.3906 6.60938 10.3219 6.60938 9C6.60938 7.67813 7.67812 6.60938 9 6.60938C10.3219 6.60938 11.3906 7.67813 11.3906 9C11.3906 10.3219 10.3219 11.3906 9 11.3906ZM9 7.875C8.38125 7.875 7.875 8.38125 7.875 9C7.875 9.61875 8.38125 10.125 9 10.125C9.61875 10.125 10.125 9.61875 10.125 9C10.125 8.38125 9.61875 7.875 9 7.875Z"
-                    fill=""
-                  />
+                <svg className="fill-current" width="18" height="18" viewBox="0 0 576 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d={highlightedRow === brand.TransactionID ? toggledPath : primaryPath} />
                 </svg>
               </button>
               <button onClick={() => openMultiDeleteModal(brand)} className="hover:text-meta-1">
-                <svg className="fill-current" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M13.7535 2.47502H11.5879V1.9969C11.5879 1.15315 10.9129 0.478149 10.0691 0.478149H7.90352C7.05977 0.478149 6.38477 1.15315 6.38477 1.9969V2.47502H4.21914C3.40352 2.47502 2.72852 3.15002 2.72852 3.96565V4.8094C2.72852 5.42815 3.09414 5.9344 3.62852 6.1594L4.07852 15.4688C4.13477 16.6219 5.09102 17.5219 6.24414 17.5219H11.7004C12.8535 17.5219 13.8098 16.6219 13.866 15.4688L14.3441 6.13127C14.8785 5.90627 15.2441 5.3719 15.2441 4.78127V3.93752C15.2441 3.15002 14.5691 2.47502 13.7535 2.47502ZM7.67852 1.9969C7.67852 1.85627 7.79102 1.74377 7.93164 1.74377H10.0973C10.2379 1.74377 10.3504 1.85627 10.3504 1.9969V2.47502H7.70664V1.9969H7.67852ZM4.02227 3.96565C4.02227 3.85315 4.10664 3.74065 4.24727 3.74065H13.7535C13.866 3.74065 13.9785 3.82502 13.9785 3.96565V4.8094C13.9785 4.9219 13.8941 5.0344 13.7535 5.0344H4.24727C4.13477 5.0344 4.02227 4.95002 4.02227 4.8094V3.96565ZM11.7285 16.2563H6.27227C5.79414 16.2563 5.40039 15.8906 5.37227 15.3844L4.95039 6.2719H13.0785L12.6566 15.3844C12.6004 15.8625 12.2066 16.2563 11.7285 16.2563Z"
-                    fill=""
-                  />
-                  <path
-                    d="M9.00039 9.11255C8.66289 9.11255 8.35352 9.3938 8.35352 9.75942V13.3313C8.35352 13.6688 8.63477 13.9782 9.00039 13.9782C9.33789 13.9782 9.64727 13.6969 9.64727 13.3313V9.75942C9.64727 9.3938 9.33789 9.11255 9.00039 9.11255Z"
-                    fill=""
-                  />
-                  <path
-                    d="M11.2502 9.67504C10.8846 9.64692 10.6033 9.90004 10.5752 10.2657L10.4064 12.7407C10.3783 13.0782 10.6314 13.3875 10.9971 13.4157C11.0252 13.4157 11.0252 13.4157 11.0533 13.4157C11.3908 13.4157 11.6721 13.1625 11.6721 12.825L11.8408 10.35C11.8408 9.98442 11.5877 9.70317 11.2502 9.67504Z"
-                    fill=""
-                  />
-                  <path
-                    d="M6.72245 9.67504C6.38495 9.70317 6.1037 10.0125 6.13182 10.35L6.3287 12.825C6.35683 13.1625 6.63808 13.4157 6.94745 13.4157C6.97558 13.4157 6.97558 13.4157 7.0037 13.4157C7.3412 13.3875 7.62245 13.0782 7.59433 12.7407L7.39745 10.2657C7.39745 9.90004 7.08808 9.64692 6.72245 9.67504Z"
-                    fill=""
-                  />
+                <svg className="fill-current" width="18" height="18" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
                 </svg>
               </button>
             </div>

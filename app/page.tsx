@@ -9,7 +9,6 @@ import CardDataStats from "../components/CardDataStats";
 import SPXChart from "../components/Charts/SPXChart";
 import DonutChart from "../components/Charts/DonutChart";
 import CurrentHoldingsTable from "../components/Tables/CurrentHoldingsTable";
-import DividendsTable from "@/components/Tables/DividendsTable";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 
 import { GetCurrentUser } from "@/lib/Auth0Functionality";

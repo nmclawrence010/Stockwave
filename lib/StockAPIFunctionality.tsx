@@ -28,6 +28,7 @@ export async function fetchLogo(ticker: string) {
 export async function fetchStockQuote(ticker: string) {
   const res = await fetch("https://api.twelvedata.com/quote?apikey=" + process.env.NEXT_PUBLIC_TWELVE_DATA_API_KEY + "&symbol=" + ticker);
   const data = await res.json();
+  console.log("fetch used:", ticker);
   return data;
 }
 

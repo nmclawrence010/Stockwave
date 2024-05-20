@@ -2,6 +2,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 
 import { addDatabaseItemSell, generateTransactionID } from "@/lib/AWSFunctionality";
+import { updateDatabaseItemSell } from "@/lib/AWSEdit";
 import { GetCurrentUser } from "@/lib/Auth0Functionality";
 import { fetchLogo } from "@/lib/StockAPIFunctionality";
 
@@ -21,7 +22,7 @@ async function fetchStockLogoOnSubmit(ticker: string): Promise<string> {
   }
 }
 
-export default function SellModal({ openModal, closeModal, userId, onSubmitSuccess }: any) {
+export default function SellModal({ openModal, closeModal, userId, onSubmitSuccess, mode = "add", initialData = null }: any) {
   let [isOpen, setIsOpen] = useState(true);
   let [formData, setFormData] = useState({
     stockTicker: "",
@@ -38,12 +39,32 @@ export default function SellModal({ openModal, closeModal, userId, onSubmitSucce
   userId = GetCurrentUser();
 
   useEffect(() => {
+    // Set initial form data based on the mode and initialData
+    if (mode === "edit" && initialData) {
+      setFormData({
+        stockTicker: initialData.stockTicker,
+        numberOfShares: initialData.numberOfShares.toString(),
+        averageCost: initialData.averageCost.toString(),
+        averageSellPrice: initialData.averageSellPrice.toString(),
+        date: initialData.date,
+      });
+    } else {
+      setFormData({
+        stockTicker: "",
+        numberOfShares: "",
+        averageCost: "",
+        averageSellPrice: "",
+        date: "",
+      });
+    }
+    const combinedTickers = [...nasdaqTickers, ...nyseTickers];
+    setValidTickers(combinedTickers);
+  }, [mode, initialData]);
+
+  useEffect(() => {
     // Check if all required fields are filled out
     const isValid = Object.values(formData).every((value) => value.trim() !== ""); // Check if any field is empty
     setFormValid(isValid);
-
-    const combinedTickers = [...nasdaqTickers, ...nyseTickers];
-    setValidTickers(combinedTickers);
   }, [formData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,24 +100,33 @@ export default function SellModal({ openModal, closeModal, userId, onSubmitSucce
         throw new Error("Invalid stock ticker. Please enter a valid ticker symbol.");
       }
 
-      // Fetch the logo URL asynchronously based on the stockTicker
-      const logoURL = await fetchStockLogoOnSubmit(enteredTicker);
+      if (mode === "add") {
+        // Fetch the logo URL asynchronously based on the stockTicker
+        const logoURL = await fetchStockLogoOnSubmit(enteredTicker);
 
-      // Call the addDatabaseItem function with the logo URL and form data
-      await addDatabaseItemSell(userId, generateTransactionID(), logoURL, {
-        stockTicker: enteredTicker,
-        numberOfShares: formData.numberOfShares,
-        averageCost: formData.averageCost,
-        averageSellPrice: formData.averageSellPrice,
-        date: formData.date,
-      });
+        // Call the addDatabaseItem function with the logo URL and form data
+        await addDatabaseItemSell(userId, generateTransactionID(), logoURL, {
+          stockTicker: enteredTicker,
+          numberOfShares: formData.numberOfShares,
+          averageCost: formData.averageCost,
+          averageSellPrice: formData.averageSellPrice,
+          date: formData.date,
+        });
+      } else if (mode === "edit") {
+        // Call the updateDatabaseItem function with the transaction ID and updated form data
+        await updateDatabaseItemSell(initialData.transactionID, userId, {
+          stockTicker: enteredTicker,
+          numberOfShares: formData.numberOfShares,
+          averageCost: formData.averageCost,
+          averageSellPrice: formData.averageSellPrice,
+          date: formData.date,
+        });
+      }
 
-      // Close the modal or perform any other necessary actions
       onSubmitSuccess();
       closeModal();
     } catch (error: any) {
       console.error("Error submitting form:", error);
-      // Handle the error gracefully, such as displaying an error message to the user
       setErrorMsg(error.message);
     }
   };

@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
 import DeleteModal from "../Modal/DeleteModal";
-import BuyModal from "../Modal/SubmitNewBuy";
-import { deleteDatabaseItem } from "@/lib/AWSFunctionality";
-import { PORTFOLIORECORD } from "@/types/userPortfolio";
+import SellModal from "../Modal/SubmitNewSell";
+import { deleteDatabaseItemSell } from "@/lib/AWSFunctionality";
+import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
 import React from "react";
 
+// Define the props type
 interface AdditionalTableProps {
-  tableData: PORTFOLIORECORD[];
+  tableData: PORTFOLIORECORDSELL[];
   transactionID: string;
-  additionalData: PORTFOLIORECORD[];
+  additionalData: PORTFOLIORECORDSELL[];
   onSubmitSuccess?: () => void;
   onDeleteSuccess?: () => void;
 }
 
-const CurrentHoldingsSubTable: React.FC<AdditionalTableProps> = ({
+const SellsSubTableV2: React.FC<AdditionalTableProps> = ({
   tableData,
   transactionID,
   additionalData,
@@ -53,7 +54,7 @@ const CurrentHoldingsSubTable: React.FC<AdditionalTableProps> = ({
 
   const handleDeleteClick = () => {
     if (deleteItemId) {
-      deleteDatabaseItem(deleteItemId, String(sessionStorage.getItem("currentUser")));
+      deleteDatabaseItemSell(deleteItemId, String(sessionStorage.getItem("currentUser")));
     }
     closeDeleteModal();
     if (onDeleteSuccess) {
@@ -76,38 +77,33 @@ const CurrentHoldingsSubTable: React.FC<AdditionalTableProps> = ({
         )}
       </div>
       <div className="flex flex-col"></div>
-
       {filteredTableData
         .sort((a, b) => new Date(a.DateBought).getTime() - new Date(b.DateBought).getTime()) // Sort by DateBought
         .map((data, index) => (
           <React.Fragment key={index}>
             <div
-              className={`grid grid-cols-3 sm:grid-cols-9 ${
-                index === filteredTableData.length - 1 ? "" : "border-stroke dark:border-strokedark"
+              className={`grid grid-cols-3 sm:grid-cols-8 ${
+                index === filteredTableData.length - 1 ? "" : " border-stroke dark:border-strokedark"
               }`}
             >
-              <div className="flex items-center gap-3 p-2.5 xl:p-5">
-                <p className="hidden text-black dark:text-white sm:block"></p>
+              <div className="flex items-center gap-3 p-2.5 xl:p-5 font-medium">
+                <p className="hidden text-black dark:text-white sm:block">{data.DateBought}</p>
               </div>
 
-              <div className="flex items-center gap-3 p-2.5 xl:p-5">
-                <p className="hidden text-black dark:text-white sm:block"></p>
+              <div className="flex items-center justify-center p-2.5 xl:p-5 font-medium">
+                <p className="text-black dark:text-white">{data.NoShares}</p>
               </div>
 
-              <div className="flex items-center justify-center p-2.5 xl:p-5">
-                <p className="text-black dark:text-white font-medium">{data.DateBought}</p>
+              <div className="flex items-center justify-center p-2.5 xl:p-5 font-medium">
+                <p className="text-black dark:text-white">{data.AverageCost}</p>
               </div>
 
-              <div className="flex items-center justify-center p-2.5 xl:p-5">
-                <p className="text-black dark:text-white font-medium">{data.NoShares}</p>
+              <div className="flex items-center justify-center p-2.5 xl:p-5 font-medium">
+                <p className="text-black dark:text-white">{data.AverageSellPrice}</p>
               </div>
 
-              <div className="flex items-center justify-center p-2.5 xl:p-5">
-                <p className="text-black dark:text-white font-medium">{data.AverageCost}</p>
-              </div>
-
-              <div className="flex items-center justify-center p-2.5 xl:p-5">
-                <p className="text-black dark:text-white font-medium">{data.MarketValue.toFixed(2)}</p>
+              <div className="flex items-center justify-center p-2.5 xl:p-5 font-medium">
+                <p className="text-black dark:text-white">{data.TotalPaid.toFixed(2)}</p>
               </div>
 
               <div className="flex items-center justify-center p-2.5 xl:p-5 font-medium">
@@ -135,7 +131,6 @@ const CurrentHoldingsSubTable: React.FC<AdditionalTableProps> = ({
                     />
                   </svg>
                 </button>
-
                 <button
                   onClick={() => {
                     openDeleteModal(data.TransactionID);
@@ -151,7 +146,7 @@ const CurrentHoldingsSubTable: React.FC<AdditionalTableProps> = ({
             </div>
             {isOpenEdit && (
               <div className="mt-4">
-                <BuyModal
+                <SellModal
                   openModal={openEditModal}
                   closeModal={closeEditModal}
                   onSubmitSuccess={onSubmitSuccess}
@@ -161,6 +156,7 @@ const CurrentHoldingsSubTable: React.FC<AdditionalTableProps> = ({
                     stockTicker: data.Ticker,
                     numberOfShares: data.NoShares,
                     averageCost: data.AverageCost,
+                    averageSellPrice: data.AverageSellPrice,
                     date: data.DateBought,
                   }}
                 />
@@ -172,4 +168,4 @@ const CurrentHoldingsSubTable: React.FC<AdditionalTableProps> = ({
   );
 };
 
-export default CurrentHoldingsSubTable;
+export default SellsSubTableV2;
