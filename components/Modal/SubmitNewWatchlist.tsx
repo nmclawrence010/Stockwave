@@ -1,8 +1,8 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 
-import { addDatabaseItemSell, generateTransactionID } from "@/lib/AWSFunctionality";
-import { updateDatabaseItemSell } from "@/lib/AWSEdit";
+import { addDatabaseItemWatchlist, generateTransactionID } from "@/lib/AWSFunctionality";
+import { updateDatabaseItemWatchlist } from "@/lib/AWSEdit";
 import { GetCurrentUser } from "@/lib/Auth0Functionality";
 import { fetchLogo } from "@/lib/StockAPIFunctionality";
 
@@ -22,14 +22,12 @@ async function fetchStockLogoOnSubmit(ticker: string): Promise<string> {
   }
 }
 
-export default function SellModal({ openModal, closeModal, userId, onSubmitSuccess, mode = "add", initialData = null }: any) {
+export default function WatchlistModal({ openModal, closeModal, userId, onSubmitSuccess, mode = "add", initialData = null }: any) {
   let [isOpen, setIsOpen] = useState(true);
   let [formData, setFormData] = useState({
     stockTicker: "",
-    numberOfShares: "",
-    averageCost: "",
-    averageSellPrice: "",
-    date: "",
+    targetPrice: "",
+    stockNotes: "",
   });
 
   const [formValid, setFormValid] = useState(false); // State to manage form validity
@@ -43,18 +41,14 @@ export default function SellModal({ openModal, closeModal, userId, onSubmitSucce
     if (mode === "edit" && initialData) {
       setFormData({
         stockTicker: initialData.stockTicker,
-        numberOfShares: initialData.numberOfShares.toString(),
-        averageCost: initialData.averageCost.toString(),
-        averageSellPrice: initialData.averageSellPrice.toString(),
-        date: initialData.date,
+        targetPrice: initialData.targetPrice.toString(),
+        stockNotes: initialData.stockNotes.toString(),
       });
     } else {
       setFormData({
         stockTicker: "",
-        numberOfShares: "",
-        averageCost: "",
-        averageSellPrice: "",
-        date: "",
+        targetPrice: "",
+        stockNotes: "",
       });
     }
     const combinedTickers = [...nasdaqTickers, ...nyseTickers];
@@ -62,18 +56,28 @@ export default function SellModal({ openModal, closeModal, userId, onSubmitSucce
   }, [mode, initialData]);
 
   useEffect(() => {
-    // Check if all required fields are filled out
-    const isValid = Object.values(formData).every((value) => value.trim() !== ""); // Check if any field is empty
+    // Check if all required fields (except targetPrice and stockNotes) are filled out
+    const isValid = Object.entries(formData).every(([key, value]) => {
+      if (key === "targetPrice" || key === "stockNotes") {
+        return true; // Allow targetPrice and stockNotes to be empty
+      }
+      return value.trim() !== ""; // Check if other fields are not empty
+    });
+
     setFormValid(isValid);
   }, [formData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if ((name === "numberOfShares" || name === "averageCost" || name === "averageSellPrice") && (!isNaN(Number(value)) || value === "")) {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+
+    if (name === "targetPrice") {
+      // Validate targetPrice to be a number
+      if (!isNaN(Number(value)) || value === "") {
+        setFormData({
+          ...formData,
+          [name]: value,
+        });
+      }
     } else if (name === "stockTicker") {
       // Convert stockTicker to uppercase and update the state
       const upperCaseValue = value.toUpperCase();
@@ -81,7 +85,8 @@ export default function SellModal({ openModal, closeModal, userId, onSubmitSucce
         ...formData,
         stockTicker: upperCaseValue,
       });
-    } else if (name !== "numberOfShares" && name !== "averageCost" && name !== "averageSellPrice") {
+    } else {
+      // For stockNotes and other fields, simply update the state
       setFormData({
         ...formData,
         [name]: value,
@@ -103,22 +108,19 @@ export default function SellModal({ openModal, closeModal, userId, onSubmitSucce
       if (mode === "add") {
         // Fetch the logo URL asynchronously based on the stockTicker
         const logoURL = await fetchStockLogoOnSubmit(enteredTicker);
+        console.log("ADD MODE BABY");
         // Call the addDatabaseItem function with the logo URL and form data
-        await addDatabaseItemSell(userId, generateTransactionID(), logoURL, {
+        await addDatabaseItemWatchlist(userId, generateTransactionID(), logoURL, {
           stockTicker: enteredTicker,
-          numberOfShares: formData.numberOfShares,
-          averageCost: formData.averageCost,
-          averageSellPrice: formData.averageSellPrice,
-          date: formData.date,
+          targetPrice: formData.targetPrice,
+          stockNotes: formData.stockNotes,
         });
       } else if (mode === "edit") {
         // Call the updateDatabaseItem function with the transaction ID and updated form data
-        await updateDatabaseItemSell(initialData.transactionID, userId, {
+        await updateDatabaseItemWatchlist(initialData.transactionID, userId, {
           stockTicker: enteredTicker,
-          numberOfShares: formData.numberOfShares,
-          averageCost: formData.averageCost,
-          averageSellPrice: formData.averageSellPrice,
-          date: formData.date,
+          targetPrice: formData.targetPrice,
+          stockNotes: formData.stockNotes,
         });
       }
 
@@ -165,73 +167,44 @@ export default function SellModal({ openModal, closeModal, userId, onSubmitSucce
                     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                       <form onSubmit={handleSubmit}>
                         <div className="p-6.5">
+                          <div className="mb-4.5 w-full xl:w-1/2 flex-grow">
+                            <label className="mb-2.5 block text-black dark:text-white">
+                              Ticker Symbol <span className="text-meta-1">*</span>
+                            </label>
+                            <input
+                              name="stockTicker"
+                              value={formData.stockTicker}
+                              onChange={handleInputChange}
+                              placeholder="AAPL, MSFT, etc"
+                              className="dark:text-white w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium placeholder:font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                            />
+                          </div>
                           <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="mb-4.5 w-full xl:w-1/2 flex-grow">
-                              <label className="mb-2.5 block text-black dark:text-white">
-                                Ticker Symbol <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                name="stockTicker"
-                                value={formData.stockTicker}
-                                onChange={handleInputChange}
-                                placeholder="AAPL, MSFT, etc"
-                                className="dark:text-white w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium placeholder:font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                              />
-                            </div>
                             <div className="w-full xl:w-1/2 flex-grow">
                               <label className="mb-2.5 block text-black dark:text-white">
-                                Number of Shares <span className="text-meta-1">*</span>
+                                Target Price <span className="text-meta-1">*</span>
                               </label>
                               <input
-                                name="numberOfShares"
-                                value={formData.numberOfShares}
+                                name="targetPrice"
+                                value={formData.targetPrice}
                                 onChange={handleInputChange}
                                 type="text"
                                 placeholder="1, 10, 100"
                                 className="dark:text-white w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium placeholder:font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                               />
                             </div>
-                          </div>
-                          <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+
                             <div className="w-full xl:w-1/2">
                               <label className="mb-2.5 block text-black dark:text-white">
-                                Cost Basis <span className="text-meta-1">*</span>
+                                Notes <span className="text-meta-1">*</span>
                               </label>
                               <input
-                                name="averageCost"
-                                value={formData.averageCost}
+                                name="stockNotes"
+                                value={formData.stockNotes}
                                 onChange={handleInputChange}
                                 type="text"
                                 placeholder="eg 54.45"
                                 className="dark:text-white w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium placeholder:font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                              />
-                            </div>
-
-                            <div className="w-full xl:w-1/2">
-                              <label className="mb-2.5 block text-black dark:text-white">
-                                Sell Price <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                name="averageSellPrice"
-                                value={formData.averageSellPrice}
-                                onChange={handleInputChange}
-                                type="text"
-                                placeholder="eg 99.99"
-                                className="dark:text-white w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium placeholder:font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                              />
-                            </div>
-                          </div>
-                          <div className="mb-4.5">
-                            <label className="mb-2.5 block text-black dark:text-white">
-                              Date <span className="text-meta-1">*</span>
-                            </label>
-                            <div className="relative">
-                              <input
-                                name="date"
-                                value={formData.date}
-                                onChange={handleInputChange}
-                                type="date"
-                                className="custom-input-date custom-input-date-1 w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                               />
                             </div>
                           </div>

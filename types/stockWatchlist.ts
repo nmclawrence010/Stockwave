@@ -3,6 +3,5 @@ export type STOCKWATCHLIST = {
   LogoURL: string;
   TargetPrice: number;
   StockNotes: string;
-  DateAdded: string;
   TransactionID: string;
 };

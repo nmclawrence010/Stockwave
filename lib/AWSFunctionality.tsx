@@ -316,7 +316,7 @@ export function getDatabaseItemsWatchlist(dbWatchlistData: STOCKWATCHLIST[] = []
         ":uid": { S: user },
       },
       KeyConditionExpression: "UserID = :uid",
-      ProjectionExpression: "UserID, TransactionID, StockTicker, TargetPrice, DateBought, StockNotes",
+      ProjectionExpression: "UserID, TransactionID, StockTicker, TargetPrice, LogoURL, StockNotes",
       TableName: "StockwaveWatchlist",
     };
 
@@ -329,7 +329,6 @@ export function getDatabaseItemsWatchlist(dbWatchlistData: STOCKWATCHLIST[] = []
           var obj = {
             Ticker: element.StockTicker.S,
             TargetPrice: element.TargetPrice.S,
-            DateAdded: element.DateAdded.S,
             TransactionID: element.TransactionID.S,
             LogoURL: element.LogoURL ? element.LogoURL.S : "",
             StockNotes: element.StockNotes.S,
@@ -345,9 +344,9 @@ export function getDatabaseItemsWatchlist(dbWatchlistData: STOCKWATCHLIST[] = []
 export function addDatabaseItemWatchlist(
   userid: string,
   randomHash: string,
+  logoURL: string,
   formData: {
     stockTicker: string;
-    date: string;
     targetPrice: string;
     stockNotes: string;
   },
@@ -359,10 +358,10 @@ export function addDatabaseItemWatchlist(
     Item: {
       TransactionID: { S: randomHash },
       UserID: { S: userid },
-      DateAdded: { S: formData.date || "01/01/2000" },
       StockTicker: { S: formData.stockTicker },
       TargetPrice: { S: formData.targetPrice || "0" },
       StockNotes: { S: formData.stockNotes || "" },
+      LogoURL: { S: logoURL },
     },
   };
 

@@ -5,9 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useUser } from "@auth0/nextjs-auth0/client";
 
-import SellsTable from "@/components/Tables/SellsTable";
 import SellsTableV2 from "@/components/Tables/SellsTableV2";
-import CardDataStats from "@/components/CardDataStats";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 
 import { GetCurrentUser } from "@/lib/Auth0Functionality";

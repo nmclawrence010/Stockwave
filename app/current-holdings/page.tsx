@@ -24,7 +24,6 @@ async function fetchAndCalculateStockData() {
 
   //For the current holdings table
   await getDatabaseItems(dbData);
-  console.log("dbData", dbData);
 
   const cache: { [key: string]: any } = {}; // Initialize a cache object
   const results: any[] = [];
