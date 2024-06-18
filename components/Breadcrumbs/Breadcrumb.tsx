@@ -5,7 +5,7 @@ interface BreadcrumbProps {
 const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h1 className="text-title-xl2 font-semibold text-black dark:text-white">{pageName}</h1>
+      <h1 className="text-title-xl2 font-semibold text-black dark:text-white"></h1>
 
       <nav>
         <ol className="flex items-center gap-2">

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 import WatchlistModal from "../Modal/SubmitNewWatchlist";
 import DeleteModal from "../Modal/DeleteModal";
-import MultiDeleteModal from "../Modal/MultiDeleteModal";
 
 import { deleteDatabaseItemWatchlist } from "@/lib/AWSFunctionality";
 
@@ -49,7 +48,10 @@ const WatchlistTable: React.FC<TableProps> = ({ tableData, onSubmitSuccess, onDe
     }
   };
 
-  useEffect(() => {}, [tableData, deleteItemId]);
+  // Add useEffect to listen for changes in tableData
+  useEffect(() => {
+    console.log("Table data updated: ", tableData);
+  }, [tableData]);
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 shadow-default dark:border-simplybackground dark:bg-simplybackground sm:px-7.5 xl:pb-1">
