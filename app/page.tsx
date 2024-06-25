@@ -5,8 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { useUser } from "@auth0/nextjs-auth0/client";
 
-import CardDataStats from "../components/CardDataStats";
-import DataStatsIndices from "@/components/DataStats/HomePageIndices";
+import PortfolioPerformanceChart from "@/components/Charts/PortfolioPerformanceChart";
+import DonutChart from "@/components/Charts/DonutChart";
+import CurrentHoldingsTable from "@/components/Tables/CurrentHoldingsTable";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 
 import { GetCurrentUser } from "@/lib/Auth0Functionality";
@@ -14,28 +15,42 @@ import { fetchStockQuote } from "@/lib/StockAPIFunctionality";
 import { getDatabaseItems, getDatabaseItemsDividends, getDatabaseItemsSell } from "@/lib/AWSFunctionality";
 
 import { STOCK } from "@/types/stocks";
-import { STOCKSELL } from "@/types/stockSell";
 import { PORTFOLIORECORD } from "@/types/userPortfolio";
-import { PORTFOLIORECORDSELL } from "@/types/userPortfolioSell";
 import { PORTFOLIORECORDEXTRA } from "@/types/userPortfolioDividends";
 
 async function fetchAndCalculateStockData() {
   const dbData: STOCK[] = [];
-  const dbDataSells: STOCKSELL[] = [];
   const dbDataDividends: PORTFOLIORECORDEXTRA[] = [];
 
   //For the current holdings table
   await getDatabaseItems(dbData);
-  const promises = dbData.map(async (element) => {
-    // Create an array of promises for fetchStockData
-    const stockData = await fetchStockQuote(element.Ticker);
 
-    //Extracting some data from our quote data call
-    const currentPrice = stockData.close;
-    const changeInPrice = stockData.change;
-    const changeInPricePercent = stockData.percent_change;
+  const cache: { [key: string]: any } = {}; // Initialize a cache object
+  const results: any[] = [];
+
+  const fetchAndCacheStockData = async (ticker: string) => {
+    if (cache[ticker] === undefined) {
+      const stockData = await fetchStockQuote(ticker);
+      cache[ticker] = stockData;
+      console.log("IFcache[ticker]", cache[ticker]);
+    } else {
+      console.log("ELSEcache[ticker]", cache[ticker]);
+    }
+
+    const { close: currentPrice, change: changeInPrice, percent_change: changeInPricePercent } = cache[ticker];
 
     return {
+      ticker,
+      currentPrice,
+      changeInPrice,
+      changeInPricePercent,
+    };
+  };
+
+  for (const element of dbData) {
+    const { ticker, currentPrice, changeInPrice, changeInPricePercent } = await fetchAndCacheStockData(element.Ticker);
+
+    results.push({
       Ticker: element.Ticker,
       NoShares: element.NoShares,
       AverageCost: element.AverageCost,
@@ -48,28 +63,12 @@ async function fetchAndCalculateStockData() {
       LogoURL: element.LogoURL,
       GainLoss: parseFloat(currentPrice) * element.NoShares - element.AverageCost * element.NoShares,
       TransactionID: element.TransactionID,
-    };
-  });
+    });
+  }
 
-  const results = await Promise.all(promises); // Wait for all promises to resolve
-
-  //For the sell table
-  await getDatabaseItemsSell(dbDataSells);
-  const promisesSell = dbDataSells.map(async (element) => {
-    return {
-      Ticker: element.Ticker,
-      NoShares: element.NoShares,
-      AverageCost: element.AverageCost,
-      AverageSellPrice: element.AverageSellPrice,
-      DateBought: element.DateBought,
-      LogoURL: element.LogoURL,
-      TotalPaid: element.AverageSellPrice * element.NoShares,
-      GainLoss: element.AverageSellPrice * element.NoShares - element.AverageCost * element.NoShares,
-      TransactionID: element.TransactionID,
-    };
-  });
-
-  const resultsSells = await Promise.all(promisesSell);
+  //const results = await Promise.all(promises); // Wait for all promises to resolve
+  //console.log("Final results:", results);
+  //console.log("Cache content:", cache);
 
   //For the sell table
   await getDatabaseItemsDividends(dbDataDividends);
@@ -91,25 +90,16 @@ async function fetchAndCalculateStockData() {
   // Unrealised (Summing the Gain/Loss from each transaction in the Current Holdings)
   const unrealisedTotal = results.reduce((sum, result) => sum + result.GainLoss, 0);
 
-  // Realised (Summing the Gain/Loss from each transaction in the Sell Table)
-  const realisedTotal = resultsSells.reduce((sum, result) => sum + result.GainLoss, 0);
+  //For the overall gain on the portfolio performance chart
+  const unrealisedMarketValue = results.reduce((sum, result) => sum + result.MarketValue, 0);
 
   // Summing the dividends
   const dividendTotal = resultsDividends.reduce((sum, result) => sum + result.Amount, 0);
 
-  // Creating a value for realised that includes dividends
-  const realisedTotalWithDividends = realisedTotal + dividendTotal;
-
-  // Adding all three together for the total gain/loss
-  const overallTotal = unrealisedTotal + realisedTotal + dividendTotal;
-
   // Calculating the percentage changes for the totals
   const unrealisedTotalPaid = results.reduce((sum, result) => sum + result.TotalPaid, 0);
-  const realisedTotalPaid = resultsSells.reduce((sum, result) => sum + result.TotalPaid, 0);
 
   const unrealisedPercentage = (unrealisedTotal / unrealisedTotalPaid) * 100;
-  const realisedPercentage = (realisedTotal / realisedTotalPaid) * 100;
-  const overallPercentage = ((unrealisedTotal + realisedTotal) / (unrealisedTotalPaid + realisedTotalPaid)) * 100;
 
   //Aggregating rows from results to display different transactions on the same stock together to show your overall position
   //Aggregated current holdings
@@ -125,23 +115,6 @@ async function fetchAndCalculateStockData() {
       existingItemCurrent.AverageCost = existingItemCurrent.TotalPaid / existingItemCurrent.NoShares;
     } else {
       // If no matching Ticker is found, add the current item to the result
-      result.push({ ...currentItem });
-    }
-
-    return result;
-  }, []);
-
-  //Aggregated Sells
-  const aggregatedDataSells = resultsSells.reduce((result: Array<PORTFOLIORECORDSELL>, currentItem) => {
-    const existingItemSell = result.find((item) => item.Ticker === currentItem.Ticker);
-
-    if (existingItemSell) {
-      existingItemSell.NoShares += currentItem.NoShares;
-      existingItemSell.TotalPaid += currentItem.TotalPaid;
-      existingItemSell.AverageSellPrice += currentItem.AverageSellPrice;
-      existingItemSell.GainLoss += currentItem.GainLoss;
-      existingItemSell.AverageCost = existingItemSell.TotalPaid / existingItemSell.NoShares;
-    } else {
       result.push({ ...currentItem });
     }
 
@@ -169,23 +142,17 @@ async function fetchAndCalculateStockData() {
 
   return {
     results,
-    resultsSells,
     resultsDividends, //Results are the ungrouped transactions from AWS
     unrealisedTotal,
+    unrealisedMarketValue,
     unrealisedPercentage,
-    realisedTotal,
-    realisedTotalWithDividends,
-    realisedPercentage,
-    overallTotal,
-    overallPercentage,
     aggregatedDataCurrent, // Aggregated are the grouped transactions by ticker
-    aggregatedDataSells,
     aggregatedDataDividends,
     DonutData,
   };
 }
 
-function Home() {
+function CurrentHoldings() {
   //Data for users transactions
   const [tableDataCurrentHoldings, setTableData] = useState<PORTFOLIORECORD[]>([]);
   const [tableDataDividends, setTableDataDividends] = useState<PORTFOLIORECORDEXTRA[]>([]);
@@ -194,12 +161,9 @@ function Home() {
   const [additionalTableDataDividends, setAdditionalTableDataDividends] = useState<PORTFOLIORECORDEXTRA[]>([]);
   //Data for the Cards
   const [unrealisedGainLoss, setUnrealisedGainLoss] = useState<number>(0);
+  const [unrealisedmarketValue, setUnrealisedMarketValue] = useState<number>(0);
   const [unrealisedPercentageGain, setUnrealisedGainLossPercentage] = useState<number>(0);
-  const [realisedGainLoss, setRealisedGainLoss] = useState<number>(0);
-  const [realisedGainLossIncDividend, setRealisedGainLossIncDividend] = useState<number>(0);
-  const [realisedPercentageGain, setRealisedGainLossPercentage] = useState<number>(0);
-  const [overallGainLoss, setOverallGainLoss] = useState<number>(0);
-  const [overallPercentageGain, setOverallGainLossPercentage] = useState<number>(0);
+
   //Data for the Donut chart
   const [donutData, setDonutData] = useState<PORTFOLIORECORD[]>([]);
   const [donutDataLabels, setDonutDataLabels] = useState([]);
@@ -211,17 +175,11 @@ function Home() {
     const fetchInitialData = async () => {
       const {
         results,
-        resultsSells,
         resultsDividends,
         unrealisedTotal,
+        unrealisedMarketValue,
         unrealisedPercentage,
-        realisedTotal,
-        realisedPercentage,
-        realisedTotalWithDividends,
-        overallTotal,
-        overallPercentage,
         aggregatedDataCurrent,
-        aggregatedDataSells,
         aggregatedDataDividends,
         DonutData,
       } = await fetchAndCalculateStockData();
@@ -230,13 +188,8 @@ function Home() {
       setAdditionalTableData(results);
       setAdditionalTableDataDividends(resultsDividends);
       setUnrealisedGainLoss(unrealisedTotal);
+      setUnrealisedMarketValue(unrealisedMarketValue);
       setUnrealisedGainLossPercentage(unrealisedPercentage);
-      setRealisedGainLoss(realisedTotal);
-      setRealisedGainLossIncDividend(realisedTotalWithDividends);
-      setRealisedGainLossPercentage(realisedPercentage);
-      setOverallGainLoss(overallTotal);
-      setOverallGainLossPercentage(overallPercentage);
-
       setDonutData(aggregatedDataCurrent);
       setDonutDataLabels(DonutData.labels as never[]);
     };
@@ -254,19 +207,7 @@ function Home() {
   };
 
   useEffect(() => {
-    refreshDataCurrentHoldings();
-  }, []);
-
-  //Dividend Table
-  const refreshDataDividends = async () => {
-    const newData = await fetchAndCalculateStockData();
-    const { resultsDividends, aggregatedDataDividends } = newData; // Declare the variables
-    setTableDataDividends(aggregatedDataDividends); // Update the state that your TableOne component uses
-    setAdditionalTableDataDividends(resultsDividends);
-  };
-
-  useEffect(() => {
-    refreshDataDividends();
+    refreshDataCurrentHoldings;
   }, []);
 
   //Displaying different HTML when the user isn't logged in
@@ -473,59 +414,37 @@ function Home() {
     <>
       <React.StrictMode>
         <Breadcrumb pageName="Current Portfolio" />
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
-          <DataStatsIndices />
+
+        <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
+          <div className="col-span-8 xl:col-span-8 h-500">
+            <PortfolioPerformanceChart
+              unAggregatedData={additionalTableData}
+              aggregatedData={tableDataCurrentHoldings}
+              unrealisedTotal={unrealisedGainLoss}
+              unrealisedPercentage={unrealisedPercentageGain}
+              unrealisedMarketValue={unrealisedmarketValue}
+            />
+          </div>
+
+          <DonutChart
+            donutData={{
+              labels: donutDataLabels,
+              series: donutData.map((item) => item.MarketValue),
+            }}
+            totalValue={unrealisedmarketValue}
+          />
+          <div className="col-span-12 xl:col-span-12">
+            <CurrentHoldingsTable
+              tableData={tableDataCurrentHoldings}
+              additionalTableData={additionalTableData}
+              onSubmitSuccess={refreshDataCurrentHoldings}
+              onDeleteSuccess={refreshDataCurrentHoldings}
+            />
+          </div>
         </div>
-        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
-          <CardDataStats
-            title="Total Gain"
-            total={`${overallGainLoss.toFixed(2)}`}
-            rate={`${overallPercentageGain.toFixed(2)}%`}
-            tooltipText="Gain on current, sells and dividends"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="fill-white dark:fill-white w-8 2xl:w-10 h-[34px]"
-              viewBox="0 0 640 512"
-              fill="none"
-            >
-              <path d="M384 160c-17.7 0-32-14.3-32-32s14.3-32 32-32H544c17.7 0 32 14.3 32 32V288c0 17.7-14.3 32-32 32s-32-14.3-32-32V205.3L342.6 374.6c-12.5 12.5-32.8 12.5-45.3 0L192 269.3 54.6 406.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l160-160c12.5-12.5 32.8-12.5 45.3 0L320 306.7 466.7 160H384z" />
-            </svg>
-          </CardDataStats>
-          <CardDataStats
-            title="Unrealised Gain"
-            total={`${unrealisedGainLoss.toFixed(2)}`}
-            rate={`${unrealisedPercentageGain.toFixed(2)}%`}
-            tooltipText="Gain on current holdings"
-          >
-            <svg
-              className="fill-white dark:fill-white w-8 2xl:w-10 h-[34px]"
-              viewBox="0 0 640 512"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M64 64C28.7 64 0 92.7 0 128V384c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H64zm64 320H64V320c35.3 0 64 28.7 64 64zM64 192V128h64c0 35.3-28.7 64-64 64zM448 384c0-35.3 28.7-64 64-64v64H448zm64-192c-35.3 0-64-28.7-64-64h64v64zM288 160a96 96 0 1 1 0 192 96 96 0 1 1 0-192z" />
-            </svg>
-          </CardDataStats>
-          <CardDataStats
-            title="Realised Gain"
-            total={`${realisedGainLossIncDividend.toFixed(2)}`}
-            rate={`${realisedPercentageGain.toFixed(2)}%`}
-            tooltipText="Unrealised gain includes dividends <br /> but the percentage does not"
-          >
-            <svg
-              className="fill-white dark:fill-white w-8 2xl:w-10 h-[34px]"
-              viewBox="0 0 640 512"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M535 41c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l64 64c4.5 4.5 7 10.6 7 17s-2.5 12.5-7 17l-64 64c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l23-23L384 112c-13.3 0-24-10.7-24-24s10.7-24 24-24l174.1 0L535 41zM105 377l-23 23L256 400c13.3 0 24 10.7 24 24s-10.7 24-24 24L81.9 448l23 23c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0L7 441c-4.5-4.5-7-10.6-7-17s2.5-12.5 7-17l64-64c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9zM96 64H337.9c-3.7 7.2-5.9 15.3-5.9 24c0 28.7 23.3 52 52 52l117.4 0c-4 17 .6 35.5 13.8 48.8c20.3 20.3 53.2 20.3 73.5 0L608 169.5V384c0 35.3-28.7 64-64 64H302.1c3.7-7.2 5.9-15.3 5.9-24c0-28.7-23.3-52-52-52l-117.4 0c4-17-.6-35.5-13.8-48.8c-20.3-20.3-53.2-20.3-73.5 0L32 342.5V128c0-35.3 28.7-64 64-64zm64 64H96v64c35.3 0 64-28.7 64-64zM544 320c-35.3 0-64 28.7-64 64h64V320zM320 352a96 96 0 1 0 0-192 96 96 0 1 0 0 192z" />
-            </svg>
-          </CardDataStats>
-        </div> */}
       </React.StrictMode>
     </>
   );
 }
 
-export default Home;
+export default CurrentHoldings;

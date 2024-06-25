@@ -167,7 +167,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               Home
                             </Link>
                           </li>
-                          <li>
+                          {/* <li>
                             <Link
                               href="/current-holdings"
                               className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
@@ -176,7 +176,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             >
                               Current Portfolio
                             </Link>
-                          </li>
+                          </li> */}
                           <li>
                             <Link
                               href="/watchlist"
