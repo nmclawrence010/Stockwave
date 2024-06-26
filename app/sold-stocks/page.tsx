@@ -66,7 +66,7 @@ async function fetchAndCalculateSoldStocks() {
   };
 }
 
-function soldStocksPage() {
+function SoldStocksPage() {
   const [tableDataSells, setTableDataSells] = useState<PORTFOLIORECORDSELL[]>([]);
   const [additionalTableDataSells, setAdditionalTableDataSells] = useState<PORTFOLIORECORDSELL[]>([]);
   const [realisedGainLoss, setRealisedGainLoss] = useState<number>(0);
@@ -317,4 +317,4 @@ function soldStocksPage() {
   );
 }
 
-export default soldStocksPage;
+export default SoldStocksPage;

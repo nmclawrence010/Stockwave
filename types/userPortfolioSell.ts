@@ -5,7 +5,7 @@ export type PORTFOLIORECORDSELL = {
   AverageCost: number;
   AverageSellPrice: number;
   TotalPaid: number;
-  //TotalSold: number;
+  TotalSold: number;
   DateBought: string;
   LogoURL: string;
   GainLoss: number;
